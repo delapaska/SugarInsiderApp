@@ -109,7 +109,6 @@ export const generateStatisticsPDF = async (data: PDFReportData): Promise<string
             padding: 20px;
             border-radius: 10px;
             text-align: center;
-            border-left: 4px solid #FF77C0;
         }
         .summary-value {
             font-size: 24px;
@@ -286,7 +285,7 @@ export const generateStatisticsPDF = async (data: PDFReportData): Promise<string
 
     const options = {
       html: htmlContent,
-      fileName: fileName,
+      fileName: fileName + '.pdf',
       directory: 'Documents',
       width: 595,
       height: 842,

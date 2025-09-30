@@ -33,6 +33,7 @@ export const translations = {
     'month': 'Month',
     'calorieIntake': 'Calorie Intake',
     'averageCalorieIntake': 'Average calorie intake',
+    'averageSugarIntake': 'Average sugar intake',
     'sugarConsumption': 'Sugar consumption',
 
     
@@ -165,6 +166,7 @@ export const translations = {
     'month': 'Mois',
     'calorieIntake': 'Apport Calorique',
     'averageCalorieIntake': 'Apport calorique moyen',
+    'averageSugarIntake': 'Apport moyen de sucre',
     'sugarConsumption': 'Consommation de sucre',
 
     
@@ -297,6 +299,7 @@ export const translations = {
     'month': 'Месяц',
     'calorieIntake': 'Потребление Калорий',
     'averageCalorieIntake': 'Среднее потребление калорий',
+    'averageSugarIntake': 'Среднее потребление сахара',
     'sugarConsumption': 'Потребление сахара',
 
     

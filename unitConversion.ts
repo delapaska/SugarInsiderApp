@@ -107,9 +107,9 @@ export const getSugarUnit = (unitSystem: UnitSystem, language: Language = 'Engli
 
 export const getSugarDisplayValue = (gramValue: number, unitSystem: UnitSystem): number => {
   if (unitSystem === 'european') {
-    return gramValue;
+    return Math.round(gramValue * 100) / 100;
   } else {
-    
+
     const ozValue = gramValue / 28.3495;
     return Math.round(ozValue * 10) / 10;
   }
