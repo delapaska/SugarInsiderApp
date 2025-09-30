@@ -1,0 +1,701 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  StatusBar,
+  Image,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
+import { formatWeight, formatHeight, parseWeight, parseHeight, convertWeight, convertHeight, UnitSystem } from './unitConversion';
+import { t, Language } from './translations';
+
+const { width, height } = Dimensions.get('window');
+
+interface ProfileScreenProps {
+  onBack: () => void;
+  onDiaryPress: () => void;
+  onStatisticsPress: () => void;
+  onPersonalDataPress: () => void;
+  onSettingsPress: () => void;
+  onProPress: () => void;
+  weight?: string;
+  height?: string;
+  userName?: string;
+  birthDate?: string;
+  unitSystem?: UnitSystem;
+  language?: Language;
+}
+
+const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onDiaryPress, onStatisticsPress, onPersonalDataPress, onSettingsPress, onProPress, weight = '60kg', height: heightProp = '160cm', userName = 'Name', birthDate = '2007/9/17', unitSystem = 'european', language = 'English' }) => {
+  const [avatarSource, setAvatarSource] = useState(require('./Profile/Avatar.png'));
+
+  
+  const getDisplayWeight = () => {
+    const weightValue = parseWeight(weight);
+    const currentWeightInKg = weight.includes('lbs') ? convertWeight(weightValue, 'american', 'european') : weightValue;
+    const displayWeight = unitSystem === 'european' ? currentWeightInKg : convertWeight(currentWeightInKg, 'european', 'american');
+    return formatWeight(displayWeight, unitSystem);
+  };
+
+  const getDisplayHeight = () => {
+    const heightValue = parseHeight(heightProp);
+    const currentHeightInCm = heightProp.includes("'") ? convertHeight(heightValue, 'american', 'european') : heightValue;
+    const displayHeight = unitSystem === 'european' ? currentHeightInCm : convertHeight(currentHeightInCm, 'european', 'american');
+    return formatHeight(displayHeight, unitSystem);
+  };
+
+  const calculateAge = (birthDateString: string) => {
+    const [year, month, day] = birthDateString.split('/').map(Number);
+    const birthDate = new Date(year, month - 1, day);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+
+    return age;
+  };
+
+  const selectImage = (useCamera: boolean) => {
+    console.log(useCamera ? 'Camera selected' : 'Gallery selected');
+  };
+
+  const handleAvatarPress = () => {
+    Alert.alert(
+      'Change Avatar',
+      'Choose an option',
+      [
+        {
+          text: 'Camera',
+          onPress: () => selectImage(true),
+        },
+        {
+          text: 'Gallery',
+          onPress: () => selectImage(false),
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ],
+    );
+  };
+
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F5A8D4" />
+
+      <Image
+        source={require('./Profile/Background.png')}
+        style={styles.backgroundImage}
+        resizeMode="cover"
+      />
+
+      <TouchableOpacity style={styles.backButton} onPress={onBack}>
+        <Image
+          source={require('./Profile/arrow.png')}
+          style={styles.backArrowImage}
+          resizeMode="contain"
+        />
+      </TouchableOpacity>
+
+      <Text style={styles.profileTitle}>{t('profile', language)}</Text>
+
+      <TouchableOpacity style={styles.settingsButton} onPress={onSettingsPress}>
+        <Image
+          source={require('./Profile/settings.png')}
+          style={styles.settingsIcon}
+          resizeMode="contain"
+        />
+      </TouchableOpacity>
+
+      <View style={styles.profileRectangle} />
+
+      <Image
+        source={avatarSource}
+        style={styles.avatarImage}
+        resizeMode="contain"
+      />
+
+      <TouchableOpacity style={styles.avatarEditButton} onPress={handleAvatarPress}>
+        <Text style={styles.avatarEditText}>+</Text>
+      </TouchableOpacity>
+
+      <Text style={styles.userNameText}>{userName}</Text>
+
+      <Text style={styles.ageText}>{t('Age:', language)} {calculateAge(birthDate)}</Text>
+
+      <View style={styles.dividerLine} />
+
+      <Text style={styles.weightText}>{t('Weight', language)}</Text>
+
+      <Text style={styles.weightValue}>{getDisplayWeight()}</Text>
+
+      <Text style={styles.heightText}>{t('Height', language)}</Text>
+
+      <Text style={styles.heightValue}>{getDisplayHeight()}</Text>
+
+      <Text style={styles.individualSettingsText}>{t('Individual Settings', language)}</Text>
+
+      <View style={styles.settingsRectangle} />
+
+      <Text style={styles.personalDataText}>{t('Personal Data', language)}</Text>
+
+      <TouchableOpacity onPress={onPersonalDataPress}>
+        <Image
+          source={require('./Profile/arrowGrey.png')}
+          style={styles.arrowGreyIcon}
+          resizeMode="contain"
+        />
+      </TouchableOpacity>
+
+      <View style={styles.bottomNavContainer}>
+        <View style={styles.topBorder} />
+
+        <View style={styles.bottomNavContent}>
+          <TouchableOpacity style={styles.diaryTab} onPress={onDiaryPress}>
+            <Image
+              source={require('./Diary/Parts/notepad1.png')}
+              style={styles.diaryIcon}
+              resizeMode="contain"
+            />
+            <Text style={styles.diaryText}>{t('diary', language)}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.statisticsTab} onPress={onStatisticsPress}>
+            <Image
+              source={require('./Diary/Parts/Statistics.png')}
+              style={styles.statisticsIcon}
+              resizeMode="contain"
+            />
+            <Text style={styles.statisticsText}>{t('statistics', language)}</Text>
+          </TouchableOpacity>
+
+          <View style={styles.profileTab}>
+            <Image
+              source={require('./Diary/Parts/prof.png')}
+              style={styles.profileIcon}
+              resizeMode="contain"
+            />
+            <Text style={styles.profileTextActive}>{t('profile', language)}</Text>
+          </View>
+
+          <TouchableOpacity style={styles.proTab} onPress={onProPress}>
+            <Image
+              source={require('./Diary/Parts/pro-1.png')}
+              style={styles.proIcon}
+              resizeMode="contain"
+            />
+            <Text style={styles.proText}>{t('pro', language)}</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={styles.additionalRectangle}>
+        <Text style={styles.upgradeText}>
+          {t('Upgrade to', language)} <Text style={styles.premiumText}>{t('Premium', language).toUpperCase()}</Text> {t('accountAndGetMore', language)}
+        </Text>
+        <Image
+          source={require('./Profile/photo.png')}
+          style={styles.photoImage}
+          resizeMode="cover"
+        />
+        <TouchableOpacity style={styles.upgradeButton} onPress={onProPress}>
+          <Text style={styles.upgradeButtonText}>Get a premium</Text>
+          <Text style={styles.leftStar}>✦</Text>
+          <Text style={styles.rightStar}>✦</Text>
+        </TouchableOpacity>
+      </View>
+
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F5A8D4',
+  },
+  backgroundImage: {
+    position: 'absolute',
+    width: 1248,
+    height: 2700,
+    top: 0,
+    left: -3,
+    transform: [{ rotate: '0deg' }],
+    opacity: 1,
+  },
+  backButton: {
+    position: 'absolute',
+    left: (51 / 1242) * width,
+    top: (205 / 1242) * width,
+    width: (45 / 1242) * width,
+    height: (72 / 1242) * width,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backArrowImage: {
+    width: (45 / 1242) * width,
+    height: (72 / 1242) * width,
+    opacity: 1,
+
+  },
+  profileTitle: {
+    position: 'absolute',
+    left: (268 / 1242) * width,
+    top: (173 / 1242) * width,
+    width: (706 / 1242) * width,
+    height: (92 / 1242) * width,
+    fontFamily: 'Alatsi',
+    fontWeight: 'bold',
+    fontSize: (64 / 1242) * width,
+    lineHeight: (64 * 0.99) / 1242 * width,
+    textAlign: 'center',
+    color: '#303539',
+    textTransform: 'capitalize',
+    opacity: 1,
+    transform: [{ rotate: '0deg' }],
+  },
+  settingsButton: {
+    position: 'absolute',
+    left: (1117 / 1242) * width,
+    top: (203 / 1242) * width,
+    width: (76 / 1242) * width,
+    height: (76 / 1242) * width,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  settingsIcon: {
+    width: (76 / 1242) * width,
+    height: (76 / 1242) * width,
+    opacity: 1,
+    transform: [{ rotate: '0deg' }],
+  },
+  profileRectangle: {
+    position: 'absolute',
+    left: (51 / 1242) * width,
+    top: (341 / 1242) * width,
+    width: (1140 / 1242) * width,
+    height: (682 / 1242) * width,
+    borderRadius: (75 / 1242) * width,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#B4ADB1',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.69,
+    shadowRadius: 8.8,
+    elevation: 8,
+    opacity: 1,
+    transform: [{ rotate: '0deg' }],
+  },
+  avatarImage: {
+    position: 'absolute',
+    left: (111 / 1242) * width,
+    top: (411 / 1242) * width,
+    width: (260 / 1242) * width,
+    height: (260 / 1242) * width,
+    opacity: 1,
+    transform: [{ rotate: '0deg' }],
+  },
+  avatarEditButton: {
+    position: 'absolute',
+    left: (294 / 1242) * width,
+    top: (578 / 1242) * width,
+    width: (93 / 1242) * width,
+    height: (93 / 1242) * width,
+    borderRadius: (93 / 2 / 1242) * width,
+    backgroundColor: '#FF77C0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    opacity: 1,
+    transform: [{ rotate: '0deg' }],
+  },
+  avatarEditText: {
+    fontFamily: 'System',
+    fontWeight: 'bold',
+    fontSize: (70 / 1242) * width,
+    color: '#FFFFFF',
+    textAlign: 'center',
+  },
+  weightText: {
+    position: 'absolute',
+    left: (111 / 1242) * width,
+    top: (771 / 1242) * width,
+    width: (706 / 1242) * width,
+    height: (60 / 1242) * width,
+    fontFamily: 'Alatsi',
+    fontWeight: 'bold',
+    fontSize: (60 / 1242) * width,
+    lineHeight: (60 * 0.99) / 1242 * width,
+    color: '#303539',
+    textTransform: 'capitalize',
+    opacity: 1,
+    zIndex: 2,
+    transform: [{ rotate: '0deg' }],
+  },
+  weightValue: {
+    position: 'absolute',
+    left: (425 / 1242) * width,
+    top: (779 / 1242) * width,
+    width: (706 / 1242) * width,
+    height: (60 / 1242) * width,
+    fontFamily: 'Alatsi',
+    fontWeight: 'bold',
+    fontSize: (60 / 1242) * width,
+    lineHeight: (60 * 0.99) / 1242 * width,
+    textAlign: 'right',
+    color: '#303539',
+    textTransform: 'capitalize',
+    opacity: 1,
+    zIndex: 2,
+    transform: [{ rotate: '0deg' }],
+  },
+  heightText: {
+    position: 'absolute',
+    left: (111 / 1242) * width,
+    top: (881 / 1242) * width,
+    width: (706 / 1242) * width,
+    height: (60 / 1242) * width,
+    fontFamily: 'Alatsi',
+    fontWeight: 'bold',
+    fontSize: (60 / 1242) * width,
+    lineHeight: (60 * 0.99) / 1242 * width,
+    color: '#303539',
+    textTransform: 'capitalize',
+    opacity: 1,
+    zIndex: 2,
+    transform: [{ rotate: '0deg' }],
+  },
+  heightValue: {
+    position: 'absolute',
+    left: (425 / 1242) * width,
+    top: (889 / 1242) * width,
+    width: (706 / 1242) * width,
+    height: (60 / 1242) * width,
+    fontFamily: 'Alatsi',
+    fontWeight: 'bold',
+    fontSize: (60 / 1242) * width,
+    lineHeight: (60 * 0.99) / 1242 * width,
+    textAlign: 'right',
+    color: '#303539',
+    textTransform: 'capitalize',
+    opacity: 1,
+    zIndex: 2,
+    transform: [{ rotate: '0deg' }],
+  },
+  dividerLine: {
+    position: 'absolute',
+    left: (53 / 1242) * width,
+    top: (721 / 1242) * width,
+    width: (1140 / 1242) * width,
+    height: 0,
+    borderTopWidth: 1,
+    borderTopColor: '#DBD7DB',
+    opacity: 1,
+    transform: [{ rotate: '0deg' }],
+  },
+  individualSettingsText: {
+    position: 'absolute',
+    left: (110 / 1242) * width,
+    top: (1122 / 1242) * width,
+    width: (1020 / 1242) * width,
+    height: (60 / 1242) * width,
+    fontFamily: 'Alatsi',
+    fontWeight: 'bold',
+    fontSize: (52 / 1242) * width,
+    lineHeight: (52 * 1.1) / 1242 * width,
+    color: '#303539',
+    opacity: 1,
+    transform: [{ rotate: '0deg' }],
+  },
+  settingsRectangle: {
+    position: 'absolute',
+    left: (51 / 1242) * width,
+    top: (1216 / 1242) * width,
+    width: (1140 / 1242) * width,
+    height: (219 / 1242) * width,
+    borderRadius: (75 / 1242) * width,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#B4ADB1',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.69,
+    shadowRadius: 8.8,
+    elevation: 8,
+    opacity: 1,
+    transform: [{ rotate: '0deg' }],
+  },
+  personalDataText: {
+    position: 'absolute',
+    left: (111 / 1242) * width,
+    top: (1296 / 1242) * width,
+    width: (706 / 1242) * width,
+    height: (60 / 1242) * width,
+    fontFamily: 'Alatsi',
+    fontWeight: 'bold',
+    fontSize: (60 / 1242) * width,
+    lineHeight: (60 * 0.99) / 1242 * width,
+    color: '#303539',
+    textTransform: 'capitalize',
+    opacity: 1,
+    transform: [{ rotate: '0deg' }],
+  },
+  bottomNavContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    width: width,
+    height: (280 / 1242) * width,
+    backgroundColor: '#FFFFFF',
+    opacity: 1,
+  },
+  topBorder: {
+    position: 'absolute',
+    top: -6,
+    left: 0,
+    right: 0,
+    width: (1243 / 1242) * width,
+    height: 3,
+    backgroundColor: '#DBD7DB',
+    opacity: 1,
+  },
+  bottomNavContent: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    paddingTop: 3,
+  },
+  diaryTab: {
+    position: 'absolute',
+    left: (110 / 1242) * width,
+    top: (2453 - 2429) / (1242 / width),
+    alignItems: 'center',
+  },
+  diaryIcon: {
+    width: (68 / 1242) * width,
+    height: (68 / 1242) * width,
+    opacity: 1,
+  },
+  diaryText: {
+    width: (140 / 1242) * width,
+    marginTop: (2537 - 2453 - 68) / (1242 / width),
+    fontFamily: 'System',
+    fontWeight: '400',
+    fontSize: (32 / 1242) * width,
+    textAlign: 'center',
+    color: '#A2A2A2',
+    textTransform: 'capitalize',
+    opacity: 1,
+  },
+  statisticsTab: {
+    position: 'absolute',
+    left: (426 / 1242) * width,
+    top: (2453 - 2429) / (1242 / width),
+    alignItems: 'center',
+  },
+  statisticsIcon: {
+    width: (68 / 1242) * width,
+    height: (68 / 1242) * width,
+    opacity: 1,
+  },
+  statisticsText: {
+    marginTop: (2536 - 2453 - 68) / (1242 / width),
+    fontFamily: 'System',
+    fontWeight: '400',
+    fontSize: (30 / 1242) * width,
+    textAlign: 'center',
+    color: '#A2A2A2',
+    textTransform: 'capitalize',
+    opacity: 1,
+    minWidth: (180 / 1242) * width,
+  },
+  profileTab: {
+    position: 'absolute',
+    left: (742 / 1242) * width,
+    top: (2453 - 2429) / (1242 / width),
+    alignItems: 'center',
+  },
+  profileIcon: {
+    width: (68 / 1242) * width,
+    height: (68 / 1242) * width,
+    opacity: 1,
+  },
+  profileTextActive: {
+    marginTop: (2537 - 2453 - 68) / (1242 / width),
+    fontFamily: 'System',
+    fontWeight: '400',
+    fontSize: (32 / 1242) * width,
+    textAlign: 'center',
+    color: '#FF77C0',
+    textTransform: 'capitalize',
+    opacity: 1,
+    minWidth: (140 / 1242) * width,
+  },
+  proTab: {
+    position: 'absolute',
+    left: (1018 / 1242) * width,
+    top: (2453 - 2429) / (1242 / width),
+    alignItems: 'center',
+  },
+  proIcon: {
+    width: (68 / 1242) * width,
+    height: (68 / 1242) * width,
+    opacity: 1,
+  },
+  proText: {
+    marginTop: (2536 - 2453 - 68) / (1242 / width),
+    fontFamily: 'System',
+    fontWeight: '400',
+    fontSize: (32 / 1242) * width,
+    textAlign: 'center',
+    color: '#A2A2A2',
+    textTransform: 'capitalize',
+    opacity: 1,
+    minWidth: (120 / 1242) * width,
+  },
+  arrowGreyIcon: {
+    position: 'absolute',
+    left: (1105 / 1242) * width,
+    top: (1305 / 1242) * width,
+    width: (26 / 1242) * width,
+    height: (42 / 1242) * width,
+    opacity: 1,
+    transform: [{ rotate: '0deg' }],
+  },
+  additionalRectangle: {
+    position: 'absolute',
+    left: (51 / 1242) * width,
+    top: (1483 / 1242) * width,
+    width: (1140 / 1242) * width,
+    height: (914 / 1242) * width,
+    borderRadius: (75 / 1242) * width,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#B4ADB1',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.69,
+    shadowRadius: 8.8,
+    elevation: 8,
+    opacity: 1,
+    transform: [{ rotate: '0deg' }],
+  },
+  upgradeText: {
+    position: 'absolute',
+    left: (60 / 1242) * width,
+    top: (56 / 1242) * width,
+    width: (1020 / 1242) * width,
+    height: (194 / 1242) * width,
+    fontFamily: 'Alatsi',
+    fontWeight: 'bold',
+    fontSize: (50 / 1242) * width,
+    lineHeight: (50 * 1.1) / 1242 * width,
+    textAlign: 'center',
+    color: '#303539',
+    opacity: 1,
+    transform: [{ rotate: '0deg' }],
+  },
+  premiumText: {
+    textTransform: 'uppercase',
+  },
+  photoImage: {
+    position: 'absolute',
+    left: (200 / 1242) * width,
+    top: (210 / 1242) * width,
+    width: (741 / 1242) * width,
+    height: (494 / 1242) * width,
+    opacity: 1,
+    transform: [{ rotate: '0deg' }],
+  },
+  upgradeButton: {
+    position: 'absolute',
+    left: (160 / 1242) * width,
+    top: (688 / 1242) * width,
+    width: (807 / 1242) * width,
+    height: (176 / 1242) * width,
+    borderRadius: (88 / 1242) * width,
+    backgroundColor: '#FF77C0',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4,
+    opacity: 1,
+    transform: [{ rotate: '0deg' }],
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  upgradeButtonText: {
+    width: (706 / 1242) * width,
+    height: (92 / 1242) * width,
+    fontFamily: 'Alatsi',
+    fontWeight: 'bold',
+    fontSize: (70 / 1242) * width,
+    lineHeight: (70 * 0.99) / 1242 * width,
+    textAlign: 'center',
+    color: '#FFFFFF',
+    opacity: 1,
+  },
+  leftStar: {
+    position: 'absolute',
+    left: ((807 / 2 - 353 / 2 - 140 - 77 / 2) / 1242) * width,
+    top: ((176 - 94) / 2 / 1242) * width,
+    width: (77 / 1242) * width,
+    height: (94 / 1242) * width,
+    fontSize: (77 / 1242) * width,
+    color: '#FFFFFF',
+    opacity: 1,
+    textAlign: 'center',
+    lineHeight: (94 / 1242) * width,
+  },
+  rightStar: {
+    position: 'absolute',
+    right: ((807 / 2 - 353 / 2 - 140 - 77 / 2) / 1242) * width,
+    top: ((176 - 94) / 2 / 1242) * width,
+    width: (77 / 1242) * width,
+    height: (94 / 1242) * width,
+    fontSize: (77 / 1242) * width,
+    color: '#FFFFFF',
+    opacity: 1,
+    textAlign: 'center',
+    lineHeight: (94 / 1242) * width,
+  },
+  userNameText: {
+    position: 'absolute',
+    left: (456 / 1242) * width,
+    top: (449 / 1242) * width,
+    width: (597 / 1242) * width,
+    height: (92 / 1242) * width,
+    fontFamily: 'Alatsi',
+    fontWeight: 'bold',
+    fontSize: (90 / 1242) * width,
+    lineHeight: (90 * 0.99) / 1242 * width,
+    color: '#303539',
+    textTransform: 'capitalize',
+    opacity: 1,
+    transform: [{ rotate: '0deg' }],
+    zIndex: 2,
+  },
+  ageText: {
+    position: 'absolute',
+    left: (456 / 1242) * width,
+    top: (541 / 1242) * width,
+    width: (597 / 1242) * width,
+    height: (92 / 1242) * width,
+    fontFamily: 'Alatsi',
+    fontWeight: 'bold',
+    fontSize: (64 / 1242) * width,
+    lineHeight: (64 * 0.99) / 1242 * width,
+    color: '#303539',
+    textTransform: 'capitalize',
+    opacity: 1,
+    transform: [{ rotate: '0deg' }],
+    zIndex: 2,
+  },
+});
+
+export default ProfileScreen;

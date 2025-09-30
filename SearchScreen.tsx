@@ -11,7 +11,6 @@ const SearchScreen: React.FC = () => {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#F5A8D4" />
 
-      {/* Background image */}
       <Image
         source={require('../Diary/Parts/Background.png')}
         style={styles.backgroundImage}
