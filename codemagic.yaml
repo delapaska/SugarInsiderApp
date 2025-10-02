@@ -18,11 +18,11 @@ workflows:
 
         distribution_type: app_store
 
-        bundle_identifier: Com.SugarInsiderApp.ivanChai
+        bundle_identifier: сom.SugarInsiderApp.ivanChai
 
       vars:
 
-        BUNDLE_ID: "Com.SugarInsiderApp.ivanChai"
+        BUNDLE_ID: "сom.SugarInsiderApp.ivanChai"
 
         XCODE_WORKSPACE: "CodemagicSample.xcworkspace" # <-- Put the name of your Xcode workspace here
 
