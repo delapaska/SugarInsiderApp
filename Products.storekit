@@ -1,0 +1,117 @@
+{
+  "identifier" : "Products",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ]
+  },
+  "subscriptions" : [
+    {
+      "adHocOffers" : [
+
+      ],
+      "codeOffers" : [
+
+      ],
+      "displayPrice" : "4.99",
+      "familyShareable" : false,
+      "groupNumber" : 1,
+      "internalID" : "6670668890",
+      "introductoryOffer" : null,
+      "localizations" : [
+        {
+          "description" : "Monthly subscription to Sugar Insider Premium features",
+          "displayName" : "Sugar Insider Monthly Premium",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.sugarinsiderapp.product1",
+      "recurringSubscriptionPeriod" : "P1M",
+      "referenceName" : "Monthly Premium",
+      "subscriptionGroupID" : "21455668",
+      "type" : "RecurringSubscription"
+    },
+    {
+      "adHocOffers" : [
+
+      ],
+      "codeOffers" : [
+
+      ],
+      "displayPrice" : "49.99",
+      "familyShareable" : false,
+      "groupNumber" : 1,
+      "internalID" : "6670668891",
+      "introductoryOffer" : null,
+      "localizations" : [
+        {
+          "description" : "Yearly subscription to Sugar Insider Premium features",
+          "displayName" : "Sugar Insider Yearly Premium",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.sugarinsiderapp.product2",
+      "recurringSubscriptionPeriod" : "P1Y",
+      "referenceName" : "Yearly Premium",
+      "subscriptionGroupID" : "21455668",
+      "type" : "RecurringSubscription"
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

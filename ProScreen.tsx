@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,8 +8,10 @@ import {
   TouchableOpacity,
   Dimensions,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { t, Language } from './translations';
+import { nativePaymentService as paymentService, PaymentProduct } from './NativePaymentService';
 
 const { width } = Dimensions.get('window');
 
@@ -20,50 +22,120 @@ interface ProScreenProps {
 }
 
 const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onPurchaseSuccess }) => {
-  const handlePurchase12Months = () => {
-    Alert.alert(
-      'Purchase Confirmation',
-      'Purchase 12 Months Pro subscription for $50?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Purchase',
-          onPress: () => {
-            
-            if (onPurchaseSuccess) onPurchaseSuccess();
-            Alert.alert('Success!', 'Pro subscription activated for 12 months!', [
-              { text: 'OK', onPress: onBack }
-            ]);
-          },
-        },
-      ]
-    );
+  const [loading, setLoading] = useState(false);
+  const [products, setProducts] = useState<PaymentProduct[]>([]);
+  const [initialized, setInitialized] = useState(false);
+
+  useEffect(() => {
+    initializePayments();
+  }, []);
+
+  const initializePayments = async () => {
+    try {
+      setLoading(true);
+      await paymentService.initialize();
+
+      setProducts(paymentService.getProducts());
+
+      setInitialized(true);
+    } catch (error) {
+      console.error('Failed to initialize payments:', error);
+      setProducts(paymentService.getProducts());
+      setInitialized(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handlePurchase1Month = () => {
-    Alert.alert(
-      'Purchase Confirmation',
-      'Purchase 1 Month Pro subscription for $5?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Purchase',
-          onPress: () => {
-            
-            if (onPurchaseSuccess) onPurchaseSuccess();
-            Alert.alert('Success!', 'Pro subscription activated for 1 month!', [
-              { text: 'OK', onPress: onBack }
-            ]);
+  const handlePurchase12Months = async () => {
+    if (paymentService.shouldUseMockPayments()) {
+      Alert.alert(
+        'Purchase Confirmation',
+        'Purchase 12 Months Pro subscription for $49.99?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
           },
-        },
-      ]
-    );
+          {
+            text: 'Purchase',
+            onPress: () => {
+              if (onPurchaseSuccess) onPurchaseSuccess();
+              Alert.alert('Success!', 'Pro subscription activated for 12 months!', [
+                { text: 'OK', onPress: onBack }
+              ]);
+            },
+          },
+        ]
+      );
+    } else {
+      try {
+        setLoading(true);
+        await paymentService.purchaseYearlySubscription();
+        if (onPurchaseSuccess) onPurchaseSuccess();
+      } catch (error) {
+        console.error('Purchase failed:', error);
+        Alert.alert('Purchase Failed', 'Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handlePurchase1Month = async () => {
+    if (paymentService.shouldUseMockPayments()) {
+      Alert.alert(
+        'Purchase Confirmation',
+        'Purchase 1 Month Pro subscription for $4.99?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'Purchase',
+            onPress: () => {
+              if (onPurchaseSuccess) onPurchaseSuccess();
+              Alert.alert('Success!', 'Pro subscription activated for 1 month!', [
+                { text: 'OK', onPress: onBack }
+              ]);
+            },
+          },
+        ]
+      );
+    } else {
+      try {
+        setLoading(true);
+        await paymentService.purchaseMonthlySubscription();
+        if (onPurchaseSuccess) onPurchaseSuccess();
+      } catch (error) {
+        console.error('Purchase failed:', error);
+        Alert.alert('Purchase Failed', 'Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleRestorePurchases = async () => {
+    try {
+      setLoading(true);
+      await paymentService.restorePurchases();
+    } catch (error) {
+      console.error('Restore failed:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getYearlyPrice = () => {
+    const yearlyProduct = products.find(p => p.productId.includes('yearly'));
+    return yearlyProduct ? yearlyProduct.price : '$49.99';
+  };
+
+  const getMonthlyPrice = () => {
+    const monthlyProduct = products.find(p => p.productId.includes('monthly'));
+    return monthlyProduct ? monthlyProduct.price : '$4.99';
   };
 
   return (
@@ -114,14 +186,36 @@ const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onP
 
       <Text style={styles.popularText}>{t('popular', language)}</Text>
 
-      <TouchableOpacity style={styles.rectangleButton} onPress={handlePurchase12Months}>
+      <TouchableOpacity
+        style={[styles.rectangleButton, loading && styles.disabledButton]}
+        onPress={handlePurchase12Months}
+        disabled={loading}
+      >
         <Text style={styles.monthsText}>{t('12_months', language)}</Text>
-        <Text style={styles.priceText}>50$</Text>
+        <Text style={styles.priceText}>{getYearlyPrice()}</Text>
+        {loading && (
+          <ActivityIndicator
+            style={styles.loadingIndicator}
+            size="small"
+            color="#FF2097"
+          />
+        )}
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.secondRectangleButton} onPress={handlePurchase1Month}>
+      <TouchableOpacity
+        style={[styles.secondRectangleButton, loading && styles.disabledButton]}
+        onPress={handlePurchase1Month}
+        disabled={loading}
+      >
         <Text style={styles.oneMonthText}>{t('1_month', language)}</Text>
-        <Text style={styles.secondPriceText}>5$</Text>
+        <Text style={styles.secondPriceText}>{getMonthlyPrice()}</Text>
+        {loading && (
+          <ActivityIndicator
+            style={styles.loadingIndicator}
+            size="small"
+            color="#FF2097"
+          />
+        )}
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.backButton} onPress={onBack}>
@@ -130,6 +224,14 @@ const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onP
           style={styles.backArrowImage}
           resizeMode="contain"
         />
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.restoreButton}
+        onPress={handleRestorePurchases}
+        disabled={loading}
+      >
+        <Text style={styles.restoreText}>Restore Purchases</Text>
       </TouchableOpacity>
 
     </View>
@@ -362,6 +464,30 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     textTransform: 'capitalize',
     color: '#FFA8D6',
+  },
+  disabledButton: {
+    opacity: 0.6,
+  },
+  loadingIndicator: {
+    position: 'absolute',
+    right: (30 / 1242) * width,
+    top: '50%',
+    marginTop: -(12 / 1242) * width,
+  },
+  restoreButton: {
+    position: 'absolute',
+    bottom: (50 / 1242) * width,
+    left: (54 / 1242) * width,
+    right: (54 / 1242) * width,
+    height: (50 / 1242) * width,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  restoreText: {
+    fontFamily: 'Alatsi',
+    fontSize: (24 / 1242) * width,
+    color: '#303539',
+    textDecorationLine: 'underline',
   },
 });
 

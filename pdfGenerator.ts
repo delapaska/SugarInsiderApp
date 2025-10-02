@@ -277,9 +277,7 @@ export const generateStatisticsPDF = async (data: PDFReportData): Promise<string
   const fileName = `SugarInsider_Statistics_${selectedPeriod}_${selectedDate.toISOString().split('T')[0]}`;
 
   try {
-    // Проверяем, что библиотека доступна
     if (!RNHTMLtoPDF || typeof RNHTMLtoPDF.convert !== 'function') {
-      // Fallback: возвращаем HTML для ручного сохранения
       return await generateFallbackReport(htmlContent, fileName, language);
     }
 
@@ -307,7 +305,6 @@ export const generateStatisticsPDF = async (data: PDFReportData): Promise<string
   } catch (error: any) {
     console.error('PDF generation error:', error);
 
-    // Если ошибка связана с native модулем, используем fallback
     if (error.message?.includes('TurboModuleRegistry') ||
         error.message?.includes('could not be found') ||
         error.message?.includes('RNHTMLtoPDF')) {
@@ -320,38 +317,32 @@ export const generateStatisticsPDF = async (data: PDFReportData): Promise<string
   }
 };
 
-// Fallback функция для случаев, когда native модуль недоступен
 const generateFallbackReport = async (htmlContent: string, fileName: string, language: Language): Promise<string> => {
   try {
-    // Импортируем Clipboard только когда нужен
     const Clipboard = require('@react-native-clipboard/clipboard');
 
-    // Создаем текстовую версию отчета
     const textReport = htmlToText(htmlContent);
 
-    // Копируем в буфер обмена
     await Clipboard.default.setString(textReport);
 
     return `${t('pdfNotAvailable', language) || 'PDF generation not available'}\n\n${t('reportCopiedToClipboard', language) || 'Report copied to clipboard! You can paste it into any app to save.'}\n\n${t('fileName', language) || 'Filename'}: ${fileName}.txt`;
 
   } catch (clipboardError) {
-    // Если и clipboard не работает, просто возвращаем текст
     const textReport = htmlToText(htmlContent);
     return `${t('reportGenerated', language) || 'Report generated'}:\n\n${textReport}`;
   }
 };
 
-// Простая функция для конвертации HTML в текст
 const htmlToText = (html: string): string => {
   return html
-    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '') // Удаляем CSS
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '') // Удаляем JS
-    .replace(/<[^>]+>/g, '') // Удаляем HTML теги
-    .replace(/&nbsp;/g, ' ') // Заменяем неразрывные пробелы
-    .replace(/&amp;/g, '&') // Декодируем амперсанды
-    .replace(/&lt;/g, '<') // Декодируем <
-    .replace(/&gt;/g, '>') // Декодируем >
-    .replace(/&quot;/g, '"') // Декодируем кавычки
-    .replace(/\s+/g, ' ') // Заменяем множественные пробелы на одинарные
-    .trim(); // Убираем пробелы в начале и конце
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/\s+/g, ' ')
+    .trim();
 };

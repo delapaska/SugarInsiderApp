@@ -1,0 +1,123 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "MythicStrikeProducts",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "0.99",
+      "familyShareable" : false,
+      "identifier" : "com.Bubka.mythicstrike.level3",
+      "internalID" : "1234567890",
+      "localizations" : [
+        {
+          "description" : "Разблокирует 3-й уровень игры с уникальными текстурами и сложностью",
+          "displayName" : "Уровень 3",
+          "locale" : "ru"
+        },
+        {
+          "description" : "Unlocks level 3 with unique textures and increased difficulty",
+          "displayName" : "Level 3",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.Bubka.mythicstrike.level3",
+      "referenceName" : "Level 3",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "1.99",
+      "familyShareable" : false,
+      "identifier" : "com.Bubka.mythicstrike.level4",
+      "internalID" : "1234567891",
+      "localizations" : [
+        {
+          "description" : "Разблокирует 4-й уровень игры с максимальной сложностью и уникальными эффектами",
+          "displayName" : "Уровень 4",
+          "locale" : "ru"
+        },
+        {
+          "description" : "Unlocks level 4 with maximum difficulty and unique effects",
+          "displayName" : "Level 4",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.Bubka.mythicstrike.level4",
+      "referenceName" : "Level 4",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "123456789",
+    "_developerTeamID" : "G49AR2C5MH",
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 738864000,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}
+

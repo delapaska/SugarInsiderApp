@@ -67,7 +67,10 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
 
 
   const handleExportPDF = async () => {
-    if (!isPremium) return;
+    if (!isPremium) {
+      onProPress();
+      return;
+    }
 
     setIsGeneratingPDF(true);
 
@@ -446,21 +449,23 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
         </Text>
       </TouchableOpacity>
 
-      {isPremium && (
-        <TouchableOpacity
-          style={[styles.pdfExportButton, isGeneratingPDF && styles.pdfExportButtonDisabled]}
-          onPress={handleExportPDF}
-          disabled={isGeneratingPDF}
-        >
-          <Text style={styles.copyIcon}>📄</Text>
-          <Text style={styles.pdfExportText}>
-            {isGeneratingPDF ?
-              (t('generating', language) || 'Generating...') :
-              (t('exportPDF', language) || 'PDF')
-            }
-          </Text>
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity
+        style={[
+          styles.pdfExportButton,
+          isGeneratingPDF && styles.pdfExportButtonDisabled,
+          !isPremium && styles.pdfExportButtonFree
+        ]}
+        onPress={handleExportPDF}
+        disabled={isGeneratingPDF}
+      >
+        <Text style={[styles.copyIcon, !isPremium && styles.copyIconFree]}>📄</Text>
+        <Text style={[styles.pdfExportText, !isPremium && styles.pdfExportTextFree]}>
+          {isGeneratingPDF ?
+            (t('generating', language) || 'Generating...') :
+            (t('exportPDF', language) || 'PDF')
+          }
+        </Text>
+      </TouchableOpacity>
 
       <Text style={styles.calorieIntakeTitle}>{t('calorieIntake', language)}</Text>
 
@@ -1793,6 +1798,23 @@ const styles = StyleSheet.create({
     fontFamily: 'Alatsi',
     fontWeight: 'bold',
     textTransform: 'uppercase',
+  },
+  pdfExportButtonFree: {
+    backgroundColor: '#B0B0B0',
+    borderWidth: 2,
+    borderColor: '#FF77C0',
+    borderStyle: 'dashed',
+  },
+  copyIconFree: {
+    color: '#666',
+  },
+  pdfExportTextFree: {
+    color: '#666',
+  },
+  proIndicator: {
+    fontSize: (20 / 1242) * width,
+    color: '#FFD700',
+    marginLeft: (8 / 1242) * width,
   },
 
 });
