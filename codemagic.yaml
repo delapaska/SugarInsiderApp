@@ -18,7 +18,7 @@ workflows:
 
         distribution_type: app_store
 
-        bundle_identifier: io.codemagic.sample.reactnative
+        bundle_identifier: Com.SugarInsiderApp.ivanChai
 
       vars:
 
