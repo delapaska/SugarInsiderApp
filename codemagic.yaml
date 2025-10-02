@@ -22,7 +22,7 @@ workflows:
 
       vars:
 
-        BUNDLE_ID: "io.codemagic.sample.reactnative"
+        BUNDLE_ID: "Com.SugarInsiderApp.ivanChai"
 
         XCODE_WORKSPACE: "CodemagicSample.xcworkspace" # <-- Put the name of your Xcode workspace here
 
