@@ -224,13 +224,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SugarInsiderApp/Pods-SugarInsiderApp-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SugarInsiderApp/Pods-SugarInsiderApp-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -245,13 +241,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SugarInsiderApp/Pods-SugarInsiderApp-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SugarInsiderApp/Pods-SugarInsiderApp-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -283,7 +275,6 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = SugarInsiderApp/Info.plist;
-				SWIFT_OBJC_BRIDGING_HEADER = "SugarInsiderApp/SugarInsiderApp-Bridging-Header.h";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -295,8 +286,11 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.sugarinsiderapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sugarinsiderapp.ivanchai;
 				PRODUCT_NAME = SugarInsiderApp;
+				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "SugarInsiderApp/SugarInsiderApp-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -311,7 +305,6 @@
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = SugarInsiderApp/Info.plist;
-				SWIFT_OBJC_BRIDGING_HEADER = "SugarInsiderApp/SugarInsiderApp-Bridging-Header.h";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -323,8 +316,11 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.sugarinsiderapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sugarinsiderapp.ivanchai;
 				PRODUCT_NAME = SugarInsiderApp;
+				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "SugarInsiderApp/SugarInsiderApp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
