@@ -41,13 +41,15 @@ workflows:
         script: | 
           npx expo prebuild --platform ios
 
-      - name: Fix Podfile
+      - name: Fix Podfile for React Native 0.81
         script: |
           cd ios
-          echo "source 'https://cdn.cocoapods.org/'" > Podfile.tmp
-          echo "" >> Podfile.tmp
-          cat Podfile >> Podfile.tmp
-          mv Podfile.tmp Podfile
+          # Добавляем source и RCT-Folly
+          sed -i '' '1s;^;source '\''https://cdn.cocoapods.org/'\''\n\n;' Podfile
+          # Ищем строку с require_relative и добавляем RCT-Folly после неё
+          sed -i '' '/require_relative/a\
+          \  pod '\''RCT-Folly'\'', :podspec => '\''../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec'\''
+          ' Podfile
 
       - name: Set Info.plist values
         script: | 
@@ -58,6 +60,7 @@ workflows:
       - name: Install CocoaPods dependencies
         script: | 
           cd ios
+          pod deintegrate || true
           pod install --repo-update
 
       - name: Set up code signing settings on Xcode project
