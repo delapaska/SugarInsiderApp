@@ -44,11 +44,8 @@ workflows:
       - name: Fix Podfile
         script: |
           cd ios
-          # Добавляем CDN источники в начало Podfile
-          cat > Podfile.tmp << 'EOF'
-source 'https://cdn.cocoapods.org/'
-
-EOF
+          echo "source 'https://cdn.cocoapods.org/'" > Podfile.tmp
+          echo "" >> Podfile.tmp
           cat Podfile >> Podfile.tmp
           mv Podfile.tmp Podfile
 
