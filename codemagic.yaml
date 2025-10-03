@@ -45,7 +45,7 @@ workflows:
         script: |
           cd ios
           ruby -i -pe 'print "source '\''https://cdn.cocoapods.org/'\''\n\n" if $. == 1' Podfile
-          awk '/target.*do/{print; print "  pod '\''RCT-Folly'\'', :podspec => '\''../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec'\''"; next}1' Podfile > Podfile.tmp && mv Podfile.tmp Podfile
+          awk '/target.*do/{print; print "  pod '\''fast_float'\'', '\''8.0.0'\''"; print "  pod '\''RCT-Folly'\'', :podspec => '\''../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec'\''"; next}1' Podfile > Podfile.tmp && mv Podfile.tmp Podfile
 
       - name: Set Info.plist values
         script: | 
@@ -53,9 +53,17 @@ workflows:
           PLIST_BUDDY=/usr/libexec/PlistBuddy
           $PLIST_BUDDY -c "Add :ITSAppUsesNonExemptEncryption bool false" $PLIST || true
 
+      - name: Clear CocoaPods cache
+        script: |
+          cd ios
+          rm -rf ~/Library/Caches/CocoaPods
+          rm -rf Pods
+          rm -rf ~/Library/Developer/Xcode/DerivedData/*
+
       - name: Install CocoaPods dependencies
         script: | 
           cd ios
+          pod repo update
           pod install --repo-update
 
       - name: Set up code signing settings on Xcode project
