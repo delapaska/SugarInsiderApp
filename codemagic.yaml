@@ -44,8 +44,10 @@ workflows:
       - name: Patch Podfile
         script: |
           cd ios
-          ruby -i -pe 'print "source '\''https://cdn.cocoapods.org/'\''\n\n" if $. == 1' Podfile
-          awk '/target.*do/{print; print "  pod '\''fast_float'\'', '\''8.0.0'\''"; print "  pod '\''RCT-Folly'\'', :podspec => '\''../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec'\''"; next}1' Podfile > Podfile.tmp && mv Podfile.tmp Podfile
+          # Используем trunk вместо CDN
+          ruby -i -pe 'print "source '\''https://github.com/CocoaPods/Specs.git'\''\n\n" if $. == 1' Podfile
+          # Добавляем RCT-Folly в target
+          awk '/target.*do/{print; print "  pod '\''RCT-Folly'\'', :podspec => '\''../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec'\''"; next}1' Podfile > Podfile.tmp && mv Podfile.tmp Podfile
 
       - name: Set Info.plist values
         script: | 
@@ -58,13 +60,12 @@ workflows:
           cd ios
           rm -rf ~/Library/Caches/CocoaPods
           rm -rf Pods
-          rm -rf ~/Library/Developer/Xcode/DerivedData/*
 
       - name: Install CocoaPods dependencies
         script: | 
           cd ios
           pod repo update
-          pod install --repo-update
+          pod install
 
       - name: Set up code signing settings on Xcode project
         script: xcode-project use-profiles
