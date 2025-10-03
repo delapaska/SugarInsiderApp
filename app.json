@@ -1,31 +1,11 @@
 {
-  "name": "SugarInsiderApp",
-  "displayName": "SugarInsiderApp",
-
   "expo": {
     "name": "SugarInsiderApp",
     "slug": "sugar-insider-app",
     "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "ios": {
       "bundleIdentifier": "com.sugarinsiderapp.ivanchai",
-      "buildNumber": "1",
-      "supportsTablet": true
-    },
-    "android": {
-      "package": "com.sugarinsiderapp.ivanchai",
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+      "buildNumber": "1"
     }
   }
-
 }
