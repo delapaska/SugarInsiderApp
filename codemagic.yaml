@@ -16,7 +16,8 @@ workflows:
         APP_STORE_APPLE_ID: 6753351573
         CM_CERTIFICATE: SugarInsiderApp
         CM_PROVISIONING_PROFILE: SugarInsiderApp
-        BUILD_NUMBER: "6"
+        MARKETING_VERSION: "1.0.0"
+        BUILD_NUMBER: "7"
       node: latest
       xcode: latest
       cocoapods: default
@@ -41,14 +42,14 @@ workflows:
           echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 --decode > assets/splash.png
           echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 --decode > assets/adaptive-icon.png
 
-      - name: Update app.json with build number
+      - name: Update app.json with version info
         script: |
           cat > app.json << 'EOF'
           {
             "expo": {
               "name": "SugarInsiderApp",
               "slug": "sugar-insider-app",
-              "version": "1.0.0",
+              "version": "MARKETING_VERSION_PLACEHOLDER",
               "orientation": "portrait",
               "icon": "./assets/icon.png",
               "splash": {
@@ -67,19 +68,19 @@ workflows:
           }
           EOF
           
+          sed -i '' "s/MARKETING_VERSION_PLACEHOLDER/$MARKETING_VERSION/" app.json
           sed -i '' "s/BUILD_NUMBER_PLACEHOLDER/$BUILD_NUMBER/" app.json
           
-          echo "Created app.json with build number $BUILD_NUMBER"
+          echo "Created app.json with version $MARKETING_VERSION ($BUILD_NUMBER)"
           cat app.json
 
-      - name: Remove old iOS folder
-        script: |
-          rm -rf ios
-          rm -rf android
-
-      - name: Run Expo Prebuild
+      - name: Run Expo Prebuild (keep existing ios folder)
         script: | 
-          npx expo prebuild --platform ios --clean
+          if [ ! -d "ios" ]; then
+            npx expo prebuild --platform ios
+          else
+            echo "iOS folder exists, skipping prebuild to preserve project settings"
+          fi
 
       - name: Patch react-native-iap podspec
         script: |
@@ -91,48 +92,52 @@ workflows:
       - name: Patch Podfile
         script: |
           cd ios
-          ruby -i -pe 'print "source '\''https://github.com/CocoaPods/Specs.git'\''\n\n" if $. == 1' Podfile
+          if ! grep -q "source 'https://github.com/CocoaPods/Specs.git'" Podfile; then
+            ruby -i -pe 'print "source '\''https://github.com/CocoaPods/Specs.git'\''\n\n" if $. == 1' Podfile
+          fi
 
-      - name: Set Info.plist values
+      - name: Set Marketing Version and Build Number
         script: | 
-          PLIST=$CM_BUILD_DIR/ios/$XCODE_SCHEME/Info.plist
-          PLIST_BUDDY=/usr/libexec/PlistBuddy
-          $PLIST_BUDDY -c "Add :ITSAppUsesNonExemptEncryption bool false" $PLIST || true
+          INFO_PLIST="$CM_BUILD_DIR/ios/$XCODE_SCHEME/Info.plist"
+          PLB=/usr/libexec/PlistBuddy
+          
+          echo "Setting MARKETING_VERSION to $MARKETING_VERSION"
+          $PLB -c "Set :CFBundleShortVersionString $MARKETING_VERSION" "$INFO_PLIST" || \
+          $PLB -c "Add :CFBundleShortVersionString string $MARKETING_VERSION" "$INFO_PLIST"
+          
+          echo "Setting BUILD_NUMBER to $BUILD_NUMBER"
+          cd "$CM_BUILD_DIR/ios"
+          agvtool new-version -all $BUILD_NUMBER
+          
+          echo "Adding ITSAppUsesNonExemptEncryption"
+          $PLB -c "Add :ITSAppUsesNonExemptEncryption bool false" "$INFO_PLIST" || true
 
       - name: Install CocoaPods dependencies
         script: | 
           cd ios
           pod install --repo-update
 
-      - name: Fix deployment target
-        script: |
-          cd ios
-          sed -i '' "s/platform :ios, '.*'/platform :ios, '13.0'/" Podfile
-          pod install
-
       - name: Fetch signing files from Codemagic
         script: |
           keychain add-certificates
           xcode-project use-profiles
 
-      - name: Verify build number in Info.plist
+      - name: Verify build settings
         script: | 
           cd $CM_BUILD_DIR/ios
-          echo "=== Checking build numbers in Info.plist ==="
-          echo "CFBundleShortVersionString (Marketing version):"
-          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$CM_BUILD_DIR/ios/$XCODE_SCHEME/Info.plist" || true
+          echo "=== Final Info.plist values ==="
+          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$CM_BUILD_DIR/ios/$XCODE_SCHEME/Info.plist"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$CM_BUILD_DIR/ios/$XCODE_SCHEME/Info.plist"
+          
           echo ""
-          echo "CFBundleVersion (Build number):"
-          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$CM_BUILD_DIR/ios/$XCODE_SCHEME/Info.plist" || true
-          echo ""
-          echo "Using agvtool:"
-          agvtool what-version
-          agvtool what-marketing-version
+          echo "=== Xcode build settings ==="
+          xcodebuild -showBuildSettings \
+            -workspace "$XCODE_WORKSPACE" \
+            -scheme "$XCODE_SCHEME" | grep -E "PRODUCT_BUNDLE_IDENTIFIER|MARKETING_VERSION|CURRENT_PROJECT_VERSION"
 
       - name: Prebuild React Native bundle
         script: |
           export NODE_BINARY=$(which node)
-          export ENTRY_FILE=index.js
           
           npx react-native bundle \
             --platform ios \
@@ -165,5 +170,5 @@ workflows:
 
       app_store_connect:
         auth: integration
-        submit_to_testflight: true
-        submit_to_app_store: true
+        submit_to_testflight: false
+        submit_to_app_store: false
