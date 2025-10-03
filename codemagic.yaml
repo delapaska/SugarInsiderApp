@@ -18,8 +18,6 @@ workflows:
       xcode: latest
       cocoapods: default
     scripts:
-      # УБРАЛИ скрипт Fetch signing files - будем использовать загруженные файлы
-      
       - name: Set up keychain
         script: keychain initialize
 
@@ -27,15 +25,23 @@ workflows:
         script: | 
           npm install
 
+      - name: Create placeholder assets
+        script: |
+          mkdir -p assets
+          # Создаем простые PNG файлы (1x1 пиксель)
+          echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 --decode > assets/icon.png
+          echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 --decode > assets/splash.png
+          echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 --decode > assets/adaptive-icon.png
+
       - name: Run Expo Prebuild
         script: | 
-          npx expo prebuild
+          npx expo prebuild --platform ios
 
       - name: Set Info.plist values
         script: | 
           PLIST=$CM_BUILD_DIR/ios/$XCODE_SCHEME/Info.plist
           PLIST_BUDDY=/usr/libexec/PlistBuddy
-          $PLIST_BUDDY -c "Add :ITSAppUsesNonExemptEncryption bool false" $PLIST
+          $PLIST_BUDDY -c "Add :ITSAppUsesNonExemptEncryption bool false" $PLIST || true
 
       - name: Install CocoaPods dependencies
         script: | 
