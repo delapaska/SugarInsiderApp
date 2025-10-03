@@ -64,6 +64,14 @@ workflows:
           cd ios
           pod install --repo-update
 
+      - name: Fix deployment target
+        script: |
+          cd ios
+          # Исправляем deployment target в Podfile
+          sed -i '' "s/platform :ios, '.*'/platform :ios, '13.0'/" Podfile
+          # Переустанавливаем поды с правильным deployment target
+          pod install
+
       - name: Set up code signing settings on Xcode project
         script: xcode-project use-profiles
 
@@ -86,20 +94,19 @@ workflows:
             CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM=Y33FQK27U3 \
             CODE_SIGN_IDENTITY="Apple Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER="" \
-            | tee $CM_BUILD_DIR/xcodebuild.log
+            IPHONEOS_DEPLOYMENT_TARGET=13.0 \
+            2>&1 | tee $CM_BUILD_DIR/xcodebuild.log
           
-          if [ ${PIPESTATUS[0]} -ne 0 ]; then
-            echo "=== BUILD FAILED ==="
-            echo "=== Last 100 lines of build log ==="
-            tail -100 $CM_BUILD_DIR/xcodebuild.log
+          BUILD_RESULT=${PIPESTATUS[0]}
+          
+          if [ $BUILD_RESULT -ne 0 ]; then
+            echo "=== BUILD FAILED WITH CODE: $BUILD_RESULT ==="
+            echo "=== Searching for errors in log ==="
+            grep -i "error:" $CM_BUILD_DIR/xcodebuild.log | tail -20
+            echo "=== Last 50 lines of build log ==="
+            tail -50 $CM_BUILD_DIR/xcodebuild.log
             exit 1
           fi
-          
-          xcodebuild -exportArchive \
-            -archivePath $CM_BUILD_DIR/build/ios/archive/SugarInsiderApp.xcarchive \
-            -exportPath $CM_BUILD_DIR/build/ios/ipa \
-            -exportOptionsPlist $CM_BUILD_DIR/ios/ExportOptions.plist
 
       - name: Create ExportOptions.plist
         script: |
@@ -116,10 +123,16 @@ workflows:
           </plist>
           EOF
 
+      - name: Export IPA
+        script: |
+          xcodebuild -exportArchive \
+            -archivePath $CM_BUILD_DIR/build/ios/archive/SugarInsiderApp.xcarchive \
+            -exportPath $CM_BUILD_DIR/build/ios/ipa \
+            -exportOptionsPlist $CM_BUILD_DIR/ios/ExportOptions.plist
+
     artifacts:
       - build/ios/ipa/*.ipa
       - xcodebuild.log
-      - /tmp/xcodebuild_logs/*.log
 
     publishing:
       email:
