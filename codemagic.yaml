@@ -67,13 +67,15 @@ workflows:
       - name: Fix deployment target
         script: |
           cd ios
-          # Исправляем deployment target в Podfile
           sed -i '' "s/platform :ios, '.*'/platform :ios, '13.0'/" Podfile
-          # Переустанавливаем поды с правильным deployment target
           pod install
 
       - name: Set up code signing settings on Xcode project
-        script: xcode-project use-profiles
+        script: |
+          xcode-project use-profiles
+          
+          echo "=== Checking available certificates ==="
+          security find-identity -v -p codesigning
 
       - name: Increment build number
         script: | 
@@ -85,15 +87,23 @@ workflows:
         script: | 
           cd $CM_BUILD_DIR/ios
           
+          CERT_IDENTITY=$(security find-identity -v -p codesigning | grep "Apple Distribution" | head -1 | grep -o '".*"' | sed 's/"//g')
+          echo "Using certificate: $CERT_IDENTITY"
+          
+          if [ -z "$CERT_IDENTITY" ]; then
+            echo "ERROR: No Apple Distribution certificate found in keychain"
+            security find-identity -v -p codesigning
+            exit 1
+          fi
+          
           xcodebuild archive \
             -workspace "$XCODE_WORKSPACE" \
             -scheme "$XCODE_SCHEME" \
             -configuration Release \
             -archivePath $CM_BUILD_DIR/build/ios/archive/SugarInsiderApp.xcarchive \
-            -allowProvisioningUpdates \
             CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM=Y33FQK27U3 \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
+            CODE_SIGN_IDENTITY="$CERT_IDENTITY" \
             IPHONEOS_DEPLOYMENT_TARGET=13.0 \
             2>&1 | tee $CM_BUILD_DIR/xcodebuild.log
           
