@@ -16,7 +16,7 @@ workflows:
         APP_STORE_APPLE_ID: 6753351573
         CM_CERTIFICATE: SugarInsiderApp
         CM_PROVISIONING_PROFILE: SugarInsiderApp
-        BUILD_NUMBER: "5"
+        BUILD_NUMBER: "6"
       node: latest
       xcode: latest
       cocoapods: default
@@ -43,20 +43,34 @@ workflows:
 
       - name: Update app.json with build number
         script: |
-          cat > app.json << EOF
+          cat > app.json << 'EOF'
           {
             "expo": {
               "name": "SugarInsiderApp",
               "slug": "sugar-insider-app",
               "version": "1.0.0",
+              "orientation": "portrait",
+              "icon": "./assets/icon.png",
+              "splash": {
+                "image": "./assets/splash.png",
+                "resizeMode": "contain",
+                "backgroundColor": "#ffffff"
+              },
               "ios": {
                 "bundleIdentifier": "com.sugarinsiderapp.ivanchai",
-                "buildNumber": "$BUILD_NUMBER"
+                "buildNumber": "BUILD_NUMBER_PLACEHOLDER"
+              },
+              "android": {
+                "package": "com.sugarinsiderapp.ivanchai"
               }
             }
           }
           EOF
-          echo "Set build number to $BUILD_NUMBER in app.json"
+          
+          sed -i '' "s/BUILD_NUMBER_PLACEHOLDER/$BUILD_NUMBER/" app.json
+          
+          echo "Created app.json with build number $BUILD_NUMBER"
+          cat app.json
 
       - name: Remove old iOS folder
         script: |
@@ -101,11 +115,19 @@ workflows:
           keychain add-certificates
           xcode-project use-profiles
 
-      - name: Verify build number
+      - name: Verify build number in Info.plist
         script: | 
           cd $CM_BUILD_DIR/ios
-          echo "Verifying build number:"
+          echo "=== Checking build numbers in Info.plist ==="
+          echo "CFBundleShortVersionString (Marketing version):"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$CM_BUILD_DIR/ios/$XCODE_SCHEME/Info.plist" || true
+          echo ""
+          echo "CFBundleVersion (Build number):"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$CM_BUILD_DIR/ios/$XCODE_SCHEME/Info.plist" || true
+          echo ""
+          echo "Using agvtool:"
           agvtool what-version
+          agvtool what-marketing-version
 
       - name: Prebuild React Native bundle
         script: |
