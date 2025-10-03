@@ -41,12 +41,15 @@ workflows:
         script: | 
           npx expo prebuild --platform ios
 
+      - name: Patch RCT-Folly podspec
+        script: |
+          # Патчим RCT-Folly.podspec чтобы использовать ~> 8.0 вместо = 8.0.0
+          sed -i '' "s/fast_float', '= 8.0.0'/fast_float', '~> 8.0'/" node_modules/react-native/third-party-podspecs/RCT-Folly.podspec
+
       - name: Patch Podfile
         script: |
           cd ios
-          # Используем trunk вместо CDN
           ruby -i -pe 'print "source '\''https://github.com/CocoaPods/Specs.git'\''\n\n" if $. == 1' Podfile
-          # Добавляем RCT-Folly в target
           awk '/target.*do/{print; print "  pod '\''RCT-Folly'\'', :podspec => '\''../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec'\''"; next}1' Podfile > Podfile.tmp && mv Podfile.tmp Podfile
 
       - name: Set Info.plist values
