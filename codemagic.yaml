@@ -41,6 +41,16 @@ workflows:
         script: | 
           npx expo prebuild --platform ios
 
+      - name: Fix Podfile for RCT-Folly
+        script: |
+          cd ios
+          # Добавляем RCT-Folly в Podfile если его нет
+          if ! grep -q "pod 'RCT-Folly'" Podfile; then
+            sed -i '' "/use_react_native!/i\\
+            pod 'RCT-Folly', :podspec => '../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec'
+            " Podfile
+          fi
+
       - name: Set Info.plist values
         script: | 
           PLIST=$CM_BUILD_DIR/ios/$XCODE_SCHEME/Info.plist
@@ -50,8 +60,7 @@ workflows:
       - name: Install CocoaPods dependencies
         script: | 
           cd ios
-          pod repo update
-          pod install
+          pod install --repo-update
 
       - name: Set up code signing settings on Xcode project
         script: xcode-project use-profiles
