@@ -41,16 +41,19 @@ workflows:
         script: | 
           npx expo prebuild --platform ios
 
-      - name: Patch RCT-Folly podspec
+      - name: Patch react-native-iap podspec
         script: |
-          # Патчим RCT-Folly.podspec чтобы использовать ~> 8.0 вместо = 8.0.0
-          sed -i '' "s/fast_float', '= 8.0.0'/fast_float', '~> 8.0'/" node_modules/react-native/third-party-podspecs/RCT-Folly.podspec
+          # Убираем зависимость от RCT-Folly в react-native-iap
+          RNIAP_PODSPEC=$(find node_modules -name "react-native-iap.podspec" -o -name "RNIap.podspec" | head -n 1)
+          if [ -f "$RNIAP_PODSPEC" ]; then
+            sed -i '' "/RCT-Folly/d" "$RNIAP_PODSPEC"
+            echo "Patched react-native-iap podspec: removed RCT-Folly dependency"
+          fi
 
       - name: Patch Podfile
         script: |
           cd ios
           ruby -i -pe 'print "source '\''https://github.com/CocoaPods/Specs.git'\''\n\n" if $. == 1' Podfile
-          awk '/target.*do/{print; print "  pod '\''RCT-Folly'\'', :podspec => '\''../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec'\''"; next}1' Podfile > Podfile.tmp && mv Podfile.tmp Podfile
 
       - name: Set Info.plist values
         script: | 
@@ -58,17 +61,10 @@ workflows:
           PLIST_BUDDY=/usr/libexec/PlistBuddy
           $PLIST_BUDDY -c "Add :ITSAppUsesNonExemptEncryption bool false" $PLIST || true
 
-      - name: Clear CocoaPods cache
-        script: |
-          cd ios
-          rm -rf ~/Library/Caches/CocoaPods
-          rm -rf Pods
-
       - name: Install CocoaPods dependencies
         script: | 
           cd ios
-          pod repo update
-          pod install
+          pod install --repo-update
 
       - name: Set up code signing settings on Xcode project
         script: xcode-project use-profiles
