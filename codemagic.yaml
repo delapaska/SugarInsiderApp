@@ -14,7 +14,6 @@ workflows:
         XCODE_WORKSPACE: "SugarInsiderApp.xcworkspace"
         XCODE_SCHEME: "SugarInsiderApp"
         APP_STORE_APPLE_ID: 6753351573
-        # Указываем reference на загруженный сертификат
         CM_CERTIFICATE: SugarInsiderApp
         CM_PROVISIONING_PROFILE: SugarInsiderApp
       node: latest
@@ -27,6 +26,13 @@ workflows:
       - name: Install npm dependencies
         script: | 
           npm install
+          npm install @expo/metro-config@latest
+
+      - name: Clear Metro cache
+        script: |
+          rm -rf node_modules/.cache
+          rm -rf /tmp/metro-*
+          rm -rf /tmp/haste-map-*
 
       - name: Create placeholder assets
         script: |
@@ -42,7 +48,7 @@ workflows:
 
       - name: Run Expo Prebuild
         script: | 
-          npx expo prebuild --platform ios
+          npx expo prebuild --platform ios --clean
 
       - name: Patch react-native-iap podspec
         script: |
@@ -77,12 +83,6 @@ workflows:
         script: |
           keychain add-certificates
           xcode-project use-profiles
-          
-          echo "=== Available certificates ==="
-          security find-identity -v -p codesigning
-          
-          echo "=== Available provisioning profiles ==="
-          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
 
       - name: Increment build number
         script: | 
@@ -92,6 +92,9 @@ workflows:
 
       - name: Build ipa with xcode-project
         script: |
+          export NODE_BINARY=$(which node)
+          export BUNDLE_COMMAND="bundle"
+          
           xcode-project build-ipa \
             --workspace "$CM_BUILD_DIR/ios/$XCODE_WORKSPACE" \
             --scheme "$XCODE_SCHEME" \
