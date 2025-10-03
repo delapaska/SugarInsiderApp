@@ -3,6 +3,8 @@ workflows:
     name: React Native iOS
     max_build_duration: 120
     instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: SugarInsederApp  # ИЛИ другое имя интеграции, которое вы создали
     environment:
       ios_signing:
         distribution_type: app_store
@@ -16,11 +18,8 @@ workflows:
       xcode: latest
       cocoapods: default
     scripts:
-      - name: Set up App Store Connect API key
-        script: |
-          mkdir -p ~/private_keys
-          echo "$APP_STORE_CONNECT_PRIVATE_KEY" > ~/private_keys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8
-
+      # УБРАЛИ скрипт "Set up App Store Connect API key"
+      
       - name: Fetch signing files
         script: |
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
