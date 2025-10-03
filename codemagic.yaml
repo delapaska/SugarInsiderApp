@@ -4,7 +4,7 @@ workflows:
     max_build_duration: 120
     instance_type: mac_mini_m2
     integrations:
-      app_store_connect: SugarInsederApp  # ИЛИ другое имя интеграции, которое вы создали
+      app_store_connect: SugarInsederApp
     environment:
       ios_signing:
         distribution_type: app_store
@@ -18,43 +18,31 @@ workflows:
       xcode: latest
       cocoapods: default
     scripts:
-      # УБРАЛИ скрипт "Set up App Store Connect API key"
+      # УБРАЛИ скрипт Fetch signing files - будем использовать загруженные файлы
       
-      - name: Fetch signing files
-        script: |
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type IOS_APP_STORE \
-            --create
-
-      - name: Add certificates to keychain
-        script: keychain add-certificates
-
-      - name: Set up code signing settings
-        script: xcode-project use-profiles
+      - name: Set up keychain
+        script: keychain initialize
 
       - name: Install npm dependencies
         script: | 
           npm install
-          npm install expo
-
-      - name: Clean iOS directory
-        script: |
-          rm -rf ios
-          rm -rf android
 
       - name: Run Expo Prebuild
         script: | 
-          npx expo prebuild --platform ios --clean
+          npx expo prebuild
 
       - name: Set Info.plist values
         script: | 
           PLIST=$CM_BUILD_DIR/ios/$XCODE_SCHEME/Info.plist
           PLIST_BUDDY=/usr/libexec/PlistBuddy
-          $PLIST_BUDDY -c "Add :ITSAppUsesNonExemptEncryption bool false" $PLIST || true
+          $PLIST_BUDDY -c "Add :ITSAppUsesNonExemptEncryption bool false" $PLIST
 
       - name: Install CocoaPods dependencies
         script: | 
           cd ios && pod install
+
+      - name: Set up code signing settings on Xcode project
+        script: xcode-project use-profiles
 
       - name: Increment build number
         script: | 
@@ -79,3 +67,8 @@ workflows:
         notify:
           success: true
           failure: true
+
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: false
