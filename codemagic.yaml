@@ -32,9 +32,6 @@ workflows:
           rm -rf node_modules/.cache
           rm -rf /tmp/metro-*
           rm -rf /tmp/haste-map-*
-          npx react-native start --reset-cache &
-          sleep 5
-          killall node || true
 
       - name: Create placeholder assets
         script: |
@@ -86,17 +83,24 @@ workflows:
           keychain add-certificates
           xcode-project use-profiles
 
-      - name: Set build number to 2
+      - name: Increment build number automatically
         script: | 
           cd $CM_BUILD_DIR/ios
-          echo "Setting build number to 2"
-          agvtool new-version -all 2
-          echo "Verifying build number:"
+          
+          echo "Fetching latest build number from App Store Connect..."
+          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" 2>/dev/null || echo "1")
+          NEW_BUILD_NUMBER=$((LATEST_BUILD_NUMBER + 1))
+          
+          echo "Latest build number in App Store Connect: $LATEST_BUILD_NUMBER"
+          echo "Setting new build number to: $NEW_BUILD_NUMBER"
+          
+          agvtool new-version -all $NEW_BUILD_NUMBER
+          
+          echo "Verifying build number was updated:"
           agvtool what-version
 
       - name: Prebuild React Native bundle
         script: |
-          cd ios
           export NODE_BINARY=$(which node)
           export ENTRY_FILE=index.js
           
@@ -104,8 +108,8 @@ workflows:
             --platform ios \
             --dev false \
             --entry-file index.js \
-            --bundle-output ./main.jsbundle \
-            --assets-dest ./
+            --bundle-output $CM_BUILD_DIR/ios/main.jsbundle \
+            --assets-dest $CM_BUILD_DIR/ios
 
       - name: Build ipa with xcode-project
         script: |
