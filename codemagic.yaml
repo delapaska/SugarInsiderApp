@@ -81,6 +81,19 @@ workflows:
           sed -i '' "s/platform :ios, '.*'/platform :ios, '13.0'/" Podfile
           pod install
 
+      - name: Fetch signing files from Codemagic
+        script: |
+          keychain add-certificates
+          xcode-project use-profiles
+
+      - name: Set build number to 2
+        script: | 
+          cd $CM_BUILD_DIR/ios
+          echo "Setting build number to 2"
+          agvtool new-version -all 2
+          echo "Verifying build number:"
+          agvtool what-version
+
       - name: Prebuild React Native bundle
         script: |
           cd ios
@@ -93,19 +106,6 @@ workflows:
             --entry-file index.js \
             --bundle-output ./main.jsbundle \
             --assets-dest ./
-
-      - name: Fetch signing files from Codemagic
-        script: |
-          keychain add-certificates
-          xcode-project use-profiles
-
-      - name: Increment build number
-        script: | 
-          cd $CM_BUILD_DIR/ios
-          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" 2>/dev/null || echo "1")
-          NEW_BUILD_NUMBER=$((LATEST_BUILD_NUMBER + 1))
-          echo "Incrementing build number from $LATEST_BUILD_NUMBER to $NEW_BUILD_NUMBER"
-          agvtool new-version -all $NEW_BUILD_NUMBER
 
       - name: Build ipa with xcode-project
         script: |
