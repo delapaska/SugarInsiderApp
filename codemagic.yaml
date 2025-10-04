@@ -72,15 +72,15 @@ workflows:
           sed -i '' "s/BUILD_NUMBER_PLACEHOLDER/$BUILD_NUMBER/" app.json
           
           echo "Created app.json with version $MARKETING_VERSION ($BUILD_NUMBER)"
-          cat app.json
 
-      - name: Run Expo Prebuild (keep existing ios folder)
+      - name: Remove old iOS folder
+        script: |
+          rm -rf ios
+          rm -rf android
+
+      - name: Run Expo Prebuild
         script: | 
-          if [ ! -d "ios" ]; then
-            npx expo prebuild --platform ios
-          else
-            echo "iOS folder exists, skipping prebuild to preserve project settings"
-          fi
+          npx expo prebuild --platform ios --clean
 
       - name: Patch react-native-iap podspec
         script: |
@@ -92,25 +92,13 @@ workflows:
       - name: Patch Podfile
         script: |
           cd ios
-          if ! grep -q "source 'https://github.com/CocoaPods/Specs.git'" Podfile; then
-            ruby -i -pe 'print "source '\''https://github.com/CocoaPods/Specs.git'\''\n\n" if $. == 1' Podfile
-          fi
+          ruby -i -pe 'print "source '\''https://github.com/CocoaPods/Specs.git'\''\n\n" if $. == 1' Podfile
 
-      - name: Set Marketing Version and Build Number
+      - name: Set Info.plist values
         script: | 
-          INFO_PLIST="$CM_BUILD_DIR/ios/$XCODE_SCHEME/Info.plist"
-          PLB=/usr/libexec/PlistBuddy
-          
-          echo "Setting MARKETING_VERSION to $MARKETING_VERSION"
-          $PLB -c "Set :CFBundleShortVersionString $MARKETING_VERSION" "$INFO_PLIST" || \
-          $PLB -c "Add :CFBundleShortVersionString string $MARKETING_VERSION" "$INFO_PLIST"
-          
-          echo "Setting BUILD_NUMBER to $BUILD_NUMBER"
-          cd "$CM_BUILD_DIR/ios"
-          agvtool new-version -all $BUILD_NUMBER
-          
-          echo "Adding ITSAppUsesNonExemptEncryption"
-          $PLB -c "Add :ITSAppUsesNonExemptEncryption bool false" "$INFO_PLIST" || true
+          PLIST=$CM_BUILD_DIR/ios/$XCODE_SCHEME/Info.plist
+          PLIST_BUDDY=/usr/libexec/PlistBuddy
+          $PLIST_BUDDY -c "Add :ITSAppUsesNonExemptEncryption bool false" $PLIST || true
 
       - name: Install CocoaPods dependencies
         script: | 
@@ -122,18 +110,12 @@ workflows:
           keychain add-certificates
           xcode-project use-profiles
 
-      - name: Verify build settings
+      - name: Verify build number
         script: | 
           cd $CM_BUILD_DIR/ios
-          echo "=== Final Info.plist values ==="
+          echo "=== Build numbers ==="
           /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$CM_BUILD_DIR/ios/$XCODE_SCHEME/Info.plist"
           /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$CM_BUILD_DIR/ios/$XCODE_SCHEME/Info.plist"
-          
-          echo ""
-          echo "=== Xcode build settings ==="
-          xcodebuild -showBuildSettings \
-            -workspace "$XCODE_WORKSPACE" \
-            -scheme "$XCODE_SCHEME" | grep -E "PRODUCT_BUNDLE_IDENTIFIER|MARKETING_VERSION|CURRENT_PROJECT_VERSION"
 
       - name: Prebuild React Native bundle
         script: |
@@ -163,12 +145,12 @@ workflows:
     publishing:
       email:
         recipients:
-          - your_email@example.com
+          - delapaska12@yandex.ru
         notify:
           success: true
           failure: true
 
       app_store_connect:
         auth: integration
-        submit_to_testflight: false
-        submit_to_app_store: false
+        submit_to_testflight: true
+        submit_to_app_store: true
