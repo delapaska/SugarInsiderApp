@@ -17,7 +17,7 @@ workflows:
         CM_CERTIFICATE: SugarInsiderApp
         CM_PROVISIONING_PROFILE: SugarInsiderApp
         MARKETING_VERSION: "1.0.0"
-        BUILD_NUMBER: "8"
+        BUILD_NUMBER: "9"  # Увеличен номер билда
       node: latest
       xcode: latest
       cocoapods: default
@@ -26,7 +26,7 @@ workflows:
         script: keychain initialize
 
       - name: Install npm dependencies
-        script: | 
+        script: |
           npm install
 
       - name: Clear Metro cache
@@ -67,11 +67,11 @@ workflows:
             }
           }
           EOF
-          
           sed -i '' "s/MARKETING_VERSION_PLACEHOLDER/$MARKETING_VERSION/" app.json
           sed -i '' "s/BUILD_NUMBER_PLACEHOLDER/$BUILD_NUMBER/" app.json
-          
-          echo "Created app.json with version $MARKETING_VERSION ($BUILD_NUMBER)"
+          echo "✅ Created app.json with version $MARKETING_VERSION ($BUILD_NUMBER)"
+          echo "📄 Content of app.json:"
+          cat app.json
 
       - name: Remove old iOS folder
         script: |
@@ -79,7 +79,7 @@ workflows:
           rm -rf android
 
       - name: Run Expo Prebuild
-        script: | 
+        script: |
           npx expo prebuild --platform ios --clean
 
       - name: Patch react-native-iap podspec
@@ -87,56 +87,154 @@ workflows:
           RNIAP_PODSPEC=$(find node_modules -name "react-native-iap.podspec" -o -name "RNIap.podspec" | head -n 1)
           if [ -f "$RNIAP_PODSPEC" ]; then
             sed -i '' "/RCT-Folly/d" "$RNIAP_PODSPEC"
+            echo "✅ Patched $RNIAP_PODSPEC"
+          else
+            echo "⚠️  react-native-iap podspec not found"
           fi
 
       - name: Patch Podfile
         script: |
           cd ios
           ruby -i -pe 'print "source '\''https://github.com/CocoaPods/Specs.git'\''\n\n" if $. == 1' Podfile
+          echo "✅ Patched Podfile"
 
-      - name: Set Info.plist values
-        script: | 
+      - name: Set Info.plist values BEFORE pod install
+        script: |
           PLIST=$CM_BUILD_DIR/ios/$XCODE_SCHEME/Info.plist
           PLIST_BUDDY=/usr/libexec/PlistBuddy
+          
+          echo "📝 Setting version in Info.plist: $MARKETING_VERSION ($BUILD_NUMBER)"
+          
+          # Устанавливаем версию
+          $PLIST_BUDDY -c "Set :CFBundleShortVersionString $MARKETING_VERSION" $PLIST || \
+          $PLIST_BUDDY -c "Add :CFBundleShortVersionString string $MARKETING_VERSION" $PLIST
+          
+          # Устанавливаем номер билда
+          $PLIST_BUDDY -c "Set :CFBundleVersion $BUILD_NUMBER" $PLIST || \
+          $PLIST_BUDDY -c "Add :CFBundleVersion string $BUILD_NUMBER" $PLIST
+          
+          # Добавляем ITSAppUsesNonExemptEncryption
           $PLIST_BUDDY -c "Add :ITSAppUsesNonExemptEncryption bool false" $PLIST || true
+          
+          echo "✅ Info.plist updated"
 
       - name: Install CocoaPods dependencies
-        script: | 
+        script: |
           cd ios
           pod install --repo-update
 
       - name: Fetch signing files from Codemagic
         script: |
+          echo "🔐 Fetching certificates and profiles..."
           keychain add-certificates
           xcode-project use-profiles
+          echo "✅ Signing files fetched"
 
-      - name: Verify build number
-        script: | 
+      - name: "🔍 DEBUG: Verify Info.plist AFTER CocoaPods"
+        script: |
           cd $CM_BUILD_DIR/ios
-          echo "=== Build numbers ==="
-          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$CM_BUILD_DIR/ios/$XCODE_SCHEME/Info.plist"
-          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$CM_BUILD_DIR/ios/$XCODE_SCHEME/Info.plist"
+          PLIST="$CM_BUILD_DIR/ios/$XCODE_SCHEME/Info.plist"
+          PLIST_BUDDY=/usr/libexec/PlistBuddy
+          
+          echo "========================================="
+          echo "📱 Info.plist verification"
+          echo "========================================="
+          echo "File: $PLIST"
+          echo ""
+          echo "CFBundleShortVersionString: $($PLIST_BUDDY -c "Print :CFBundleShortVersionString" "$PLIST")"
+          echo "CFBundleVersion: $($PLIST_BUDDY -c "Print :CFBundleVersion" "$PLIST")"
+          echo "CFBundleIdentifier: $($PLIST_BUDDY -c "Print :CFBundleIdentifier" "$PLIST")"
+          echo "ITSAppUsesNonExemptEncryption: $($PLIST_BUDDY -c "Print :ITSAppUsesNonExemptEncryption" "$PLIST" || echo "Not set")"
+          echo "========================================="
+
+      - name: "🔍 DEBUG: Verify provisioning profile"
+        script: |
+          echo "========================================="
+          echo "🔐 Provisioning profile verification"
+          echo "========================================="
+          security find-identity -v -p codesigning
+          echo ""
+          echo "Provisioning profiles:"
+          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ || echo "No profiles found"
+          echo "========================================="
 
       - name: Prebuild React Native bundle
         script: |
           export NODE_BINARY=$(which node)
-          
+          echo "📦 Creating React Native bundle..."
           npx react-native bundle \
             --platform ios \
             --dev false \
             --entry-file index.js \
             --bundle-output $CM_BUILD_DIR/ios/main.jsbundle \
             --assets-dest $CM_BUILD_DIR/ios
+          echo "✅ Bundle created"
+
+      - name: "🔍 DEBUG: Final check before build"
+        script: |
+          echo "========================================="
+          echo "🎯 Final verification before IPA build"
+          echo "========================================="
+          echo "Expected version: $MARKETING_VERSION"
+          echo "Expected build: $BUILD_NUMBER"
+          echo "Bundle ID: $BUNDLE_ID"
+          echo ""
+          echo "Workspace: $CM_BUILD_DIR/ios/$XCODE_WORKSPACE"
+          echo "Scheme: $XCODE_SCHEME"
+          echo ""
+          ls -la $CM_BUILD_DIR/ios/
+          echo "========================================="
 
       - name: Build ipa with xcode-project
         script: |
           export NODE_BINARY=$(which node)
           export SKIP_BUNDLING=1
           
+          echo "🏗️  Building IPA..."
           xcode-project build-ipa \
             --workspace "$CM_BUILD_DIR/ios/$XCODE_WORKSPACE" \
             --scheme "$XCODE_SCHEME" \
             --config "Release"
+          echo "✅ IPA build completed"
+
+      - name: "🔍 DEBUG: Verify IPA file"
+        script: |
+          echo "========================================="
+          echo "📦 IPA file verification"
+          echo "========================================="
+          IPA_PATH=$(find build/ios/ipa -name "*.ipa" | head -n 1)
+          
+          if [ -f "$IPA_PATH" ]; then
+            echo "✅ IPA found: $IPA_PATH"
+            echo "Size: $(ls -lh "$IPA_PATH" | awk '{print $5}')"
+            echo ""
+            
+            # Распаковываем IPA и проверяем Info.plist внутри
+            echo "Extracting IPA to verify embedded Info.plist..."
+            TEMP_DIR="/tmp/ipa_extract"
+            rm -rf $TEMP_DIR
+            mkdir -p $TEMP_DIR
+            unzip -q "$IPA_PATH" -d $TEMP_DIR
+            
+            APP_PATH=$(find $TEMP_DIR -name "*.app" | head -n 1)
+            EMBEDDED_PLIST="$APP_PATH/Info.plist"
+            
+            if [ -f "$EMBEDDED_PLIST" ]; then
+              echo ""
+              echo "📱 Embedded Info.plist in IPA:"
+              echo "Version: $(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$EMBEDDED_PLIST")"
+              echo "Build: $(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$EMBEDDED_PLIST")"
+              echo "Bundle ID: $(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$EMBEDDED_PLIST")"
+            else
+              echo "⚠️  Could not find embedded Info.plist"
+            fi
+            
+            rm -rf $TEMP_DIR
+          else
+            echo "❌ IPA file not found!"
+            ls -la build/ios/ipa/
+          fi
+          echo "========================================="
 
     artifacts:
       - build/ios/ipa/*.ipa
@@ -149,8 +247,7 @@ workflows:
         notify:
           success: true
           failure: true
-
       app_store_connect:
         auth: integration
         submit_to_testflight: true
-        submit_to_app_store: true
+        submit_to_app_store: false  # Сначала только TestFlight
