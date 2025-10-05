@@ -1,4 +1,6 @@
 {
+  "name": "SugarInsiderApp",
+  "displayName": "SugarInsiderApp",
   "expo": {
     "name": "SugarInsiderApp",
     "slug": "sugar-insider-app",
