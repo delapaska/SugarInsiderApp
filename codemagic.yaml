@@ -59,6 +59,19 @@ workflows:
         script: |
           npx expo prebuild --platform ios --clean
 
+      - name: Add privacy permissions to Info.plist
+        script: |
+          PLIST=$CM_BUILD_DIR/ios/$XCODE_SCHEME/Info.plist
+          PLIST_BUDDY=/usr/libexec/PlistBuddy
+
+          # Add photo library usage description
+          $PLIST_BUDDY -c "Add :NSPhotoLibraryUsageDescription string 'This app needs access to photo library to save and share your dietary records and reports.'" $PLIST || true
+
+          # Add camera usage description (just in case)
+          $PLIST_BUDDY -c "Add :NSCameraUsageDescription string 'This app needs access to camera to capture photos of your meals for dietary tracking.'" $PLIST || true
+
+          echo "✅ Added privacy permissions to Info.plist"
+
       - name: Patch react-native-iap podspec
         script: |
           RNIAP_PODSPEC=$(find node_modules -name "react-native-iap.podspec" -o -name "RNIap.podspec" | head -n 1)
@@ -117,4 +130,3 @@ workflows:
       app_store_connect:
         auth: integration
         submit_to_testflight: true
-        submit_to_app_store: true
