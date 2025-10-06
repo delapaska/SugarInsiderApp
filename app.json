@@ -5,7 +5,7 @@
     "name": "SugarInsiderApp",
     "slug": "sugar-insider-app",
     "version": "1.0.0",
-    "icon": "./icon.png",
+    "icon": "./assets/icon.png",
     "ios": {
       "bundleIdentifier": "com.sugarinsiderapp.ivanchai",
       "buildNumber": "1"

@@ -35,15 +35,12 @@ workflows:
           rm -rf /tmp/metro-*
           rm -rf /tmp/haste-map-*
 
-      - name: Create assets folder with app icons
+      - name: Create placeholder assets
         script: |
           mkdir -p assets
-          # Copy your actual icon instead of using placeholder
-          cp icon.png assets/icon.png
-          cp icon.png assets/splash.png
-          # Create adaptive icon for Android compatibility (though we're iOS only)
-          cp icon.png assets/adaptive-icon.png
-          echo "✅ Created assets folder with actual app icons"
+          echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 --decode > assets/icon.png
+          echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 --decode > assets/splash.png
+          echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 --decode > assets/adaptive-icon.png
 
       - name: Update app.json with version info
         script: |
@@ -63,6 +60,9 @@ workflows:
               "ios": {
                 "bundleIdentifier": "com.sugarinsiderapp.ivanchai",
                 "buildNumber": "BUILD_NUMBER_PLACEHOLDER"
+              },
+              "android": {
+                "package": "com.sugarinsiderapp.ivanchai"
               }
             }
           }
@@ -75,6 +75,7 @@ workflows:
       - name: Remove old iOS folder
         script: |
           rm -rf ios
+          rm -rf android
 
       - name: Run Expo Prebuild
         script: |
