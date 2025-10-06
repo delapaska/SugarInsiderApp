@@ -35,12 +35,15 @@ workflows:
           rm -rf /tmp/metro-*
           rm -rf /tmp/haste-map-*
 
-      - name: Create placeholder assets
+      - name: Create assets folder with app icons
         script: |
           mkdir -p assets
-          echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 --decode > assets/icon.png
-          echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 --decode > assets/splash.png
-          echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 --decode > assets/adaptive-icon.png
+          # Copy your actual icon instead of using placeholder
+          cp icon.png assets/icon.png
+          cp icon.png assets/splash.png
+          # Create adaptive icon for Android compatibility (though we're iOS only)
+          cp icon.png assets/adaptive-icon.png
+          echo "✅ Created assets folder with actual app icons"
 
       - name: Update app.json with version info
         script: |
