@@ -49,6 +49,12 @@ workflows:
           rm -rf ios
           rm -rf android
 
+      - name: Show version info
+        script: |
+          echo "📱 App version from app.json:"
+          cat app.json | grep -A 5 '"version"'
+          echo ""
+
       - name: Run Expo Prebuild
         script: |
           npx expo prebuild --platform ios --clean
