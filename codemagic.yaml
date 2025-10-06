@@ -139,32 +139,6 @@ workflows:
             --scheme "$XCODE_SCHEME" \
             --config "Release"
 
-      - name: "📤 Manual upload to App Store Connect with altool"
-        script: |
-          IPA_PATH=$(find build/ios/ipa -name "*.ipa" | head -n 1)
-          
-          echo "========================================="
-          echo "📤 Uploading IPA manually using altool"
-          echo "========================================="
-          echo "IPA: $IPA_PATH"
-          echo "Bundle ID: $BUNDLE_ID"
-          echo ""
-          
-          # Получаем API ключи из интеграции Codemagic
-          # Они автоматически доступны как переменные окружения
-          
-          xcrun altool --upload-app \
-            --type ios \
-            --file "$IPA_PATH" \
-            --apiKey $APP_STORE_CONNECT_KEY_IDENTIFIER \
-            --apiIssuer $APP_STORE_CONNECT_ISSUER_ID \
-            --verbose
-          
-          echo ""
-          echo "✅ Upload completed!"
-          echo "⏳ Now wait 5-15 minutes for Apple to process the build"
-          echo "🔍 Check status at: https://appstoreconnect.apple.com"
-          echo "========================================="
 
     artifacts:
       - build/ios/ipa/*.ipa
@@ -177,4 +151,7 @@ workflows:
         notify:
           success: true
           failure: true
-      # УБРАЛ app_store_connect отсюда - загружаем вручную через altool
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: false
+        cancel_previous_submissions: true
