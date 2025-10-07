@@ -115,21 +115,40 @@ workflows:
           keychain add-certificates
           xcode-project use-profiles
 
-      - name: Verify React Native setup
+      - name: Pre-build React Native bundle
         script: |
           export NODE_BINARY=$(which node)
-          echo "Node binary: $NODE_BINARY"
-          echo "React Native CLI version:"
-          npx react-native --version
-          echo "Metro config:"
-          cat metro.config.js
-          echo "Index.js exists:"
-          ls -la index.js
+          echo "🔧 Pre-building React Native bundle to avoid Metro serializer issues..."
+
+          # Ensure bundle directory exists
+          mkdir -p ios/SugarInsiderApp
+
+          # Clear any existing bundle and Metro cache thoroughly
+          rm -rf ios/SugarInsiderApp/main.jsbundle
+          rm -rf node_modules/.cache
+          rm -rf /tmp/metro-*
+          rm -rf /tmp/haste-map-*
+          rm -rf $TMPDIR/metro-* 2>/dev/null || true
+
+          # Create the bundle with React Native CLI directly
+          npx react-native bundle \
+            --platform ios \
+            --dev false \
+            --entry-file index.js \
+            --bundle-output ios/SugarInsiderApp/main.jsbundle \
+            --assets-dest ios/SugarInsiderApp \
+            --reset-cache \
+            --verbose
+
+          echo "✅ Bundle created successfully"
+          ls -la ios/SugarInsiderApp/main.jsbundle
 
       - name: Build ipa with xcode-project
         script: |
           export NODE_BINARY=$(which node)
-          # Let Xcode handle the bundle creation through its build phase
+          export SKIP_BUNDLING=1
+          echo "🏗️ Building with pre-built bundle (SKIP_BUNDLING=1)"
+
           xcode-project build-ipa \
             --workspace "$CM_BUILD_DIR/ios/$XCODE_WORKSPACE" \
             --scheme "$XCODE_SCHEME" \
