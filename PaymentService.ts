@@ -1,6 +1,5 @@
 import * as RNIap from 'react-native-iap';
 import { Alert, Platform } from 'react-native';
-import { t, Language } from './translations';
 
 export interface PaymentProduct {
   productId: string;

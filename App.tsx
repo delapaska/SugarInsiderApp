@@ -7,7 +7,7 @@ import { Language } from './translations';
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState<'onboarding' | 'diary'>('onboarding');
-  const [language, setLanguage] = useState<Language>('English');
+  const [language] = useState<Language>('English');
 
   const navigateToScreen = (screen: 'onboarding' | 'diary') => {
     setCurrentScreen(screen);
