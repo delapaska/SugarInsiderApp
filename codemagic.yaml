@@ -59,6 +59,13 @@ workflows:
         script: |
           npx expo prebuild --platform ios --clean
 
+      - name: Fix NODE_BINARY path for Xcode build
+        script: |
+          # Update .xcode.env.local with correct NODE_BINARY for CI environment
+          echo "export NODE_BINARY=$(which node)" > ios/.xcode.env.local
+          echo "export RCT_NEW_ARCH_ENABLED=0" >> ios/.xcode.env.local
+          echo "✅ Updated .xcode.env.local with NODE_BINARY: $(which node)"
+
       - name: Add privacy permissions to Info.plist
         script: |
           PLIST=$CM_BUILD_DIR/ios/$XCODE_SCHEME/Info.plist
@@ -67,10 +74,22 @@ workflows:
           # Add photo library usage description
           $PLIST_BUDDY -c "Add :NSPhotoLibraryUsageDescription string 'This app needs access to photo library to save and share your dietary records and reports.'" $PLIST || true
 
-          # Add camera usage description (just in case)
+          # Add camera usage description
           $PLIST_BUDDY -c "Add :NSCameraUsageDescription string 'This app needs access to camera to capture photos of your meals for dietary tracking.'" $PLIST || true
 
-          echo "✅ Added privacy permissions to Info.plist"
+          # Add photo library add usage description (for saving files)
+          $PLIST_BUDDY -c "Add :NSPhotoLibraryAddUsageDescription string 'This app needs to save PDF reports and dietary data to your photo library.'" $PLIST || true
+
+          # Add documents folder access (for PDF generation)
+          $PLIST_BUDDY -c "Add :NSDocumentsFolderUsageDescription string 'This app needs access to documents folder to save PDF reports of your dietary data.'" $PLIST || true
+
+          # Add file provider domain access
+          $PLIST_BUDDY -c "Add :NSFileProviderDomainUsageDescription string 'This app needs to access file system to export and share dietary reports.'" $PLIST || true
+
+          # Add encryption exemption for App Store
+          $PLIST_BUDDY -c "Add :ITSAppUsesNonExemptEncryption bool false" $PLIST || true
+
+          echo "✅ Added all privacy permissions to Info.plist"
 
       - name: Patch react-native-iap podspec
         script: |
@@ -96,20 +115,21 @@ workflows:
           keychain add-certificates
           xcode-project use-profiles
 
-      - name: Prebuild React Native bundle
+      - name: Verify React Native setup
         script: |
           export NODE_BINARY=$(which node)
-          npx react-native bundle \
-            --platform ios \
-            --dev false \
-            --entry-file index.js \
-            --bundle-output $CM_BUILD_DIR/ios/main.jsbundle \
-            --assets-dest $CM_BUILD_DIR/ios
+          echo "Node binary: $NODE_BINARY"
+          echo "React Native CLI version:"
+          npx react-native --version
+          echo "Metro config:"
+          cat metro.config.js
+          echo "Index.js exists:"
+          ls -la index.js
 
       - name: Build ipa with xcode-project
         script: |
           export NODE_BINARY=$(which node)
-          export SKIP_BUNDLING=1
+          # Let Xcode handle the bundle creation through its build phase
           xcode-project build-ipa \
             --workspace "$CM_BUILD_DIR/ios/$XCODE_WORKSPACE" \
             --scheme "$XCODE_SCHEME" \

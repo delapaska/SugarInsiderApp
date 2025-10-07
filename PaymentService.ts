@@ -64,14 +64,14 @@ class PaymentService {
   async loadProducts(): Promise<void> {
     try {
       const productIds = Object.values(this.PRODUCT_IDS);
-      console.log('Loading products with IDs:', productIds);
+      console.log('Loading subscriptions with IDs:', productIds);
 
-      // Use getProducts with skus parameter (new API)
-      const products = await RNIap.getProducts({skus: productIds});
-      this.products = products;
-      console.log('Loaded products:', products);
+      // Use getSubscriptions instead of getProducts for subscription products
+      const subscriptions = await RNIap.getSubscriptions({skus: productIds});
+      this.products = subscriptions;
+      console.log('Loaded subscriptions:', subscriptions);
     } catch (error) {
-      console.error('Failed to load products:', error);
+      console.error('Failed to load subscriptions:', error);
       console.log('Falling back to mock products due to StoreKit unavailability');
       this.products = this.getMockProducts();
     }
@@ -125,7 +125,7 @@ class PaymentService {
 
       console.log('Initiating purchase for:', productId);
 
-      await RNIap.requestPurchase({sku: productId});
+      await RNIap.requestSubscription({sku: productId});
 
       return true;
     } catch (error) {
@@ -157,16 +157,24 @@ class PaymentService {
     );
   }
 
-  private onPurchaseSuccess(purchase: any): void {
+  private async onPurchaseSuccess(purchase: any): Promise<void> {
     console.log('Purchase successful:', purchase.productId);
 
-    this.updatePremiumStatus(purchase.productId);
+    try {
+      // Finalize the subscription purchase
+      await RNIap.finishTransaction({purchase, isConsumable: false});
+      console.log('Subscription finalized successfully');
 
-    Alert.alert(
-      'Purchase Successful!',
-      'Your premium subscription has been activated.',
-      [{ text: 'OK' }]
-    );
+      this.updatePremiumStatus(purchase.productId);
+
+      Alert.alert(
+        'Purchase Successful!',
+        'Your premium subscription has been activated.',
+        [{ text: 'OK' }]
+      );
+    } catch (error) {
+      console.error('Failed to finalize subscription:', error);
+    }
   }
 
   private updatePremiumStatus(productId: string): void {
