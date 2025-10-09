@@ -27,14 +27,14 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate, languag
       <StatusBar barStyle="light-content" backgroundColor="#F5A8D4" />
 
       <Image
-        source={require('./Onboarding/Parts/5 1.png')}
+        source={require('./Onboarding/Parts/logo.png')}
         style={styles.backgroundImage}
         resizeMode="cover"
       />
 
       <View style={styles.logoContainer}>
         <Image
-          source={require('./Onboarding/Parts/Group 67 1.png')}
+          source={require('./Onboarding/Parts/group67.png')}
           style={styles.logoImage}
           resizeMode="contain"
         />
