@@ -199,58 +199,10 @@ workflows:
             echo "⚠️ Bundle missing or empty, creating emergency fallback bundle..."
 
             # Create a minimal working bundle as last resort
-            cat > ios/SugarInsiderApp/main.jsbundle << 'EOF'
-var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.now(),__DEV__=false,process=this.process||{};process.env=process.env||{};process.env.NODE_ENV=process.env.NODE_ENV||"production";
-(function(global) {
-  global.__r = metroRequire;
-  global.__d = define;
-  global.__c = clear;
-  global.__registerSegment = registerSegment;
-  var modules = [];
-  function metroRequire(moduleId) {
-    var module = modules[moduleId];
-    if (!module) {
-      throw new Error('Unknown module: ' + moduleId);
-    }
-    if (!module.isInitialized) {
-      module.isInitialized = true;
-      module.publicModule = {exports: {}};
-      module.factory(
-        global,
-        metroRequire,
-        module.publicModule,
-        module.publicModule.exports
-      );
-    }
-    return module.publicModule.exports;
-  }
-  function define(factory, moduleId) {
-    modules[moduleId] = {
-      factory: factory,
-      isInitialized: false
-    };
-  }
-  function clear() {
-    modules = [];
-  }
-  function registerSegment() {}
-})(this);
-
-__d(function(global, require, module, exports) {
-  var React = require('react');
-  var AppRegistry = require('react-native').AppRegistry;
-
-  var App = function() {
-    return React.createElement('View', {
-      style: {flex: 1, justifyContent: 'center', alignItems: 'center'}
-    }, React.createElement('Text', null, 'SugarInsiderApp Loading...'));
-  };
-
-  AppRegistry.registerComponent('SugarInsiderApp', function() { return App; });
-}, 0, []);
-
-metroRequire(0);
-EOF
+            echo 'var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.now(),__DEV__=false,process=this.process||{};process.env=process.env||{};process.env.NODE_ENV=process.env.NODE_ENV||"production";' > ios/SugarInsiderApp/main.jsbundle
+            echo 'var modules=Object.create(null);function __r(moduleId){var module=modules[moduleId];if(!module)throw new Error("Unknown module: "+moduleId);if(!module.isInitialized){module.isInitialized=true;module.publicModule={exports:{}};module.factory(global,__r,module.publicModule,module.publicModule.exports)}return module.publicModule.exports}function __d(factory,moduleId){modules[moduleId]={factory:factory,isInitialized:false}}' >> ios/SugarInsiderApp/main.jsbundle
+            echo '__d(function(global,require,module,exports){var React=require("react");var AppRegistry=require("react-native").AppRegistry;var App=function(){return React.createElement("View",{style:{flex:1,justifyContent:"center",alignItems:"center"}},React.createElement("Text",null,"SugarInsiderApp"))};AppRegistry.registerComponent("SugarInsiderApp",function(){return App})},0,[]);' >> ios/SugarInsiderApp/main.jsbundle
+            echo '__r(0);' >> ios/SugarInsiderApp/main.jsbundle
 
             echo "📦 Emergency bundle created ($(stat -f%z ios/SugarInsiderApp/main.jsbundle) bytes)"
           fi
