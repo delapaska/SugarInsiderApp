@@ -143,6 +143,26 @@ workflows:
           echo "✅ Bundle created successfully"
           ls -la ios/SugarInsiderApp/main.jsbundle
 
+          # Verify bundle file is not empty and contains expected content
+          BUNDLE_SIZE=$(stat -f%z ios/SugarInsiderApp/main.jsbundle)
+          echo "📦 Bundle size: $BUNDLE_SIZE bytes"
+
+          if [ $BUNDLE_SIZE -lt 1000 ]; then
+            echo "❌ Bundle file too small! ($BUNDLE_SIZE bytes)"
+            exit 1
+          fi
+
+          # Check if bundle contains app registration
+          if grep -q "SugarInsiderApp" ios/SugarInsiderApp/main.jsbundle; then
+            echo "✅ Bundle contains app name - good!"
+          else
+            echo "⚠️ Bundle may not contain app registration"
+          fi
+
+          # Show first few lines of bundle for debugging
+          echo "📋 Bundle content preview:"
+          head -2 ios/SugarInsiderApp/main.jsbundle
+
       - name: Build ipa with xcode-project
         script: |
           export NODE_BINARY=$(which node)
@@ -153,6 +173,38 @@ workflows:
             --workspace "$CM_BUILD_DIR/ios/$XCODE_WORKSPACE" \
             --scheme "$XCODE_SCHEME" \
             --config "Release"
+
+      - name: Verify bundle inclusion in .app
+        script: |
+          echo "🔍 Checking if main.jsbundle is included in the built .app..."
+
+          # Find the built .app file
+          APP_PATH=$(find build -name "*.app" -type d | head -n 1)
+
+          if [ -z "$APP_PATH" ]; then
+            echo "❌ Could not find .app file in build directory"
+            exit 1
+          fi
+
+          echo "📱 Found app at: $APP_PATH"
+
+          # Check if main.jsbundle exists in the app
+          if [ -f "$APP_PATH/main.jsbundle" ]; then
+            BUNDLE_SIZE=$(stat -f%z "$APP_PATH/main.jsbundle")
+            echo "✅ main.jsbundle found in app bundle! Size: $BUNDLE_SIZE bytes"
+
+            # Quick verification that it's not empty
+            if [ $BUNDLE_SIZE -gt 1000 ]; then
+              echo "✅ Bundle size looks good"
+            else
+              echo "⚠️ Bundle size seems small: $BUNDLE_SIZE bytes"
+            fi
+          else
+            echo "❌ main.jsbundle NOT found in app bundle!"
+            echo "📋 App bundle contents:"
+            ls -la "$APP_PATH/" | head -10
+            exit 1
+          fi
 
 
     artifacts:
