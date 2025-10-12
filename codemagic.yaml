@@ -166,13 +166,41 @@ workflows:
       - name: Build ipa with xcode-project
         script: |
           export NODE_BINARY=$(which node)
-          export SKIP_BUNDLING=1
-          echo "🏗️ Building with pre-built bundle (SKIP_BUNDLING=1)"
+          echo "🏗️ Building iOS app..."
 
+          # Build normally - let the Bundle React Native script handle bundle creation
           xcode-project build-ipa \
             --workspace "$CM_BUILD_DIR/ios/$XCODE_WORKSPACE" \
             --scheme "$XCODE_SCHEME" \
             --config "Release"
+
+      - name: Manual bundle copy if needed
+        script: |
+          echo "🔧 Ensuring bundle is in app (manual copy as fallback)..."
+
+          # Find the built .app file first
+          APP_PATH=$(find build -name "*.app" -type d | head -n 1)
+
+          if [ -z "$APP_PATH" ]; then
+            echo "❌ Could not find .app file"
+            exit 1
+          fi
+
+          echo "📱 App found at: $APP_PATH"
+
+          # If bundle is missing, copy it manually
+          if [ ! -f "$APP_PATH/main.jsbundle" ]; then
+            echo "⚠️ Bundle not found in app, copying manually..."
+            if [ -f "ios/SugarInsiderApp/main.jsbundle" ]; then
+              cp "ios/SugarInsiderApp/main.jsbundle" "$APP_PATH/"
+              echo "✅ Bundle copied manually"
+            else
+              echo "❌ Source bundle not found!"
+              exit 1
+            fi
+          else
+            echo "✅ Bundle already present in app"
+          fi
 
       - name: Verify bundle inclusion in .app
         script: |
