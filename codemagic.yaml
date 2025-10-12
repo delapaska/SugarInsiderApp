@@ -166,9 +166,10 @@ workflows:
       - name: Build ipa with xcode-project
         script: |
           export NODE_BINARY=$(which node)
-          echo "🏗️ Building iOS app..."
+          export SKIP_BUNDLING=1
+          echo "🏗️ Building iOS app with pre-built bundle (SKIP_BUNDLING=1)..."
 
-          # Build normally - let the Bundle React Native script handle bundle creation
+          # Build with SKIP_BUNDLING to avoid Metro serializer conflicts
           xcode-project build-ipa \
             --workspace "$CM_BUILD_DIR/ios/$XCODE_WORKSPACE" \
             --scheme "$XCODE_SCHEME" \

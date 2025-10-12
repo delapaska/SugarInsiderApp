@@ -216,7 +216,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
+			shellScript = "set -e\n\n# Skip bundling if SKIP_BUNDLING=1 or if bundle already exists\nif [ \"$SKIP_BUNDLING\" = \"1\" ]; then\n  echo \"⏭️ Skipping bundling (SKIP_BUNDLING=1)\"\n  if [ -f \"${SRCROOT}/SugarInsiderApp/main.jsbundle\" ]; then\n    echo \"📦 Using pre-built bundle\"\n    cp \"${SRCROOT}/SugarInsiderApp/main.jsbundle\" \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/\"\n    echo \"✅ Bundle copied to app\"\n  else\n    echo \"⚠️ No pre-built bundle found at ${SRCROOT}/SugarInsiderApp/main.jsbundle\"\n  fi\n  exit 0\nfi\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
 		};
 		18CA3F0C7D729F52BCABC92B /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
