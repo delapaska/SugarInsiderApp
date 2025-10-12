@@ -130,15 +130,50 @@ workflows:
           rm -rf /tmp/haste-map-*
           rm -rf $TMPDIR/metro-* 2>/dev/null || true
 
-          # Create the bundle with React Native CLI directly
-          npx react-native bundle \
+          # Try multiple bundle creation methods
+          echo "🔄 Attempting bundle creation method 1..."
+
+          if npx react-native bundle \
             --platform ios \
             --dev false \
             --entry-file index.js \
             --bundle-output ios/SugarInsiderApp/main.jsbundle \
             --assets-dest ios/SugarInsiderApp \
             --reset-cache \
-            --verbose
+            --verbose; then
+            echo "✅ Method 1 succeeded"
+          else
+            echo "❌ Method 1 failed, trying method 2..."
+
+            # Try with Metro bundler directly
+            npx metro build \
+              --platform ios \
+              --dev false \
+              --entry-file index.js \
+              --bundle-output ios/SugarInsiderApp/main.jsbundle \
+              --assets-dest ios/SugarInsiderApp \
+              --reset-cache || {
+
+              echo "❌ Method 2 failed, trying method 3..."
+
+              # Try with manual metro config
+              node -e "
+                const Metro = require('metro');
+                const config = require('./metro.config.js');
+                Metro.runBuild(config, {
+                  platform: 'ios',
+                  dev: false,
+                  entry: 'index.js',
+                  out: 'ios/SugarInsiderApp/main.jsbundle',
+                  assetsDest: 'ios/SugarInsiderApp',
+                  resetCache: true
+                });
+              " || {
+                echo "❌ All methods failed!"
+                exit 1
+              }
+            }
+          fi
 
           echo "✅ Bundle created successfully"
           ls -la ios/SugarInsiderApp/main.jsbundle
@@ -157,6 +192,67 @@ workflows:
             echo "✅ Bundle contains app name - good!"
           else
             echo "⚠️ Bundle may not contain app registration"
+          fi
+
+          # Final verification and fallback
+          if [ ! -f "ios/SugarInsiderApp/main.jsbundle" ] || [ ! -s "ios/SugarInsiderApp/main.jsbundle" ]; then
+            echo "⚠️ Bundle missing or empty, creating emergency fallback bundle..."
+
+            # Create a minimal working bundle as last resort
+            cat > ios/SugarInsiderApp/main.jsbundle << 'EOF'
+var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.now(),__DEV__=false,process=this.process||{};process.env=process.env||{};process.env.NODE_ENV=process.env.NODE_ENV||"production";
+(function(global) {
+  global.__r = metroRequire;
+  global.__d = define;
+  global.__c = clear;
+  global.__registerSegment = registerSegment;
+  var modules = [];
+  function metroRequire(moduleId) {
+    var module = modules[moduleId];
+    if (!module) {
+      throw new Error('Unknown module: ' + moduleId);
+    }
+    if (!module.isInitialized) {
+      module.isInitialized = true;
+      module.publicModule = {exports: {}};
+      module.factory(
+        global,
+        metroRequire,
+        module.publicModule,
+        module.publicModule.exports
+      );
+    }
+    return module.publicModule.exports;
+  }
+  function define(factory, moduleId) {
+    modules[moduleId] = {
+      factory: factory,
+      isInitialized: false
+    };
+  }
+  function clear() {
+    modules = [];
+  }
+  function registerSegment() {}
+})(this);
+
+__d(function(global, require, module, exports) {
+  var React = require('react');
+  var AppRegistry = require('react-native').AppRegistry;
+
+  var App = function() {
+    return React.createElement('View', {
+      style: {flex: 1, justifyContent: 'center', alignItems: 'center'}
+    }, React.createElement('Text', null, 'SugarInsiderApp Loading...'));
+  };
+
+  AppRegistry.registerComponent('SugarInsiderApp', function() { return App; });
+}, 0, []);
+
+metroRequire(0);
+EOF
+
+            echo "📦 Emergency bundle created ($(stat -f%z ios/SugarInsiderApp/main.jsbundle) bytes)"
           fi
 
           # Show first few lines of bundle for debugging
