@@ -8,7 +8,7 @@
     "icon": "./assets/icon.png",
     "ios": {
       "bundleIdentifier": "com.sugarinsiderapp.ivanchai",
-      "buildNumber": "30"
+      "buildNumber": "31"
     }
   }
 }
