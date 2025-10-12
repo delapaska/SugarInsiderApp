@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		00CFF4B92E8D4CF000648E61 /* Products.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 00CFF4B82E8D4CF000648E61 /* Products.storekit */; };
+		13B07FC11A68108700A75B9B /* main.jsbundle in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FC01A68108700A75B9B /* main.jsbundle */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		52704972228742C39626BCD0 /* NativeStoreKit.m in Sources */ = {isa = PBXBuildFile; fileRef = 52704972228742C39626BCD1 /* NativeStoreKit.m */; };
 		6EE94F202AF13B388DCA6D32 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
@@ -20,6 +21,7 @@
 
 /* Begin PBXFileReference section */
 		00CFF4B82E8D4CF000648E61 /* Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Products.storekit; sourceTree = "<group>"; };
+		13B07FC01A68108700A75B9B /* main.jsbundle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = main.jsbundle; path = SugarInsiderApp/main.jsbundle; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* SugarInsiderApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SugarInsiderApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = SugarInsiderApp/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = SugarInsiderApp/Info.plist; sourceTree = "<group>"; };
@@ -58,6 +60,7 @@
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
 				00CFF4B82E8D4CF000648E61 /* Products.storekit */,
+				13B07FC01A68108700A75B9B /* main.jsbundle */,
 			);
 			name = SugarInsiderApp;
 			sourceTree = "<group>";
@@ -192,6 +195,7 @@
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				6EE94F202AF13B388DCA6D32 /* PrivacyInfo.xcprivacy in Resources */,
+				13B07FC11A68108700A75B9B /* main.jsbundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
