@@ -272,17 +272,24 @@ workflows:
             echo "✅ Bundle already present in app"
           fi
 
-          # Copy assets to app if missing
+          # Copy assets to app if missing (check both possible locations)
           if [ ! -d "$APP_PATH/assets" ]; then
             echo "⚠️ Assets not found in app, copying from source..."
             if [ -d "ios/assets" ]; then
               cp -r "ios/assets" "$APP_PATH/"
-              echo "✅ Assets copied to app"
+              echo "✅ Assets copied to app from ios/assets"
             else
-              echo "⚠️ Source assets not found"
+              echo "⚠️ Source assets not found in ios/assets"
             fi
           else
             echo "✅ Assets already present in app"
+          fi
+
+          # Also ensure assets are copied to SugarInsiderApp directory for bundle process
+          if [ -d "ios/assets" ] && [ ! -d "ios/SugarInsiderApp/assets" ]; then
+            echo "🔧 Copying assets to SugarInsiderApp directory for bundle process..."
+            cp -r "ios/assets" "ios/SugarInsiderApp/"
+            echo "✅ Assets copied to ios/SugarInsiderApp/"
           fi
 
           # Verify final bundle in .app
