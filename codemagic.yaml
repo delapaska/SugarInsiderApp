@@ -280,37 +280,60 @@ workflows:
             exit 1
           fi
 
-      - name: Verify bundle inclusion in .app
+      - name: Verify bundle inclusion in FINAL .ipa
         script: |
-          echo "🔍 Checking if main.jsbundle is included in the built .app..."
+          echo "🔍 Checking if main.jsbundle is included in the FINAL exported .ipa..."
 
-          # Find the built .app file
-          APP_PATH=$(find build -name "*.app" -type d | head -n 1)
+          # Extract and verify the EXPORTED .ipa
+          IPA_PATH="build/ios/ipa/SugarInsiderApp.ipa"
 
-          if [ -z "$APP_PATH" ]; then
-            echo "❌ Could not find .app file in build directory"
+          if [ ! -f "$IPA_PATH" ]; then
+            echo "❌ .ipa file not found at $IPA_PATH"
             exit 1
           fi
 
-          echo "📱 Found app at: $APP_PATH"
+          # Create temp directory and extract .ipa
+          TEMP_DIR=$(mktemp -d)
+          cd "$TEMP_DIR"
+          unzip -q "$CM_BUILD_DIR/$IPA_PATH"
 
-          # Check if main.jsbundle exists in the app
+          # Find the .app in extracted .ipa
+          APP_PATH=$(find . -name "*.app" -type d | head -n 1)
+
+          if [ -z "$APP_PATH" ]; then
+            echo "❌ Could not find .app in extracted .ipa"
+            exit 1
+          fi
+
+          echo "📱 Found app in .ipa at: $APP_PATH"
+
+          # Check if main.jsbundle exists in the FINAL .ipa
           if [ -f "$APP_PATH/main.jsbundle" ]; then
-            BUNDLE_SIZE=$(stat -f%z "$APP_PATH/main.jsbundle")
-            echo "✅ main.jsbundle found in app bundle! Size: $BUNDLE_SIZE bytes"
+            BUNDLE_SIZE=$(stat -f%z "$APP_PATH/main.jsbundle" 2>/dev/null || stat -c%s "$APP_PATH/main.jsbundle")
+            echo "✅ main.jsbundle found in FINAL .ipa! Size: $BUNDLE_SIZE bytes"
 
-            # Quick verification that it's not empty
-            if [ $BUNDLE_SIZE -gt 1000 ]; then
-              echo "✅ Bundle size looks good"
+            if [ $BUNDLE_SIZE -gt 100000 ]; then
+              echo "✅ Bundle size looks good - your REAL app will load!"
             else
               echo "⚠️ Bundle size seems small: $BUNDLE_SIZE bytes"
             fi
+
+            # Show first line of bundle
+            echo "📋 Bundle content (first line):"
+            head -1 "$APP_PATH/main.jsbundle"
+
           else
-            echo "❌ main.jsbundle NOT found in app bundle!"
-            echo "📋 App bundle contents:"
+            echo "❌ CRITICAL: main.jsbundle NOT found in final .ipa!"
+            echo "📋 App contents in .ipa:"
             ls -la "$APP_PATH/" | head -10
+            echo ""
+            echo "🚨 This means Emergency Bundle will be used instead of real app!"
             exit 1
           fi
+
+          # Cleanup
+          cd "$CM_BUILD_DIR"
+          rm -rf "$TEMP_DIR"
 
 
     artifacts:
