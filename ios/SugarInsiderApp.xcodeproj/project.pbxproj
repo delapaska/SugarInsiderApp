@@ -8,8 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		00CFF4B92E8D4CF000648E61 /* Products.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 00CFF4B82E8D4CF000648E61 /* Products.storekit */; };
-		13B07FC11A68108700A75B9B /* main.jsbundle in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FC01A68108700A75B9B /* main.jsbundle */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		13B07FC11A68108700A75B9B /* main.jsbundle in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FC01A68108700A75B9B /* main.jsbundle */; };
 		52704972228742C39626BCD0 /* NativeStoreKit.m in Sources */ = {isa = PBXBuildFile; fileRef = 52704972228742C39626BCD1 /* NativeStoreKit.m */; };
 		6EE94F202AF13B388DCA6D32 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
@@ -21,11 +21,11 @@
 
 /* Begin PBXFileReference section */
 		00CFF4B82E8D4CF000648E61 /* Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Products.storekit; sourceTree = "<group>"; };
-		13B07FC01A68108700A75B9B /* main.jsbundle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = main.jsbundle; path = SugarInsiderApp/main.jsbundle; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* SugarInsiderApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SugarInsiderApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = SugarInsiderApp/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = SugarInsiderApp/Info.plist; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = SugarInsiderApp/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		13B07FC01A68108700A75B9B /* main.jsbundle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = main.jsbundle; path = SugarInsiderApp/main.jsbundle; sourceTree = "<group>"; };
 		187B494CBB0DBCFB0FD9EF02 /* Pods-SugarInsiderApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SugarInsiderApp.debug.xcconfig"; path = "Target Support Files/Pods-SugarInsiderApp/Pods-SugarInsiderApp.debug.xcconfig"; sourceTree = "<group>"; };
 		52704972228742C39626BCD1 /* NativeStoreKit.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = NativeStoreKit.m; path = SugarInsiderApp/NativeStoreKit.m; sourceTree = "<group>"; };
 		6F40B53C3B58D874E03CDD6F /* Pods-SugarInsiderApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SugarInsiderApp.release.xcconfig"; path = "Target Support Files/Pods-SugarInsiderApp/Pods-SugarInsiderApp.release.xcconfig"; sourceTree = "<group>"; };
