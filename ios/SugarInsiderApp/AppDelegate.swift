@@ -39,54 +39,59 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
   }
 
   override func bundleURL() -> URL? {
+    // Always try Metro first in development, then fallback to embedded bundle
+    // This works for both Debug and Release builds
+
 #if DEBUG
-    // In debug, try local first, then fallback to bundle
+    // In debug, try Metro first
     if let bundleURL = RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index"),
        bundleURL.scheme == "http" || bundleURL.scheme == "https" {
       print("🔧 [AppDelegate] Using Metro bundler URL: \(bundleURL)")
       return bundleURL
     }
-    print("⚠️ [AppDelegate] Metro not available, falling back to bundle")
-    return getBundleFromMainBundle()
+    print("⚠️ [AppDelegate] Metro not available in Debug, falling back to embedded bundle")
 #else
-    // In production, ALWAYS use embedded bundle
-    print("🚀 [AppDelegate] Production mode - loading embedded bundle")
-    return getBundleFromMainBundle()
+    print("🚀 [AppDelegate] Release mode - using embedded bundle")
 #endif
+
+    // Fallback to embedded bundle for both Debug and Release
+    return getBundleFromMainBundle()
   }
 
   private func getBundleFromMainBundle() -> URL? {
-    // Try multiple bundle names and log what we find
-    let bundleNames = ["main.jsbundle", "main", "index.ios.bundle", "index.bundle"]
-
     print("📦 [AppDelegate] Looking for bundle in main bundle...")
     print("📂 [AppDelegate] Bundle path: \(Bundle.main.bundlePath)")
 
     // List all files in bundle for debugging
     if let bundleContents = try? FileManager.default.contentsOfDirectory(atPath: Bundle.main.bundlePath) {
-      print("📋 [AppDelegate] Bundle contents: \(bundleContents.filter { $0.contains("bundle") || $0.contains(".js") })")
+      let relevantFiles = bundleContents.filter { $0.contains("bundle") || $0.contains(".js") }
+      print("📋 [AppDelegate] Relevant files in bundle: \(relevantFiles)")
     }
 
+    // Method 1: Direct file path check (most reliable)
+    let directPath = Bundle.main.bundlePath + "/main.jsbundle"
+    if FileManager.default.fileExists(atPath: directPath) {
+      let fileSize = (try? FileManager.default.attributesOfItem(atPath: directPath)[.size] as? Int) ?? 0
+      print("✅ [AppDelegate] Found bundle at direct path: \(directPath) (size: \(fileSize) bytes)")
+      return URL(fileURLWithPath: directPath)
+    }
+
+    // Method 2: Try Bundle.main.url methods
+    let bundleNames = ["main.jsbundle", "main", "index.ios.bundle", "index.bundle"]
     for bundleName in bundleNames {
       if let bundleURL = Bundle.main.url(forResource: bundleName, withExtension: nil) {
-        print("✅ [AppDelegate] Found bundle: \(bundleName) at \(bundleURL)")
+        print("✅ [AppDelegate] Found bundle using Bundle.main.url: \(bundleName) at \(bundleURL)")
         return bundleURL
-      } else if let bundleURL = Bundle.main.url(forResource: bundleName.replacingOccurrences(of: ".jsbundle", with: ""), withExtension: "jsbundle") {
-        print("✅ [AppDelegate] Found bundle: \(bundleName) at \(bundleURL)")
+      }
+
+      if let bundleURL = Bundle.main.url(forResource: bundleName.replacingOccurrences(of: ".jsbundle", with: ""), withExtension: "jsbundle") {
+        print("✅ [AppDelegate] Found bundle with extension: \(bundleName) at \(bundleURL)")
         return bundleURL
       }
     }
 
     print("❌ [AppDelegate] No bundle found in main bundle!")
-
-    // Last resort - check if file exists directly
-    let directPath = Bundle.main.bundlePath + "/main.jsbundle"
-    if FileManager.default.fileExists(atPath: directPath) {
-      print("✅ [AppDelegate] Found bundle at direct path: \(directPath)")
-      return URL(fileURLWithPath: directPath)
-    }
-
-    print("💥 [AppDelegate] Bundle completely missing - app will crash")
+    print("💥 [AppDelegate] This will cause 'No script URL provided' error")
     return nil
   }
 }
