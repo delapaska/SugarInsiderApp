@@ -88,8 +88,16 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
     print("❌ [AppDelegate] No bundle found in main bundle!")
     print("🚨 [AppDelegate] Creating emergency bundle to prevent crash...")
 
-    // Create emergency bundle IMMEDIATELY
-    let emergencyBundlePath = Bundle.main.bundlePath + "/main.jsbundle"
+    // Create emergency bundle IMMEDIATELY in Documents directory (writable!)
+    let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+    let emergencyBundlePath = documentsPath + "/main.jsbundle"
+
+    // Check if emergency bundle already exists
+    if FileManager.default.fileExists(atPath: emergencyBundlePath) {
+      let fileSize = (try? FileManager.default.attributesOfItem(atPath: emergencyBundlePath)[.size] as? Int) ?? 0
+      print("✅ [AppDelegate] Emergency bundle already exists: \(emergencyBundlePath) (size: \(fileSize) bytes)")
+      return URL(fileURLWithPath: emergencyBundlePath)
+    }
     let emergencyBundle = """
 var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.now(),__DEV__=false,process=this.process||{};
 process.env=process.env||{};process.env.NODE_ENV=process.env.NODE_ENV||"production";
@@ -131,8 +139,9 @@ __r(0);
     } catch {
       print("❌ [AppDelegate] Failed to create emergency bundle: \(error)")
 
-      // ABSOLUTE LAST RESORT - return a fake URL to prevent nil return
-      let fallbackPath = Bundle.main.bundlePath + "/emergency.jsbundle"
+      // ABSOLUTE LAST RESORT - return Documents path
+      let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+      let fallbackPath = documentsPath + "/emergency.jsbundle"
       print("🆘 [AppDelegate] Returning fallback path: \(fallbackPath)")
       return URL(fileURLWithPath: fallbackPath)
     }
