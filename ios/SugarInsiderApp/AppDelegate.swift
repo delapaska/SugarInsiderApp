@@ -107,7 +107,7 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
     // Check if emergency bundle already exists and is valid
     if FileManager.default.fileExists(atPath: emergencyBundlePath) {
       if let bundleContent = try? String(contentsOfFile: emergencyBundlePath, encoding: .utf8),
-         bundleContent.contains("var global=this;") && bundleContent.contains("\"react\"") {
+         bundleContent.contains("COMPLETE JAVASCRIPT RUNTIME SETUP") && bundleContent.contains("global.console=console") {
         let fileSize = (try? FileManager.default.attributesOfItem(atPath: emergencyBundlePath)[.size] as? Int) ?? 0
         print("✅ [AppDelegate] Valid emergency bundle already exists: \(emergencyBundlePath) (size: \(fileSize) bytes)")
         return URL(fileURLWithPath: emergencyBundlePath)
@@ -117,9 +117,46 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
       }
     }
     let emergencyBundle = """
+// COMPLETE JAVASCRIPT RUNTIME SETUP
 var global=this;
-var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.now(),__DEV__=false,process=this.process||{};
-process.env=process.env||{};process.env.NODE_ENV=process.env.NODE_ENV||"production";
+var window=global;
+var self=global;
+
+// Console mock
+var console={
+  log:function(){return true;},
+  warn:function(){return true;},
+  error:function(){return true;},
+  info:function(){return true;},
+  debug:function(){return true;}
+};
+global.console=console;
+
+// setTimeout/setInterval mocks
+global.setTimeout=function(fn,delay){return 1;};
+global.clearTimeout=function(id){};
+global.setInterval=function(fn,delay){return 1;};
+global.clearInterval=function(id){};
+
+// JSON mock (if not available)
+if(!global.JSON){
+  global.JSON={
+    stringify:function(obj){return String(obj);},
+    parse:function(str){return {};}
+  };
+}
+
+// Performance mock
+global.performance={now:function(){return Date.now();}};
+global.nativePerformanceNow=global.performance.now;
+
+// React Native specific globals
+var __BUNDLE_START_TIME__=Date.now();
+var __DEV__=false;
+var process=global.process||{env:{NODE_ENV:"production"}};
+global.process=process;
+
+// Module system
 var modules=Object.create(null);
 function __r(moduleId){
   var module=modules[moduleId];
@@ -127,47 +164,89 @@ function __r(moduleId){
   if(!module.isInitialized){
     module.isInitialized=true;
     module.publicModule={exports:{}};
-    module.factory(global,__r,module.publicModule,module.publicModule.exports);
+    try{
+      module.factory(global,__r,module.publicModule,module.publicModule.exports);
+    }catch(e){
+      console.error("Module error:",e);
+    }
   }
   return module.publicModule.exports;
 }
-function __d(factory,moduleId){modules[moduleId]={factory:factory,isInitialized:false};}
+function __d(factory,moduleId,deps){
+  modules[moduleId]={factory:factory,isInitialized:false,dependencies:deps||[]};
+}
 
 // React module
 __d(function(global,require,module,exports){
   module.exports={
     createElement:function(type,props){
-      var args=Array.prototype.slice.call(arguments,2);
-      return {type:type,props:props||{},children:args};
-    }
+      return {type:type||"div",props:props||{},children:[]};
+    },
+    Component:function(){},
+    Fragment:"Fragment"
   };
-},"react",[]);
+},"react");
 
 // React Native module
 __d(function(global,require,module,exports){
   module.exports={
     AppRegistry:{
       registerComponent:function(name,componentProvider){
-        console.log("Registered component: "+name);
-      }
+        console.log("✅ Emergency Bundle: Registered component "+name);
+        return true;
+      },
+      runApplication:function(){return true;}
+    },
+    View:"View",
+    Text:"Text",
+    StyleSheet:{
+      create:function(styles){return styles;}
     }
   };
-},"react-native",[]);
+},"react-native");
 
-// Main app component
+// Main app
 __d(function(global,require,module,exports){
-  var React=require("react");
-  var AppRegistry=require("react-native").AppRegistry;
-  var App=function(){
-    return React.createElement("View",{style:{flex:1,justifyContent:"center",alignItems:"center",backgroundColor:"#ffc0cb"}},
-      React.createElement("Text",{style:{fontSize:24,fontWeight:"bold",color:"#fff",textAlign:"center"}},
-        "Sugar Insider\\n🍭 Emergency Bundle Loaded!"
-      )
-    );
-  };
-  AppRegistry.registerComponent("SugarInsiderApp",function(){return App;});
-},0,["react","react-native"]);
-__r(0);
+  try{
+    var React=require("react");
+    var RN=require("react-native");
+
+    console.log("🍭 Emergency Bundle: Creating Sugar Insider app...");
+
+    var App=function(){
+      return React.createElement("View",{
+        style:{
+          flex:1,
+          justifyContent:"center",
+          alignItems:"center",
+          backgroundColor:"#ffc0cb"
+        }
+      },React.createElement("Text",{
+        style:{
+          fontSize:24,
+          fontWeight:"bold",
+          color:"#fff",
+          textAlign:"center",
+          padding:20
+        }
+      },"Sugar Insider\\n🍭\\nEmergency Bundle Loaded!\\n\\nApp is running from\\nDocuments directory"));
+    };
+
+    RN.AppRegistry.registerComponent("SugarInsiderApp",function(){return App;});
+    console.log("✅ Emergency Bundle: App registered successfully!");
+
+  }catch(e){
+    console.error("❌ Emergency Bundle Error:",e);
+  }
+},0);
+
+// Initialize
+try{
+  __r(0);
+  console.log("🚀 Emergency Bundle: Initialization complete!");
+}catch(e){
+  console.error("💥 Emergency Bundle Fatal:",e);
+}
 """
 
     do {
