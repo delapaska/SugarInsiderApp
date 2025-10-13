@@ -95,7 +95,7 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
     // Check if emergency bundle already exists and is valid
     if FileManager.default.fileExists(atPath: emergencyBundlePath) {
       if let bundleContent = try? String(contentsOfFile: emergencyBundlePath, encoding: .utf8),
-         bundleContent.contains("var global=this;") {
+         bundleContent.contains("var global=this;") && bundleContent.contains("\"react\"") {
         let fileSize = (try? FileManager.default.attributesOfItem(atPath: emergencyBundlePath)[.size] as? Int) ?? 0
         print("✅ [AppDelegate] Valid emergency bundle already exists: \(emergencyBundlePath) (size: \(fileSize) bytes)")
         return URL(fileURLWithPath: emergencyBundlePath)
@@ -120,6 +120,29 @@ function __r(moduleId){
   return module.publicModule.exports;
 }
 function __d(factory,moduleId){modules[moduleId]={factory:factory,isInitialized:false};}
+
+// React module
+__d(function(global,require,module,exports){
+  module.exports={
+    createElement:function(type,props){
+      var args=Array.prototype.slice.call(arguments,2);
+      return {type:type,props:props||{},children:args};
+    }
+  };
+},"react",[]);
+
+// React Native module
+__d(function(global,require,module,exports){
+  module.exports={
+    AppRegistry:{
+      registerComponent:function(name,componentProvider){
+        console.log("Registered component: "+name);
+      }
+    }
+  };
+},"react-native",[]);
+
+// Main app component
 __d(function(global,require,module,exports){
   var React=require("react");
   var AppRegistry=require("react-native").AppRegistry;
@@ -131,7 +154,7 @@ __d(function(global,require,module,exports){
     );
   };
   AppRegistry.registerComponent("SugarInsiderApp",function(){return App;});
-},0,[]);
+},0,["react","react-native"]);
 __r(0);
 """
 
