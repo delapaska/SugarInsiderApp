@@ -4,6 +4,7 @@ import json
 import subprocess
 import uuid
 import sys
+import os
 
 def add_bundle_to_xcode_project():
     try:
@@ -94,10 +95,73 @@ def add_bundle_to_xcode_project():
         subprocess.run(['rm', '-f', 'temp_project.json'])
 
         print(f"✅ Added main.jsbundle to Xcode project (FileRef: {file_ref_uuid})")
+
+        # Also add assets folder if it exists
+        if add_assets_folder_to_project(project, sources_group_uuid, main_target_uuid):
+            print("✅ Added assets folder to Xcode project")
+
+        # Convert back to plist and save again with assets
+        json_str = json.dumps(project, indent=2)
+        with open('temp_project.json', 'w') as f:
+            f.write(json_str)
+
+        # Convert back to plist
+        result = subprocess.run(['plutil', '-convert', 'xml1', '-o',
+                                'SugarInsiderApp.xcodeproj/project.pbxproj', 'temp_project.json'])
+
+        if result.returncode != 0:
+            print("❌ Failed to convert JSON back to plist")
+            return False
+
+        # Cleanup
+        subprocess.run(['rm', '-f', 'temp_project.json'])
+
         return True
 
     except Exception as e:
         print(f"❌ Error: {str(e)}")
+        return False
+
+def add_assets_folder_to_project(project, sources_group_uuid, main_target_uuid):
+    """Add assets folder to Xcode project if it exists"""
+    try:
+        # Check if assets folder exists
+        if not os.path.exists('assets'):
+            print("ℹ️ Assets folder not found, skipping")
+            return False
+
+        # Check if assets folder is already in project
+        for uuid_key, obj in project['objects'].items():
+            if (obj.get('isa') == 'PBXFileReference' and
+                obj.get('path') == 'assets' and
+                obj.get('lastKnownFileType') == 'folder'):
+                print("✅ Assets folder already exists in project")
+                return True
+
+        # Generate UUID for assets folder
+        assets_ref_uuid = str(uuid.uuid4()).replace('-', '').upper()[:24]
+        assets_build_uuid = str(uuid.uuid4()).replace('-', '').upper()[:24]
+
+        # Add assets folder reference
+        project['objects'][assets_ref_uuid] = {
+            'isa': 'PBXFileReference',
+            'lastKnownFileType': 'folder',
+            'name': 'assets',
+            'path': 'assets',
+            'sourceTree': '<group>'
+        }
+
+        # Add to source group
+        if 'children' not in project['objects'][sources_group_uuid]:
+            project['objects'][sources_group_uuid]['children'] = []
+        if assets_ref_uuid not in project['objects'][sources_group_uuid]['children']:
+            project['objects'][sources_group_uuid]['children'].append(assets_ref_uuid)
+
+        print(f"✅ Added assets folder to Xcode project (FileRef: {assets_ref_uuid})")
+        return True
+
+    except Exception as e:
+        print(f"❌ Error adding assets folder: {str(e)}")
         return False
 
 if __name__ == "__main__":
