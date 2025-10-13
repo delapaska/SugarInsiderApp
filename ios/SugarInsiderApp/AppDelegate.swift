@@ -53,8 +53,8 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
     print("🚀 [AppDelegate] Release mode - using embedded bundle")
 #endif
 
-    // Try embedded bundle, then emergency bundle as last resort
-    print("🔄 [AppDelegate] Trying embedded bundle...")
+    // Try embedded bundle with enhanced search
+    print("🔄 [AppDelegate] Trying embedded bundle with enhanced search...")
     return getBundleFromMainBundle()
   }
 
@@ -71,14 +71,22 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
     // Method 1: Try Bundle.main.url methods first (most reliable for .ipa)
     let bundleNames = ["main.jsbundle", "main", "index.ios.bundle", "index.bundle"]
     for bundleName in bundleNames {
+      // Try with extension
       if let bundleURL = Bundle.main.url(forResource: bundleName.replacingOccurrences(of: ".jsbundle", with: ""), withExtension: "jsbundle") {
-        print("✅ [AppDelegate] Found bundle with extension: \(bundleName) at \(bundleURL)")
-        return bundleURL
+        let fileSize = (try? bundleURL.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0
+        if fileSize > 10000 { // Must be real bundle, not empty
+          print("✅ [AppDelegate] Found bundle with extension: \(bundleName) at \(bundleURL) (size: \(fileSize) bytes)")
+          return bundleURL
+        }
       }
 
+      // Try without extension
       if let bundleURL = Bundle.main.url(forResource: bundleName, withExtension: nil) {
-        print("✅ [AppDelegate] Found bundle using Bundle.main.url: \(bundleName) at \(bundleURL)")
-        return bundleURL
+        let fileSize = (try? bundleURL.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0
+        if fileSize > 10000 { // Must be real bundle, not empty
+          print("✅ [AppDelegate] Found bundle using Bundle.main.url: \(bundleName) at \(bundleURL) (size: \(fileSize) bytes)")
+          return bundleURL
+        }
       }
     }
 
@@ -86,8 +94,12 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
     let directPath = Bundle.main.bundlePath + "/main.jsbundle"
     if FileManager.default.fileExists(atPath: directPath) {
       let fileSize = (try? FileManager.default.attributesOfItem(atPath: directPath)[.size] as? Int) ?? 0
-      print("✅ [AppDelegate] Found bundle at direct path: \(directPath) (size: \(fileSize) bytes)")
-      return URL(fileURLWithPath: directPath)
+      if fileSize > 10000 { // Must be real bundle
+        print("✅ [AppDelegate] Found bundle at direct path: \(directPath) (size: \(fileSize) bytes)")
+        return URL(fileURLWithPath: directPath)
+      } else {
+        print("⚠️ [AppDelegate] Bundle at direct path is too small: \(fileSize) bytes")
+      }
     }
 
     // Method 3: Recursive search in app bundle (for .ipa files)
@@ -95,6 +107,24 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
     if let foundBundle = findBundleRecursively(in: Bundle.main.bundlePath) {
       print("✅ [AppDelegate] Found bundle recursively: \(foundBundle)")
       return URL(fileURLWithPath: foundBundle)
+    }
+
+    // Method 4: Check all possible locations in .app bundle
+    let possiblePaths = [
+      Bundle.main.bundlePath + "/main.jsbundle",
+      Bundle.main.bundlePath + "/assets/main.jsbundle",
+      Bundle.main.bundlePath + "/www/main.jsbundle",
+      Bundle.main.bundlePath + "/static/main.jsbundle"
+    ]
+
+    for path in possiblePaths {
+      if FileManager.default.fileExists(atPath: path) {
+        let fileSize = (try? FileManager.default.attributesOfItem(atPath: path)[.size] as? Int) ?? 0
+        if fileSize > 10000 {
+          print("✅ [AppDelegate] Found bundle at alternative path: \(path) (size: \(fileSize) bytes)")
+          return URL(fileURLWithPath: path)
+        }
+      }
     }
 
     print("❌ [AppDelegate] No bundle found in main bundle!")
@@ -273,16 +303,27 @@ try{
       return nil
     }
 
+    var foundBundles: [(path: String, size: Int)] = []
+
     while let file = enumerator.nextObject() as? String {
-      if file.hasSuffix("main.jsbundle") || file.hasSuffix("index.bundle") {
+      if file.hasSuffix(".jsbundle") || file.hasSuffix(".bundle") || file.contains("main") && file.contains(".js") {
         let fullPath = directory + "/" + file
         if FileManager.default.fileExists(atPath: fullPath) {
           let fileSize = (try? FileManager.default.attributesOfItem(atPath: fullPath)[.size] as? Int) ?? 0
-          print("🔍 [AppDelegate] Found bundle recursively: \(fullPath) (size: \(fileSize) bytes)")
-          return fullPath
+          if fileSize > 10000 { // Must be real bundle
+            foundBundles.append((path: fullPath, size: fileSize))
+            print("🔍 [AppDelegate] Found bundle candidate: \(fullPath) (size: \(fileSize) bytes)")
+          }
         }
       }
     }
+
+    // Return the largest bundle (most likely the real one)
+    if let largestBundle = foundBundles.max(by: { $0.size < $1.size }) {
+      print("✅ [AppDelegate] Selected largest bundle: \(largestBundle.path) (size: \(largestBundle.size) bytes)")
+      return largestBundle.path
+    }
+
     return nil
   }
 }

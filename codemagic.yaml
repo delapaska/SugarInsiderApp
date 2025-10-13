@@ -66,6 +66,86 @@ workflows:
           echo "✅ Custom AppDelegate.swift with emergency bundle logic has been installed!"
           echo "🔧 This will prevent 'No script URL provided' errors in production .ipa"
 
+      - name: Add main.jsbundle to Xcode project to ensure inclusion in .ipa
+        script: |
+          echo "🔧 Adding main.jsbundle to Xcode project..."
+          cd ios
+
+          # Create placeholder bundle file first (will be replaced by real bundle)
+          touch SugarInsiderApp/main.jsbundle
+
+          # Add to Xcode project using plutil (more reliable than manual pbxproj editing)
+          python3 << 'EOF'
+import json
+import subprocess
+import uuid
+
+# Get current project structure
+result = subprocess.run(['plutil', '-convert', 'json', '-o', '-', 'SugarInsiderApp.xcodeproj/project.pbxproj'],
+                       capture_output=True, text=True)
+project = json.loads(result.stdout)
+
+# Generate UUIDs for the bundle file
+file_ref_uuid = str(uuid.uuid4()).replace('-', '').upper()[:24]
+build_file_uuid = str(uuid.uuid4()).replace('-', '').upper()[:24]
+
+# Find the main target and source group
+main_target_uuid = None
+sources_group_uuid = None
+
+for uuid_key, obj in project['objects'].items():
+    if obj.get('isa') == 'PBXNativeTarget' and obj.get('name') == 'SugarInsiderApp':
+        main_target_uuid = uuid_key
+    elif obj.get('isa') == 'PBXGroup' and obj.get('name') == 'SugarInsiderApp':
+        sources_group_uuid = uuid_key
+
+if not main_target_uuid or not sources_group_uuid:
+    print("❌ Could not find main target or source group")
+    exit(1)
+
+# Add file reference
+project['objects'][file_ref_uuid] = {
+    'isa': 'PBXFileReference',
+    'lastKnownFileType': 'text',
+    'name': 'main.jsbundle',
+    'path': 'main.jsbundle',
+    'sourceTree': '<group>'
+}
+
+# Add build file
+project['objects'][build_file_uuid] = {
+    'isa': 'PBXBuildFile',
+    'fileRef': file_ref_uuid
+}
+
+# Add to source group
+if 'children' not in project['objects'][sources_group_uuid]:
+    project['objects'][sources_group_uuid]['children'] = []
+project['objects'][sources_group_uuid]['children'].append(file_ref_uuid)
+
+# Add to resources build phase
+for uuid_key, obj in project['objects'].items():
+    if (obj.get('isa') == 'PBXResourcesBuildPhase' and
+        uuid_key in project['objects'][main_target_uuid]['buildPhases']):
+        if 'files' not in obj:
+            obj['files'] = []
+        obj['files'].append(build_file_uuid)
+        break
+
+# Convert back to plist and save
+json_str = json.dumps(project, indent=2)
+with open('temp_project.json', 'w') as f:
+    f.write(json_str)
+
+# Convert back to plist
+subprocess.run(['plutil', '-convert', 'xml1', '-o', 'SugarInsiderApp.xcodeproj/project.pbxproj', 'temp_project.json'])
+
+print(f"✅ Added main.jsbundle to Xcode project (FileRef: {file_ref_uuid})")
+EOF
+
+          echo "✅ main.jsbundle added to Xcode project resources!"
+          echo "🔧 This ensures bundle will be included in final .ipa"
+
       - name: Fix NODE_BINARY path for Xcode build
         script: |
           # Update .xcode.env.local with correct NODE_BINARY for CI environment
