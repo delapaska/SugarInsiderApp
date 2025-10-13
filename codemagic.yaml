@@ -71,8 +71,8 @@ workflows:
           echo "🔧 Adding main.jsbundle to Xcode project..."
           cd ios
 
-          # Create placeholder bundle file first (will be replaced by real bundle)
-          touch SugarInsiderApp/main.jsbundle
+          # Create placeholder bundle file in CORRECT location (ios root, not ios/SugarInsiderApp)
+          touch main.jsbundle
 
           # Run Python script to add bundle to Xcode project
           python3 ../scripts/add-bundle-to-xcode.py
@@ -142,10 +142,10 @@ workflows:
           echo "🔧 Pre-building React Native bundle to avoid Metro serializer issues..."
 
           # Ensure bundle directory exists
-          mkdir -p ios/SugarInsiderApp
+          mkdir -p ios
 
           # Clear any existing bundle and Metro cache thoroughly
-          rm -rf ios/SugarInsiderApp/main.jsbundle
+          rm -rf ios/main.jsbundle
           rm -rf node_modules/.cache
           rm -rf /tmp/metro-*
           rm -rf /tmp/haste-map-*
@@ -158,8 +158,8 @@ workflows:
             --platform ios \
             --dev false \
             --entry-file index.js \
-            --bundle-output ios/SugarInsiderApp/main.jsbundle \
-            --assets-dest ios/SugarInsiderApp \
+            --bundle-output ios/main.jsbundle \
+            --assets-dest ios \
             --reset-cache \
             --verbose; then
             echo "✅ Method 1 succeeded"
@@ -171,8 +171,8 @@ workflows:
               --platform ios \
               --dev false \
               --entry-file index.js \
-              --bundle-output ios/SugarInsiderApp/main.jsbundle \
-              --assets-dest ios/SugarInsiderApp \
+              --bundle-output ios/main.jsbundle \
+              --assets-dest ios \
               --reset-cache || {
 
               echo "❌ Method 2 failed, trying method 3..."
@@ -185,8 +185,8 @@ workflows:
                   platform: 'ios',
                   dev: false,
                   entry: 'index.js',
-                  out: 'ios/SugarInsiderApp/main.jsbundle',
-                  assetsDest: 'ios/SugarInsiderApp',
+                  out: 'ios/main.jsbundle',
+                  assetsDest: 'ios',
                   resetCache: true
                 });
               " || {
@@ -197,10 +197,10 @@ workflows:
           fi
 
           echo "✅ Bundle created successfully"
-          ls -la ios/SugarInsiderApp/main.jsbundle
+          ls -la ios/main.jsbundle
 
           # Verify bundle file is not empty and contains expected content
-          BUNDLE_SIZE=$(stat -f%z ios/SugarInsiderApp/main.jsbundle)
+          BUNDLE_SIZE=$(stat -f%z ios/main.jsbundle)
           echo "📦 Bundle size: $BUNDLE_SIZE bytes"
 
           if [ $BUNDLE_SIZE -lt 1000 ]; then
@@ -209,28 +209,28 @@ workflows:
           fi
 
           # Check if bundle contains app registration
-          if grep -q "SugarInsiderApp" ios/SugarInsiderApp/main.jsbundle; then
+          if grep -q "SugarInsiderApp" ios/main.jsbundle; then
             echo "✅ Bundle contains app name - good!"
           else
             echo "⚠️ Bundle may not contain app registration"
           fi
 
           # Final verification and fallback
-          if [ ! -f "ios/SugarInsiderApp/main.jsbundle" ] || [ ! -s "ios/SugarInsiderApp/main.jsbundle" ]; then
+          if [ ! -f "ios/main.jsbundle" ] || [ ! -s "ios/main.jsbundle" ]; then
             echo "⚠️ Bundle missing or empty, creating emergency fallback bundle..."
 
             # Create a minimal working bundle as last resort
-            echo 'var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.now(),__DEV__=false,process=this.process||{};process.env=process.env||{};process.env.NODE_ENV=process.env.NODE_ENV||"production";' > ios/SugarInsiderApp/main.jsbundle
-            echo 'var modules=Object.create(null);function __r(moduleId){var module=modules[moduleId];if(!module)throw new Error("Unknown module: "+moduleId);if(!module.isInitialized){module.isInitialized=true;module.publicModule={exports:{}};module.factory(global,__r,module.publicModule,module.publicModule.exports)}return module.publicModule.exports}function __d(factory,moduleId){modules[moduleId]={factory:factory,isInitialized:false}}' >> ios/SugarInsiderApp/main.jsbundle
-            echo '__d(function(global,require,module,exports){var React=require("react");var AppRegistry=require("react-native").AppRegistry;var App=function(){return React.createElement("View",{style:{flex:1,justifyContent:"center",alignItems:"center"}},React.createElement("Text",null,"SugarInsiderApp"))};AppRegistry.registerComponent("SugarInsiderApp",function(){return App})},0,[]);' >> ios/SugarInsiderApp/main.jsbundle
-            echo '__r(0);' >> ios/SugarInsiderApp/main.jsbundle
+            echo 'var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.now(),__DEV__=false,process=this.process||{};process.env=process.env||{};process.env.NODE_ENV=process.env.NODE_ENV||"production";' > ios/main.jsbundle
+            echo 'var modules=Object.create(null);function __r(moduleId){var module=modules[moduleId];if(!module)throw new Error("Unknown module: "+moduleId);if(!module.isInitialized){module.isInitialized=true;module.publicModule={exports:{}};module.factory(global,__r,module.publicModule,module.publicModule.exports)}return module.publicModule.exports}function __d(factory,moduleId){modules[moduleId]={factory:factory,isInitialized:false}}' >> ios/main.jsbundle
+            echo '__d(function(global,require,module,exports){var React=require("react");var AppRegistry=require("react-native").AppRegistry;var App=function(){return React.createElement("View",{style:{flex:1,justifyContent:"center",alignItems:"center"}},React.createElement("Text",null,"SugarInsiderApp"))};AppRegistry.registerComponent("SugarInsiderApp",function(){return App})},0,[]);' >> ios/main.jsbundle
+            echo '__r(0);' >> ios/main.jsbundle
 
-            echo "📦 Emergency bundle created ($(stat -f%z ios/SugarInsiderApp/main.jsbundle) bytes)"
+            echo "📦 Emergency bundle created ($(stat -f%z ios/main.jsbundle) bytes)"
           fi
 
           # Show first few lines of bundle for debugging
           echo "📋 Bundle content preview:"
-          head -2 ios/SugarInsiderApp/main.jsbundle
+          head -2 ios/main.jsbundle
 
       - name: Build ipa with xcode-project
         script: |
@@ -261,8 +261,8 @@ workflows:
           # Copy bundle to app if missing
           if [ ! -f "$APP_PATH/main.jsbundle" ]; then
             echo "⚠️ Bundle not found in app, copying from source..."
-            if [ -f "ios/SugarInsiderApp/main.jsbundle" ]; then
-              cp "ios/SugarInsiderApp/main.jsbundle" "$APP_PATH/"
+            if [ -f "ios/main.jsbundle" ]; then
+              cp "ios/main.jsbundle" "$APP_PATH/"
               echo "✅ Bundle copied to app"
             else
               echo "❌ Source bundle not found!"
@@ -275,8 +275,8 @@ workflows:
           # Copy assets to app if missing
           if [ ! -d "$APP_PATH/assets" ]; then
             echo "⚠️ Assets not found in app, copying from source..."
-            if [ -d "ios/SugarInsiderApp/assets" ]; then
-              cp -r "ios/SugarInsiderApp/assets" "$APP_PATH/"
+            if [ -d "ios/assets" ]; then
+              cp -r "ios/assets" "$APP_PATH/"
               echo "✅ Assets copied to app"
             else
               echo "⚠️ Source assets not found"
