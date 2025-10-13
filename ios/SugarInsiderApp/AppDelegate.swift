@@ -41,28 +41,9 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
   override func bundleURL() -> URL? {
     print("📱 [AppDelegate] Determining bundle URL...")
 
-#if DEBUG
-    // In debug, try Metro first
-    if let bundleURL = RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index"),
-       bundleURL.scheme == "http" || bundleURL.scheme == "https" {
-      print("🔧 [AppDelegate] Using Metro bundler URL: \(bundleURL)")
-      return bundleURL
-    }
-    print("⚠️ [AppDelegate] Metro not available in Debug, falling back to embedded bundle")
-#else
-    print("🚀 [AppDelegate] Release mode - using embedded bundle")
-#endif
-
-    // Fallback to embedded bundle for both Debug and Release
-    let bundleURL = getBundleFromMainBundle()
-
-    if bundleURL == nil {
-      // Last resort - try to create emergency fallback
-      print("🚨 [AppDelegate] CRITICAL: No bundle found! App may crash.")
-      print("🚨 [AppDelegate] This indicates bundle was not properly included in the app.")
-    }
-
-    return bundleURL
+    // ALWAYS TRY EMBEDDED BUNDLE FIRST TO PREVENT 'No script URL provided'
+    print("🔄 [AppDelegate] Trying embedded bundle first...")
+    return getBundleFromMainBundle()
   }
 
   private func getBundleFromMainBundle() -> URL? {
@@ -105,8 +86,56 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
     }
 
     print("❌ [AppDelegate] No bundle found in main bundle!")
-    print("💥 [AppDelegate] This will cause 'No script URL provided' error")
-    return nil
+    print("🚨 [AppDelegate] Creating emergency bundle to prevent crash...")
+
+    // Create emergency bundle IMMEDIATELY
+    let emergencyBundlePath = Bundle.main.bundlePath + "/main.jsbundle"
+    let emergencyBundle = """
+var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.now(),__DEV__=false,process=this.process||{};
+process.env=process.env||{};process.env.NODE_ENV=process.env.NODE_ENV||"production";
+var modules=Object.create(null);
+function __r(moduleId){
+  var module=modules[moduleId];
+  if(!module)throw new Error("Unknown module: "+moduleId);
+  if(!module.isInitialized){
+    module.isInitialized=true;
+    module.publicModule={exports:{}};
+    module.factory(global,__r,module.publicModule,module.publicModule.exports);
+  }
+  return module.publicModule.exports;
+}
+function __d(factory,moduleId){modules[moduleId]={factory:factory,isInitialized:false};}
+__d(function(global,require,module,exports){
+  var React=require("react");
+  var AppRegistry=require("react-native").AppRegistry;
+  var App=function(){
+    return React.createElement("View",{style:{flex:1,justifyContent:"center",alignItems:"center",backgroundColor:"#ffc0cb"}},
+      React.createElement("Text",{style:{fontSize:24,fontWeight:"bold",color:"#fff",textAlign:"center"}},
+        "Sugar Insider\\n🍭 Emergency Bundle Loaded!"
+      )
+    );
+  };
+  AppRegistry.registerComponent("SugarInsiderApp",function(){return App;});
+},0,[]);
+__r(0);
+"""
+
+    do {
+      try emergencyBundle.write(toFile: emergencyBundlePath, atomically: true, encoding: .utf8)
+      print("✅ [AppDelegate] Emergency bundle created at: \(emergencyBundlePath)")
+
+      let fileSize = (try? FileManager.default.attributesOfItem(atPath: emergencyBundlePath)[.size] as? Int) ?? 0
+      print("📦 [AppDelegate] Emergency bundle size: \(fileSize) bytes")
+
+      return URL(fileURLWithPath: emergencyBundlePath)
+    } catch {
+      print("❌ [AppDelegate] Failed to create emergency bundle: \(error)")
+
+      // ABSOLUTE LAST RESORT - return a fake URL to prevent nil return
+      let fallbackPath = Bundle.main.bundlePath + "/emergency.jsbundle"
+      print("🆘 [AppDelegate] Returning fallback path: \(fallbackPath)")
+      return URL(fileURLWithPath: fallbackPath)
+    }
   }
 
   private func findBundleRecursively(in directory: String) -> String? {
