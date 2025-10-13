@@ -92,13 +92,20 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
     let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
     let emergencyBundlePath = documentsPath + "/main.jsbundle"
 
-    // Check if emergency bundle already exists
+    // Check if emergency bundle already exists and is valid
     if FileManager.default.fileExists(atPath: emergencyBundlePath) {
-      let fileSize = (try? FileManager.default.attributesOfItem(atPath: emergencyBundlePath)[.size] as? Int) ?? 0
-      print("✅ [AppDelegate] Emergency bundle already exists: \(emergencyBundlePath) (size: \(fileSize) bytes)")
-      return URL(fileURLWithPath: emergencyBundlePath)
+      if let bundleContent = try? String(contentsOfFile: emergencyBundlePath, encoding: .utf8),
+         bundleContent.contains("var global=this;") {
+        let fileSize = (try? FileManager.default.attributesOfItem(atPath: emergencyBundlePath)[.size] as? Int) ?? 0
+        print("✅ [AppDelegate] Valid emergency bundle already exists: \(emergencyBundlePath) (size: \(fileSize) bytes)")
+        return URL(fileURLWithPath: emergencyBundlePath)
+      } else {
+        print("⚠️ [AppDelegate] Outdated emergency bundle found, recreating...")
+        try? FileManager.default.removeItem(atPath: emergencyBundlePath)
+      }
     }
     let emergencyBundle = """
+var global=this;
 var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.now(),__DEV__=false,process=this.process||{};
 process.env=process.env||{};process.env.NODE_ENV=process.env.NODE_ENV||"production";
 var modules=Object.create(null);
