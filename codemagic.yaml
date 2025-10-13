@@ -223,11 +223,11 @@ workflows:
             --scheme "$XCODE_SCHEME" \
             --config "Release"
 
-      - name: Manual bundle copy if needed
+      - name: Ensure bundle is properly included in .ipa
         script: |
-          echo "🔧 Ensuring bundle is in app (manual copy as fallback)..."
+          echo "🔧 Ensuring bundle and assets are in .ipa file..."
 
-          # Find the built .app file first
+          # Find the built .app file in the archive
           APP_PATH=$(find build -name "*.app" -type d | head -n 1)
 
           if [ -z "$APP_PATH" ]; then
@@ -237,18 +237,40 @@ workflows:
 
           echo "📱 App found at: $APP_PATH"
 
-          # If bundle is missing, copy it manually
+          # Copy bundle to app if missing
           if [ ! -f "$APP_PATH/main.jsbundle" ]; then
-            echo "⚠️ Bundle not found in app, copying manually..."
+            echo "⚠️ Bundle not found in app, copying from source..."
             if [ -f "ios/SugarInsiderApp/main.jsbundle" ]; then
               cp "ios/SugarInsiderApp/main.jsbundle" "$APP_PATH/"
-              echo "✅ Bundle copied manually"
+              echo "✅ Bundle copied to app"
             else
               echo "❌ Source bundle not found!"
               exit 1
             fi
           else
             echo "✅ Bundle already present in app"
+          fi
+
+          # Copy assets to app if missing
+          if [ ! -d "$APP_PATH/assets" ]; then
+            echo "⚠️ Assets not found in app, copying from source..."
+            if [ -d "ios/SugarInsiderApp/assets" ]; then
+              cp -r "ios/SugarInsiderApp/assets" "$APP_PATH/"
+              echo "✅ Assets copied to app"
+            else
+              echo "⚠️ Source assets not found"
+            fi
+          else
+            echo "✅ Assets already present in app"
+          fi
+
+          # Verify final bundle in .app
+          if [ -f "$APP_PATH/main.jsbundle" ]; then
+            BUNDLE_SIZE=$(stat -f%z "$APP_PATH/main.jsbundle" 2>/dev/null || stat -c%s "$APP_PATH/main.jsbundle")
+            echo "✅ Final verification: Bundle in app (size: $BUNDLE_SIZE bytes)"
+          else
+            echo "❌ CRITICAL: Bundle still missing from .app!"
+            exit 1
           fi
 
       - name: Verify bundle inclusion in .app

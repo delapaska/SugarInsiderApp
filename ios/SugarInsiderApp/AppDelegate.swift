@@ -39,8 +39,7 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
   }
 
   override func bundleURL() -> URL? {
-    // Always try Metro first in development, then fallback to embedded bundle
-    // This works for both Debug and Release builds
+    print("📱 [AppDelegate] Determining bundle URL...")
 
 #if DEBUG
     // In debug, try Metro first
@@ -55,7 +54,15 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
 #endif
 
     // Fallback to embedded bundle for both Debug and Release
-    return getBundleFromMainBundle()
+    let bundleURL = getBundleFromMainBundle()
+
+    if bundleURL == nil {
+      // Last resort - try to create emergency fallback
+      print("🚨 [AppDelegate] CRITICAL: No bundle found! App may crash.")
+      print("🚨 [AppDelegate] This indicates bundle was not properly included in the app.")
+    }
+
+    return bundleURL
   }
 
   private func getBundleFromMainBundle() -> URL? {
@@ -68,7 +75,21 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
       print("📋 [AppDelegate] Relevant files in bundle: \(relevantFiles)")
     }
 
-    // Method 1: Direct file path check (most reliable)
+    // Method 1: Try Bundle.main.url methods first (most reliable for .ipa)
+    let bundleNames = ["main.jsbundle", "main", "index.ios.bundle", "index.bundle"]
+    for bundleName in bundleNames {
+      if let bundleURL = Bundle.main.url(forResource: bundleName.replacingOccurrences(of: ".jsbundle", with: ""), withExtension: "jsbundle") {
+        print("✅ [AppDelegate] Found bundle with extension: \(bundleName) at \(bundleURL)")
+        return bundleURL
+      }
+
+      if let bundleURL = Bundle.main.url(forResource: bundleName, withExtension: nil) {
+        print("✅ [AppDelegate] Found bundle using Bundle.main.url: \(bundleName) at \(bundleURL)")
+        return bundleURL
+      }
+    }
+
+    // Method 2: Direct file path check (fallback for simulator)
     let directPath = Bundle.main.bundlePath + "/main.jsbundle"
     if FileManager.default.fileExists(atPath: directPath) {
       let fileSize = (try? FileManager.default.attributesOfItem(atPath: directPath)[.size] as? Int) ?? 0
@@ -76,22 +97,33 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
       return URL(fileURLWithPath: directPath)
     }
 
-    // Method 2: Try Bundle.main.url methods
-    let bundleNames = ["main.jsbundle", "main", "index.ios.bundle", "index.bundle"]
-    for bundleName in bundleNames {
-      if let bundleURL = Bundle.main.url(forResource: bundleName, withExtension: nil) {
-        print("✅ [AppDelegate] Found bundle using Bundle.main.url: \(bundleName) at \(bundleURL)")
-        return bundleURL
-      }
-
-      if let bundleURL = Bundle.main.url(forResource: bundleName.replacingOccurrences(of: ".jsbundle", with: ""), withExtension: "jsbundle") {
-        print("✅ [AppDelegate] Found bundle with extension: \(bundleName) at \(bundleURL)")
-        return bundleURL
-      }
+    // Method 3: Recursive search in app bundle (for .ipa files)
+    print("🔍 [AppDelegate] Searching recursively for bundle files...")
+    if let foundBundle = findBundleRecursively(in: Bundle.main.bundlePath) {
+      print("✅ [AppDelegate] Found bundle recursively: \(foundBundle)")
+      return URL(fileURLWithPath: foundBundle)
     }
 
     print("❌ [AppDelegate] No bundle found in main bundle!")
     print("💥 [AppDelegate] This will cause 'No script URL provided' error")
+    return nil
+  }
+
+  private func findBundleRecursively(in directory: String) -> String? {
+    guard let enumerator = FileManager.default.enumerator(atPath: directory) else {
+      return nil
+    }
+
+    while let file = enumerator.nextObject() as? String {
+      if file.hasSuffix("main.jsbundle") || file.hasSuffix("index.bundle") {
+        let fullPath = directory + "/" + file
+        if FileManager.default.fileExists(atPath: fullPath) {
+          let fileSize = (try? FileManager.default.attributesOfItem(atPath: fullPath)[.size] as? Int) ?? 0
+          print("🔍 [AppDelegate] Found bundle recursively: \(fullPath) (size: \(fileSize) bytes)")
+          return fullPath
+        }
+      }
+    }
     return nil
   }
 }
