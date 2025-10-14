@@ -9,6 +9,7 @@ import {
   Image,
 } from 'react-native';
 import { t, Language } from './translations';
+import { getAssetSource } from './AssetHelper';
 
 const { width, height } = Dimensions.get('window');
 
@@ -27,14 +28,14 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onNavigate, languag
       <StatusBar barStyle="light-content" backgroundColor="#F5A8D4" />
 
       <Image
-        source={require('./assets/Onboarding/Parts/logo.png')}
+        source={getAssetSource('assets/Onboarding/Parts/logo.png')}
         style={styles.backgroundImage}
         resizeMode="cover"
       />
 
       <View style={styles.logoContainer}>
         <Image
-          source={require('./assets/Onboarding/Parts/group67.png')}
+          source={getAssetSource('assets/Onboarding/Parts/group67.png')}
           style={styles.logoImage}
           resizeMode="contain"
         />

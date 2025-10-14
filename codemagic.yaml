@@ -80,6 +80,15 @@ workflows:
 
           echo "✅ All assets verified and prepared for bundling"
 
+          # Verify AssetHelper.js exists and contains asset registry
+          if [ -f "AssetHelper.js" ]; then
+            REGISTRY_ASSETS=$(grep -c "require('./" AssetHelper.js)
+            echo "✅ AssetHelper.js found with $REGISTRY_ASSETS registered assets"
+          else
+            echo "❌ AssetHelper.js not found - production asset loading may fail!"
+            exit 1
+          fi
+
 
       - name: Remove old iOS folder
         script: |
@@ -94,7 +103,16 @@ workflows:
 
       - name: Run Expo Prebuild
         script: |
+          echo "🔧 Running Expo prebuild with asset preservation..."
           npx expo prebuild --platform ios --clean
+
+          echo "📋 Post-prebuild asset verification:"
+          if [ -d "ios" ]; then
+            echo "✅ iOS directory created"
+            ls -la ios/ | grep -E "(assets|\.app)" || echo "ℹ️ No assets or .app in ios/ yet"
+          else
+            echo "❌ iOS directory not created!"
+          fi
 
       - name: Replace AppDelegate with custom version to fix 'No script URL provided' error
         script: |
@@ -274,11 +292,34 @@ workflows:
           fi
 
           # Verify assets are available for final app
-          echo "📁 Final asset verification:"
+          echo "📁 Final asset verification after bundling:"
           if [ -d "ios/assets" ]; then
-            echo "✅ Assets in ios/assets: $(find ios/assets -name '*.png' | wc -l) files"
+            ASSETS_COUNT=$(find ios/assets -name '*.png' | wc -l)
+            echo "✅ Assets in ios/assets: $ASSETS_COUNT files"
             echo "📋 Sample assets found:"
             find ios/assets -name '*.png' | head -10
+
+            # Critical check: verify key UI assets exist
+            KEY_ASSETS=("ios/assets/Diary/Parts/icecream.png" "ios/assets/Profile/Avatar.png" "ios/assets/Onboarding/Parts/logo.png")
+            echo "🔍 Checking critical UI assets:"
+            for asset in "${KEY_ASSETS[@]}"; do
+              if [ -f "$asset" ]; then
+                echo "✅ Found: $(basename $(dirname $asset))/$(basename $asset)"
+              else
+                echo "❌ MISSING: $(basename $(dirname $asset))/$(basename $asset)"
+              fi
+            done
+          else
+            echo "❌ CRITICAL: No ios/assets directory after bundling!"
+            echo "🔍 Checking what's in ios/:"
+            ls -la ios/ | head -10
+
+            echo "🚨 EMERGENCY: Manually copying assets to ios/"
+            if [ -d "assets" ]; then
+              cp -r assets ios/
+              echo "✅ Emergency copy completed"
+              echo "📋 Copied: $(find ios/assets -name '*.png' | wc -l) asset files"
+            fi
           fi
 
           # Show first few lines of bundle for debugging

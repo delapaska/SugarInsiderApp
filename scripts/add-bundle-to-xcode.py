@@ -125,14 +125,24 @@ def add_bundle_to_xcode_project():
 def add_assets_folder_to_project(project, sources_group_uuid, main_target_uuid):
     """Add assets folder to Xcode project if it exists"""
     try:
-        # Check if assets folder exists
-        if not os.path.exists('assets'):
-            print("ℹ️ Assets folder not found, skipping")
+        # Check if assets folder exists (check both current dir and parent dir)
+        assets_path = None
+        if os.path.exists('assets'):
+            assets_path = 'assets'
+        elif os.path.exists('../assets'):
+            assets_path = '../assets'
+        elif os.path.exists('../../assets'):
+            assets_path = '../../assets'
+
+        if not assets_path:
+            print("ℹ️ Assets folder not found in current, parent, or grandparent directory, skipping")
             return False
+
+        print(f"📁 Found assets at: {assets_path}")
 
         # Count assets for logging
         asset_count = 0
-        for root, dirs, files in os.walk('assets'):
+        for root, dirs, files in os.walk(assets_path):
             asset_count += len([f for f in files if f.endswith(('.png', '.jpg', '.jpeg'))])
 
         print(f"📦 Found {asset_count} image assets in assets folder")
@@ -149,7 +159,8 @@ def add_assets_folder_to_project(project, sources_group_uuid, main_target_uuid):
         assets_ref_uuid = str(uuid.uuid4()).replace('-', '').upper()[:24]
         assets_build_uuid = str(uuid.uuid4()).replace('-', '').upper()[:24]
 
-        # Add assets folder reference
+        # Add assets folder reference (use relative path for Xcode project)
+        # For Xcode, we always want to reference as 'assets' regardless of where we found it
         project['objects'][assets_ref_uuid] = {
             'isa': 'PBXFileReference',
             'lastKnownFileType': 'folder',
