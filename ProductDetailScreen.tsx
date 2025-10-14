@@ -114,14 +114,14 @@ const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ onBack, produ
       <StatusBar barStyle="dark-content" backgroundColor="#F5A8D4" />
 
       <Image
-        source={require('./Pro/background.png')}
+        source={require('./assets/Pro/background.png')}
         style={styles.backgroundImage}
         resizeMode="cover"
       />
 
       <TouchableOpacity style={styles.backButton} onPress={onBack}>
         <Image
-          source={require('./Profile/arrow.png')}
+          source={require('./assets/Profile/arrow.png')}
           style={styles.backArrowImage}
           resizeMode="contain"
         />
@@ -145,7 +145,7 @@ const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ onBack, produ
         onPress={() => setIsDropdownVisible(!isDropdownVisible)}
       >
         <Image
-          source={require('./Profile/arrowGrey.png')}
+          source={require('./assets/Profile/arrowGrey.png')}
           style={styles.arrowDown}
           resizeMode="contain"
         />

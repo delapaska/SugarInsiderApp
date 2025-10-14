@@ -403,14 +403,14 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
       <StatusBar barStyle="dark-content" backgroundColor="#F5A8D4" />
 
       <Image
-        source={require('./Settings/background.png')}
+        source={require('./assets/Settings/background.png')}
         style={styles.backgroundImage}
         resizeMode="cover"
       />
 
       <TouchableOpacity style={styles.backButton} onPress={onBack}>
         <Image
-          source={require('./Profile/arrow.png')}
+          source={require('./assets/Profile/arrow.png')}
           style={styles.backArrowImage}
           resizeMode="contain"
         />
@@ -724,7 +724,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
         <View style={styles.bottomNavContent}>
           <TouchableOpacity style={styles.diaryTab} onPress={onDiaryPress}>
             <Image
-              source={require('./Diary/Parts/notepad1.png')}
+              source={require('./assets/Diary/Parts/notepad1.png')}
               style={styles.diaryIcon}
               resizeMode="contain"
             />
@@ -733,7 +733,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
 
           <View style={styles.statisticsTab}>
             <Image
-              source={require('./Diary/Parts/Statistics.png')}
+              source={require('./assets/Diary/Parts/Statistics.png')}
               style={styles.statisticsIcon}
               resizeMode="contain"
             />
@@ -742,7 +742,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
 
           <TouchableOpacity style={styles.profileTab} onPress={onProfilePress}>
             <Image
-              source={require('./Diary/Parts/prof.png')}
+              source={require('./assets/Diary/Parts/prof.png')}
               style={styles.profileIcon}
               resizeMode="contain"
             />
@@ -751,7 +751,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
 
           <TouchableOpacity style={styles.proTab} onPress={onProPress}>
             <Image
-              source={require('./Diary/Parts/pro-1.png')}
+              source={require('./assets/Diary/Parts/pro-1.png')}
               style={styles.proIcon}
               resizeMode="contain"
             />

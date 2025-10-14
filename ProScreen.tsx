@@ -143,7 +143,7 @@ const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onP
       <StatusBar barStyle="dark-content" backgroundColor="#F5A8D4" />
 
       <Image
-        source={require('./Pro/background.png')}
+        source={require('./assets/Pro/background.png')}
         style={styles.backgroundImage}
         resizeMode="cover"
       />
@@ -177,7 +177,7 @@ const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onP
       </Text>
 
       <Image
-        source={require('./Pro/photo.png')}
+        source={require('./assets/Pro/photo.png')}
         style={styles.photoImage}
         resizeMode="contain"
       />
@@ -220,7 +220,7 @@ const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onP
 
       <TouchableOpacity style={styles.backButton} onPress={onBack}>
         <Image
-          source={require('./Profile/arrow.png')}
+          source={require('./assets/Profile/arrow.png')}
           style={styles.backArrowImage}
           resizeMode="contain"
         />

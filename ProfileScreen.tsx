@@ -30,7 +30,7 @@ interface ProfileScreenProps {
 }
 
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onDiaryPress, onStatisticsPress, onPersonalDataPress, onSettingsPress, onProPress, weight = '60kg', height: heightProp = '160cm', userName = 'Name', birthDate = '2007/9/17', unitSystem = 'european', language = 'English' }) => {
-  const [avatarSource, setAvatarSource] = useState(require('./Profile/Avatar.png'));
+  const [avatarSource, setAvatarSource] = useState(require('./assets/Profile/Avatar.png'));
 
   
   const getDisplayWeight = () => {
@@ -91,14 +91,14 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onDiaryPress, onS
       <StatusBar barStyle="dark-content" backgroundColor="#F5A8D4" />
 
       <Image
-        source={require('./Profile/Background.png')}
+        source={require('./assets/Profile/Background.png')}
         style={styles.backgroundImage}
         resizeMode="cover"
       />
 
       <TouchableOpacity style={styles.backButton} onPress={onBack}>
         <Image
-          source={require('./Profile/arrow.png')}
+          source={require('./assets/Profile/arrow.png')}
           style={styles.backArrowImage}
           resizeMode="contain"
         />
@@ -108,7 +108,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onDiaryPress, onS
 
       <TouchableOpacity style={styles.settingsButton} onPress={onSettingsPress}>
         <Image
-          source={require('./Profile/settings.png')}
+          source={require('./assets/Profile/settings.png')}
           style={styles.settingsIcon}
           resizeMode="contain"
         />
@@ -148,7 +148,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onDiaryPress, onS
 
       <TouchableOpacity onPress={onPersonalDataPress}>
         <Image
-          source={require('./Profile/arrowGrey.png')}
+          source={require('./assets/Profile/arrowGrey.png')}
           style={styles.arrowGreyIcon}
           resizeMode="contain"
         />
@@ -160,7 +160,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onDiaryPress, onS
         <View style={styles.bottomNavContent}>
           <TouchableOpacity style={styles.diaryTab} onPress={onDiaryPress}>
             <Image
-              source={require('./Diary/Parts/notepad1.png')}
+              source={require('./assets/Diary/Parts/notepad1.png')}
               style={styles.diaryIcon}
               resizeMode="contain"
             />
@@ -169,7 +169,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onDiaryPress, onS
 
           <TouchableOpacity style={styles.statisticsTab} onPress={onStatisticsPress}>
             <Image
-              source={require('./Diary/Parts/Statistics.png')}
+              source={require('./assets/Diary/Parts/Statistics.png')}
               style={styles.statisticsIcon}
               resizeMode="contain"
             />
@@ -178,7 +178,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onDiaryPress, onS
 
           <View style={styles.profileTab}>
             <Image
-              source={require('./Diary/Parts/prof.png')}
+              source={require('./assets/Diary/Parts/prof.png')}
               style={styles.profileIcon}
               resizeMode="contain"
             />
@@ -187,7 +187,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onDiaryPress, onS
 
           <TouchableOpacity style={styles.proTab} onPress={onProPress}>
             <Image
-              source={require('./Diary/Parts/pro-1.png')}
+              source={require('./assets/Diary/Parts/pro-1.png')}
               style={styles.proIcon}
               resizeMode="contain"
             />
@@ -201,7 +201,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onDiaryPress, onS
           {t('Upgrade to', language)} <Text style={styles.premiumText}>{t('Premium', language).toUpperCase()}</Text> {t('accountAndGetMore', language)}
         </Text>
         <Image
-          source={require('./Profile/photo.png')}
+          source={require('./assets/Profile/photo.png')}
           style={styles.photoImage}
           resizeMode="cover"
         />

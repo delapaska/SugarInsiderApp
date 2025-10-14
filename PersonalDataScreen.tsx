@@ -341,14 +341,14 @@ const PersonalDataScreen: React.FC<PersonalDataScreenProps> = ({ onBack, onWeigh
       <StatusBar barStyle="dark-content" backgroundColor="#F5A8D4" />
 
       <Image
-        source={require('./Profile/Background.png')}
+        source={require('./assets/Profile/Background.png')}
         style={styles.backgroundImage}
         resizeMode="cover"
       />
 
       <TouchableOpacity style={styles.backButton} onPress={onBack}>
         <Image
-          source={require('./Profile/arrow.png')}
+          source={require('./assets/Profile/arrow.png')}
           style={styles.backArrowImage}
           resizeMode="contain"
         />

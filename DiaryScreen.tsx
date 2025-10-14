@@ -254,15 +254,15 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
   const getProductImage = (category: string) => {
     switch (category) {
       case 'icecream':
-        return require('./Diary/Parts/icecream.png');
+        return require('./assets/Diary/Parts/icecream.png');
       case 'chocolate':
-        return require('./Diary/Parts/chocolate.png');
+        return require('./assets/Diary/Parts/chocolate.png');
       case 'candies':
-        return require('./Diary/Parts/candies.png');
+        return require('./assets/Diary/Parts/candies.png');
       case 'cake':
-        return require('./Diary/Parts/cake.png');
+        return require('./assets/Diary/Parts/cake.png');
       default:
-        return require('./Diary/Parts/cake.png');
+        return require('./assets/Diary/Parts/cake.png');
     }
   };
 
@@ -424,7 +424,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
       <StatusBar barStyle="light-content" backgroundColor="#F5A8D4" />
 
       <Image
-        source={require('./Diary/Parts/Background.png')}
+        source={require('./assets/Diary/Parts/Background.png')}
         style={styles.backgroundImage}
         resizeMode="cover"
       />
@@ -453,7 +453,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
 
       <TouchableOpacity onPress={handlePreviousDay}>
         <Image
-          source={require('./Diary/Parts/chevron.right.png')}
+          source={require('./assets/Diary/Parts/chevron.right.png')}
           style={styles.leftArrow}
           resizeMode="contain"
         />
@@ -461,7 +461,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
 
       <TouchableOpacity onPress={handleNextDay}>
         <Image
-          source={require('./Diary/Parts/chevron.right.png')}
+          source={require('./assets/Diary/Parts/chevron.right.png')}
           style={styles.rightArrow}
           resizeMode="contain"
         />
@@ -572,7 +572,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
                   onPress={() => handleEditProduct(index)}
                 >
                   <Image
-                    source={require('./Diary/Parts/Pencil.png')}
+                    source={require('./assets/Diary/Parts/Pencil.png')}
                     style={styles.pencilImage}
                     resizeMode="contain"
                   />
@@ -589,7 +589,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
         <View style={styles.bottomNavContent}>
           <View style={styles.diaryTab}>
             <Image
-              source={require('./Diary/Parts/notepad1.png')}
+              source={require('./assets/Diary/Parts/notepad1.png')}
               style={styles.diaryIcon}
               resizeMode="contain"
             />
@@ -598,7 +598,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
 
           <TouchableOpacity style={styles.statisticsTab} onPress={handleStatisticsPress}>
             <Image
-              source={require('./Diary/Parts/Statistics.png')}
+              source={require('./assets/Diary/Parts/Statistics.png')}
               style={styles.statisticsIcon}
               resizeMode="contain"
             />
@@ -607,7 +607,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
 
           <TouchableOpacity style={styles.profileTab} onPress={handleProfilePress}>
             <Image
-              source={require('./Diary/Parts/prof.png')}
+              source={require('./assets/Diary/Parts/prof.png')}
               style={styles.profileIcon}
               resizeMode="contain"
             />
@@ -616,7 +616,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
 
           <TouchableOpacity style={styles.proTab} onPress={handleProPress}>
             <Image
-              source={require('./Diary/Parts/pro-1.png')}
+              source={require('./assets/Diary/Parts/pro-1.png')}
               style={styles.proIcon}
               resizeMode="contain"
             />
@@ -632,7 +632,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
         <View style={styles.modalOverlay}>
           <TouchableOpacity onPress={() => handleCategoryPress('icecream')}>
             <Image
-              source={require('./Diary/Parts/icecream.png')}
+              source={require('./assets/Diary/Parts/icecream.png')}
               style={styles.iceCreamImage}
               resizeMode="contain"
             />
@@ -644,7 +644,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
 
           <TouchableOpacity onPress={() => handleCategoryPress('chocolate')}>
             <Image
-              source={require('./Diary/Parts/chocolate.png')}
+              source={require('./assets/Diary/Parts/chocolate.png')}
               style={styles.chocolateImage}
               resizeMode="contain"
             />
@@ -656,7 +656,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
 
           <TouchableOpacity onPress={() => handleCategoryPress('candies')}>
             <Image
-              source={require('./Diary/Parts/candies.png')}
+              source={require('./assets/Diary/Parts/candies.png')}
               style={styles.candiesImage}
               resizeMode="contain"
             />
@@ -668,7 +668,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
 
           <TouchableOpacity onPress={() => handleCategoryPress('cake')}>
             <Image
-              source={require('./Diary/Parts/cake.png')}
+              source={require('./assets/Diary/Parts/cake.png')}
               style={styles.cakeImage}
               resizeMode="contain"
             />
@@ -688,7 +688,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
       {isAddModalVisible && selectedCategory && (
         <View style={styles.modalOverlay}>
           <Image
-            source={require('./Diary/Parts/Background.png')}
+            source={require('./assets/Diary/Parts/Background.png')}
             style={styles.categoryBackgroundImage}
             resizeMode="cover"
           />
@@ -716,7 +716,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
           />
 
           <Image
-            source={require('./Search/zoom.png')}
+            source={require('./assets/Search/zoom.png')}
             style={styles.zoomIcon}
             resizeMode="contain"
           />

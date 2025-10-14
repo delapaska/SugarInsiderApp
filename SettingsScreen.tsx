@@ -353,14 +353,14 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, userName = 'Nam
         <StatusBar barStyle="dark-content" backgroundColor="#F5A8D4" />
 
         <Image
-          source={require('./Settings/background.png')}
+          source={require('./assets/Settings/background.png')}
           style={styles.backgroundImage}
           resizeMode="cover"
         />
 
         <TouchableOpacity style={styles.backButton} onPress={handleNotificationsBack}>
           <Image
-            source={require('./Profile/arrow.png')}
+            source={require('./assets/Profile/arrow.png')}
             style={styles.backArrowImage}
             resizeMode="contain"
           />
@@ -454,14 +454,14 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, userName = 'Nam
         <StatusBar barStyle="dark-content" backgroundColor="#F5A8D4" />
 
         <Image
-          source={require('./Settings/background.png')}
+          source={require('./assets/Settings/background.png')}
           style={styles.backgroundImage}
           resizeMode="cover"
         />
 
         <TouchableOpacity style={styles.backButton} onPress={handleSugarLimitBack}>
           <Image
-            source={require('./Profile/arrow.png')}
+            source={require('./assets/Profile/arrow.png')}
             style={styles.backArrowImage}
             resizeMode="contain"
           />
@@ -512,14 +512,14 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, userName = 'Nam
         <StatusBar barStyle="dark-content" backgroundColor="#F5A8D4" />
 
         <Image
-          source={require('./Settings/background.png')}
+          source={require('./assets/Settings/background.png')}
           style={styles.backgroundImage}
           resizeMode="cover"
         />
 
         <TouchableOpacity style={styles.backButton} onPress={handleLanguageBack}>
           <Image
-            source={require('./Profile/arrow.png')}
+            source={require('./assets/Profile/arrow.png')}
             style={styles.backArrowImage}
             resizeMode="contain"
           />
@@ -560,14 +560,14 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, userName = 'Nam
         <StatusBar barStyle="dark-content" backgroundColor="#F5A8D4" />
 
         <Image
-          source={require('./Settings/background.png')}
+          source={require('./assets/Settings/background.png')}
           style={styles.backgroundImage}
           resizeMode="cover"
         />
 
         <TouchableOpacity style={styles.backButton} onPress={handleUnitsBack}>
           <Image
-            source={require('./Profile/arrow.png')}
+            source={require('./assets/Profile/arrow.png')}
             style={styles.backArrowImage}
             resizeMode="contain"
           />
@@ -600,14 +600,14 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, userName = 'Nam
         <StatusBar barStyle="dark-content" backgroundColor="#F5A8D4" />
 
         <Image
-          source={require('./Settings/background.png')}
+          source={require('./assets/Settings/background.png')}
           style={styles.backgroundImage}
           resizeMode="cover"
         />
 
         <TouchableOpacity style={styles.backButton} onPress={handleAccountBack}>
           <Image
-            source={require('./Profile/arrow.png')}
+            source={require('./assets/Profile/arrow.png')}
             style={styles.backArrowImage}
             resizeMode="contain"
           />
@@ -644,7 +644,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, userName = 'Nam
         <Text style={styles.consentText}>{t('Consent to data processing', selectedLanguage)}</Text>
 
         <Image
-          source={require('./Profile/arrowGrey.png')}
+          source={require('./assets/Profile/arrowGrey.png')}
           style={styles.consentArrowIcon}
           resizeMode="contain"
         />
@@ -696,14 +696,14 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, userName = 'Nam
       <StatusBar barStyle="dark-content" backgroundColor="#F5A8D4" />
 
       <Image
-        source={require('./Settings/background.png')}
+        source={require('./assets/Settings/background.png')}
         style={styles.backgroundImage}
         resizeMode="cover"
       />
 
       <TouchableOpacity style={styles.backButton} onPress={onBack}>
         <Image
-          source={require('./Profile/arrow.png')}
+          source={require('./assets/Profile/arrow.png')}
           style={styles.backArrowImage}
           resizeMode="contain"
         />
@@ -719,7 +719,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, userName = 'Nam
 
       <TouchableOpacity onPress={handleAccountPress}>
         <Image
-          source={require('./Profile/arrowGrey.png')}
+          source={require('./assets/Profile/arrowGrey.png')}
           style={styles.arrowGreyIcon}
           resizeMode="contain"
         />
@@ -739,7 +739,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, userName = 'Nam
 
       <TouchableOpacity onPress={handleNotificationsPress}>
         <Image
-          source={require('./Profile/arrowGrey.png')}
+          source={require('./assets/Profile/arrowGrey.png')}
           style={styles.notificationsArrowIcon}
           resizeMode="contain"
         />
@@ -751,7 +751,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, userName = 'Nam
 
       <TouchableOpacity onPress={handleSugarLimitPress}>
         <Image
-          source={require('./Profile/arrowGrey.png')}
+          source={require('./assets/Profile/arrowGrey.png')}
           style={styles.sugarLimitArrowIcon}
           resizeMode="contain"
         />
