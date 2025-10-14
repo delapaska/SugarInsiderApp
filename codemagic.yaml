@@ -35,13 +35,50 @@ workflows:
 
       - name: Create assets folder with app icons
         script: |
-          mkdir -p assets
-          # Copy your actual icon instead of using placeholder
-          cp icon.png assets/icon.png
-          cp icon.png assets/splash.png
-          # Create adaptive icon for Android compatibility (though we're iOS only)
-          cp icon.png assets/adaptive-icon.png
-          echo "✅ Created assets folder with actual app icons"
+          echo "🔧 Verifying and preparing ALL assets for bundling..."
+
+          # Verify assets directory exists and contains all required icons
+          if [ ! -d "assets" ]; then
+            echo "❌ Assets directory not found!"
+            exit 1
+          fi
+
+          # Count total assets
+          TOTAL_ASSETS=$(find assets -name '*.png' -o -name '*.jpg' -o -name '*.jpeg' | wc -l)
+          echo "📦 Found $TOTAL_ASSETS image assets in project"
+
+          # List all asset directories for debugging
+          echo "📁 Asset directory structure:"
+          find assets -type d | sort
+
+          # Verify key asset files exist
+          REQUIRED_DIRS=("assets/Diary/Parts" "assets/Profile" "assets/Settings" "assets/Onboarding/Parts")
+          for dir in "${REQUIRED_DIRS[@]}"; do
+            if [ -d "$dir" ]; then
+              ASSETS_COUNT=$(find "$dir" -name '*.png' | wc -l)
+              echo "✅ $dir: $ASSETS_COUNT assets"
+            else
+              echo "❌ Missing required directory: $dir"
+              exit 1
+            fi
+          done
+
+          # Ensure main app icon exists for Expo
+          if [ -f "icon.png" ]; then
+            # Copy main icon to assets if not already there
+            if [ ! -f "assets/icon.png" ]; then
+              cp icon.png assets/icon.png
+              echo "✅ Copied main icon to assets/icon.png"
+            fi
+            # Create splash and adaptive icons for Expo compatibility
+            cp icon.png assets/splash.png 2>/dev/null || true
+            cp icon.png assets/adaptive-icon.png 2>/dev/null || true
+          else
+            echo "❌ Main icon.png not found in project root!"
+            exit 1
+          fi
+
+          echo "✅ All assets verified and prepared for bundling"
 
 
       - name: Remove old iOS folder
@@ -139,20 +176,31 @@ workflows:
       - name: Pre-build React Native bundle
         script: |
           export NODE_BINARY=$(which node)
-          echo "🔧 Pre-building React Native bundle to avoid Metro serializer issues..."
+          echo "🔧 Pre-building React Native bundle with proper asset handling..."
 
           # Ensure bundle directory exists
           mkdir -p ios
 
           # Clear any existing bundle and Metro cache thoroughly
           rm -rf ios/main.jsbundle
+          rm -rf ios/assets
           rm -rf node_modules/.cache
           rm -rf /tmp/metro-*
           rm -rf /tmp/haste-map-*
           rm -rf $TMPDIR/metro-* 2>/dev/null || true
 
-          # Try multiple bundle creation methods
-          echo "🔄 Attempting bundle creation method 1..."
+          # CRITICAL: Ensure assets are available for bundling
+          echo "📦 Ensuring assets are available for bundling process..."
+          if [ -d "assets" ]; then
+            TOTAL_ASSETS=$(find assets -name '*.png' -o -name '*.jpg' -o -name '*.jpeg' | wc -l)
+            echo "✅ Assets directory verified: $TOTAL_ASSETS files"
+          else
+            echo "❌ Assets directory missing! Bundle will fail."
+            exit 1
+          fi
+
+          # Try multiple bundle creation methods with proper asset handling
+          echo "🔄 Attempting bundle creation with assets..."
 
           if npx react-native bundle \
             --platform ios \
@@ -162,9 +210,18 @@ workflows:
             --assets-dest ios \
             --reset-cache \
             --verbose; then
-            echo "✅ Method 1 succeeded"
+            echo "✅ Bundle creation succeeded with react-native bundle"
+
+            # Verify assets were copied
+            if [ -d "ios/assets" ]; then
+              COPIED_ASSETS=$(find ios/assets -name '*.png' | wc -l)
+              echo "✅ Assets copied to ios/: $COPIED_ASSETS files"
+            else
+              echo "⚠️ No assets directory created in ios/ - assets may be embedded in bundle"
+            fi
+
           else
-            echo "❌ Method 1 failed, trying method 2..."
+            echo "❌ react-native bundle failed, trying Metro bundler..."
 
             # Try with Metro bundler directly
             npx metro build \
@@ -175,24 +232,25 @@ workflows:
               --assets-dest ios \
               --reset-cache || {
 
-              echo "❌ Method 2 failed, trying method 3..."
+              echo "❌ Metro build failed, trying manual approach..."
 
-              # Try with manual metro config
-              node -e "
-                const Metro = require('metro');
-                const config = require('./metro.config.js');
-                Metro.runBuild(config, {
-                  platform: 'ios',
-                  dev: false,
-                  entry: 'index.js',
-                  out: 'ios/main.jsbundle',
-                  assetsDest: 'ios',
-                  resetCache: true
-                });
-              " || {
+              # Try with Expo bundling (more reliable for assets)
+              if command -v expo &> /dev/null; then
+                echo "🔄 Trying Expo export for better asset handling..."
+                npx expo export --platform ios --output-dir ios/export --clear || {
+                  echo "❌ All bundling methods failed!"
+                  exit 1
+                }
+
+                # Move exported bundle to expected location
+                if [ -f "ios/export/_expo/static/js/ios/index-*.js" ]; then
+                  mv ios/export/_expo/static/js/ios/index-*.js ios/main.jsbundle
+                  echo "✅ Expo export succeeded"
+                fi
+              else
                 echo "❌ All methods failed!"
                 exit 1
-              }
+              fi
             }
           fi
 
@@ -215,17 +273,12 @@ workflows:
             echo "⚠️ Bundle may not contain app registration"
           fi
 
-          # Final verification and fallback
-          if [ ! -f "ios/main.jsbundle" ] || [ ! -s "ios/main.jsbundle" ]; then
-            echo "⚠️ Bundle missing or empty, creating emergency fallback bundle..."
-
-            # Create a minimal working bundle as last resort
-            echo 'var __BUNDLE_START_TIME__=this.nativePerformanceNow?nativePerformanceNow():Date.now(),__DEV__=false,process=this.process||{};process.env=process.env||{};process.env.NODE_ENV=process.env.NODE_ENV||"production";' > ios/main.jsbundle
-            echo 'var modules=Object.create(null);function __r(moduleId){var module=modules[moduleId];if(!module)throw new Error("Unknown module: "+moduleId);if(!module.isInitialized){module.isInitialized=true;module.publicModule={exports:{}};module.factory(global,__r,module.publicModule,module.publicModule.exports)}return module.publicModule.exports}function __d(factory,moduleId){modules[moduleId]={factory:factory,isInitialized:false}}' >> ios/main.jsbundle
-            echo '__d(function(global,require,module,exports){var React=require("react");var AppRegistry=require("react-native").AppRegistry;var App=function(){return React.createElement("View",{style:{flex:1,justifyContent:"center",alignItems:"center"}},React.createElement("Text",null,"SugarInsiderApp"))};AppRegistry.registerComponent("SugarInsiderApp",function(){return App})},0,[]);' >> ios/main.jsbundle
-            echo '__r(0);' >> ios/main.jsbundle
-
-            echo "📦 Emergency bundle created ($(stat -f%z ios/main.jsbundle) bytes)"
+          # Verify assets are available for final app
+          echo "📁 Final asset verification:"
+          if [ -d "ios/assets" ]; then
+            echo "✅ Assets in ios/assets: $(find ios/assets -name '*.png' | wc -l) files"
+            echo "📋 Sample assets found:"
+            find ios/assets -name '*.png' | head -10
           fi
 
           # Show first few lines of bundle for debugging
@@ -244,9 +297,9 @@ workflows:
             --scheme "$XCODE_SCHEME" \
             --config "Release"
 
-      - name: Ensure bundle is properly included in .ipa
+      - name: Ensure bundle and assets are properly included in .ipa
         script: |
-          echo "🔧 Ensuring bundle and assets are in .ipa file..."
+          echo "🔧 Ensuring bundle and ALL assets are in .ipa file..."
 
           # Find the built .app file in the archive
           APP_PATH=$(find build -name "*.app" -type d | head -n 1)
@@ -272,24 +325,79 @@ workflows:
             echo "✅ Bundle already present in app"
           fi
 
-          # Copy assets to app if missing (check both possible locations)
-          if [ ! -d "$APP_PATH/assets" ]; then
-            echo "⚠️ Assets not found in app, copying from source..."
-            if [ -d "ios/assets" ]; then
+          # CRITICAL: Ensure ALL assets are available in multiple locations
+          echo "📦 Comprehensive asset copying to ensure inclusion..."
+
+          # Method 1: Copy from ios/assets if exists
+          if [ -d "ios/assets" ]; then
+            if [ ! -d "$APP_PATH/assets" ]; then
               cp -r "ios/assets" "$APP_PATH/"
               echo "✅ Assets copied to app from ios/assets"
-            else
-              echo "⚠️ Source assets not found in ios/assets"
             fi
-          else
-            echo "✅ Assets already present in app"
+            ASSETS_IN_IOS=$(find ios/assets -name '*.png' | wc -l)
+            echo "📋 Assets in ios/assets: $ASSETS_IN_IOS files"
           fi
 
-          # Also ensure assets are copied to SugarInsiderApp directory for bundle process
-          if [ -d "ios/assets" ] && [ ! -d "ios/SugarInsiderApp/assets" ]; then
-            echo "🔧 Copying assets to SugarInsiderApp directory for bundle process..."
-            cp -r "ios/assets" "ios/SugarInsiderApp/"
-            echo "✅ Assets copied to ios/SugarInsiderApp/"
+          # Method 2: Copy directly from project assets (fallback)
+          if [ -d "assets" ]; then
+            if [ ! -d "$APP_PATH/assets" ]; then
+              cp -r "assets" "$APP_PATH/"
+              echo "✅ Assets copied to app from project root"
+            else
+              # Ensure all subdirectories are present
+              for asset_dir in assets/*/; do
+                if [ -d "$asset_dir" ]; then
+                  dir_name=$(basename "$asset_dir")
+                  if [ ! -d "$APP_PATH/assets/$dir_name" ]; then
+                    cp -r "$asset_dir" "$APP_PATH/assets/"
+                    echo "✅ Copied missing asset directory: $dir_name"
+                  fi
+                fi
+              done
+            fi
+            PROJECT_ASSETS=$(find assets -name '*.png' | wc -l)
+            echo "📋 Total project assets: $PROJECT_ASSETS files"
+          fi
+
+          # Method 3: Ensure assets in SugarInsiderApp directory too
+          if [ -d "assets" ]; then
+            mkdir -p "ios/SugarInsiderApp"
+            if [ ! -d "ios/SugarInsiderApp/assets" ]; then
+              cp -r "assets" "ios/SugarInsiderApp/"
+              echo "✅ Assets copied to ios/SugarInsiderApp/ for Xcode resources"
+            fi
+          fi
+
+          # Final verification of assets in .app
+          if [ -d "$APP_PATH/assets" ]; then
+            FINAL_ASSETS=$(find "$APP_PATH/assets" -name '*.png' | wc -l)
+            echo "✅ Assets in final .app: $FINAL_ASSETS files"
+
+            # List key directories to verify structure
+            echo "📁 Asset directories in final app:"
+            find "$APP_PATH/assets" -type d | sort
+
+            # Verify key asset files exist
+            KEY_ASSETS=("$APP_PATH/assets/Diary/Parts/icecream.png" "$APP_PATH/assets/Profile/Avatar.png" "$APP_PATH/assets/Onboarding/Parts/logo.png")
+            for asset in "${KEY_ASSETS[@]}"; do
+              if [ -f "$asset" ]; then
+                echo "✅ Key asset verified: $(basename "$asset")"
+              else
+                echo "⚠️ Missing key asset: $(basename "$asset")"
+              fi
+            done
+          else
+            echo "❌ CRITICAL: Assets directory still missing from .app!"
+
+            # Emergency asset copy
+            echo "🚨 Emergency: Copying assets directly to app bundle..."
+            if [ -d "assets" ]; then
+              cp -r "assets" "$APP_PATH/"
+              echo "✅ Emergency asset copy completed"
+            else
+              echo "❌ No assets directory found to copy!"
+              exit 1
+            fi
           fi
 
           # Verify final bundle in .app

@@ -130,6 +130,13 @@ def add_assets_folder_to_project(project, sources_group_uuid, main_target_uuid):
             print("ℹ️ Assets folder not found, skipping")
             return False
 
+        # Count assets for logging
+        asset_count = 0
+        for root, dirs, files in os.walk('assets'):
+            asset_count += len([f for f in files if f.endswith(('.png', '.jpg', '.jpeg'))])
+
+        print(f"📦 Found {asset_count} image assets in assets folder")
+
         # Check if assets folder is already in project
         for uuid_key, obj in project['objects'].items():
             if (obj.get('isa') == 'PBXFileReference' and
@@ -151,13 +158,35 @@ def add_assets_folder_to_project(project, sources_group_uuid, main_target_uuid):
             'sourceTree': '<group>'
         }
 
+        # Add build file for assets folder
+        project['objects'][assets_build_uuid] = {
+            'isa': 'PBXBuildFile',
+            'fileRef': assets_ref_uuid
+        }
+
         # Add to source group
         if 'children' not in project['objects'][sources_group_uuid]:
             project['objects'][sources_group_uuid]['children'] = []
         if assets_ref_uuid not in project['objects'][sources_group_uuid]['children']:
             project['objects'][sources_group_uuid]['children'].append(assets_ref_uuid)
 
-        print(f"✅ Added assets folder to Xcode project (FileRef: {assets_ref_uuid})")
+        # Add to resources build phase for proper inclusion in .ipa
+        resources_phase_found = False
+        for uuid_key, obj in project['objects'].items():
+            if (obj.get('isa') == 'PBXResourcesBuildPhase' and
+                uuid_key in project['objects'][main_target_uuid]['buildPhases']):
+                if 'files' not in obj:
+                    obj['files'] = []
+                if assets_build_uuid not in obj['files']:
+                    obj['files'].append(assets_build_uuid)
+                    resources_phase_found = True
+                    break
+
+        if not resources_phase_found:
+            print("⚠️ Could not find Resources build phase for assets")
+
+        print(f"✅ Added assets folder to Xcode project (FileRef: {assets_ref_uuid}, BuildFile: {assets_build_uuid})")
+        print(f"📁 This includes {asset_count} image assets")
         return True
 
     except Exception as e:
