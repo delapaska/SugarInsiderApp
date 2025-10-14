@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import OnboardingScreen from './OnboardingScreen';
 import DiaryScreen from './DiaryScreen';
 import { Language } from './translations';
-import { preloadAssets } from './AssetHelper';
+const { preloadAssets } = require('./AssetHelper');
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState<'onboarding' | 'diary'>('onboarding');

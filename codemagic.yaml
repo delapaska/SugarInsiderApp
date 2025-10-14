@@ -82,8 +82,13 @@ workflows:
 
           # Verify AssetHelper.js exists and contains asset registry
           if [ -f "AssetHelper.js" ]; then
-            REGISTRY_ASSETS=$(grep -c "require('./" AssetHelper.js)
-            echo "✅ AssetHelper.js found with $REGISTRY_ASSETS registered assets"
+            REGISTRY_ASSETS=$(grep -c "require('./" AssetHelper.js || echo "0")
+            if [ "$REGISTRY_ASSETS" -gt "0" ]; then
+              echo "✅ AssetHelper.js found with $REGISTRY_ASSETS registered assets"
+            else
+              echo "⚠️ AssetHelper.js found but no assets detected - checking file..."
+              head -20 AssetHelper.js
+            fi
           else
             echo "❌ AssetHelper.js not found - production asset loading may fail!"
             exit 1
@@ -241,13 +246,11 @@ workflows:
           else
             echo "❌ react-native bundle failed, trying Metro bundler..."
 
-            # Try with Metro bundler directly
-            npx metro build \
+            # Try with Metro bundler directly (correct syntax)
+            npx metro build index.js \
               --platform ios \
               --dev false \
-              --entry-file index.js \
-              --bundle-output ios/main.jsbundle \
-              --assets-dest ios \
+              --out ios/main.jsbundle \
               --reset-cache || {
 
               echo "❌ Metro build failed, trying manual approach..."

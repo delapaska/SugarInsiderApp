@@ -9,7 +9,7 @@ import {
   Image,
 } from 'react-native';
 import { t, Language } from './translations';
-import { getAssetSource } from './AssetHelper';
+const { getAssetSource } = require('./AssetHelper');
 
 const { width, height } = Dimensions.get('window');
 
