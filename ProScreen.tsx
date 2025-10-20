@@ -9,11 +9,12 @@ import {
   Dimensions,
   Alert,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { t, Language } from './translations';
 import { nativePaymentService as paymentService, PaymentProduct } from './NativePaymentService';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 interface ProScreenProps {
   onBack: () => void;
@@ -25,6 +26,21 @@ const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onP
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState<PaymentProduct[]>([]);
   const [initialized, setInitialized] = useState(false);
+
+  // iPad detection logic
+  const screenData = Dimensions.get('screen');
+  const screenWidth = screenData.width;
+  const screenHeight = screenData.height;
+  const screenMinDimension = Math.min(screenWidth, screenHeight);
+
+  const aspectRatio = Math.max(width, height) / Math.min(width, height);
+  const isPossibleTablet = Platform.OS === 'ios' && (
+    screenMinDimension >= 768 ||
+    (width === 375 && height === 667 && aspectRatio < 2.2)
+  );
+
+  const isTablet = isPossibleTablet;
+  const isLandscape = width > height;
 
   useEffect(() => {
     initializePayments();
@@ -138,6 +154,164 @@ const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onP
     return monthlyProduct ? monthlyProduct.price : '$4.99';
   };
 
+  // Create adaptive styles function
+  const getStyles = () => {
+    return StyleSheet.create({
+      ...baseStyles,
+      proText: {
+        position: 'absolute',
+        width: (1100 / 1242) * width,
+        height: isTablet ? (300 / 1242) * width : (400 / 1242) * width,
+        top: isTablet ? (200 / 1242) * width : (260 / 1242) * width,
+        left: (70 / 1242) * width,
+        fontFamily: 'Alatsi',
+        fontWeight: 'bold',
+        fontSize: isTablet ? (50 / 1242) * width : (70 / 1242) * width,
+        lineHeight: isTablet ? (50 * 0.99 / 1242) * width : (70 * 0.99 / 1242) * width,
+        letterSpacing: 0,
+        textAlign: 'center',
+        color: '#303539',
+        zIndex: 10,
+      },
+      unlimitedText: {
+        position: 'absolute',
+        width: (900 / 1242) * width,
+        height: (120 / 1242) * width,
+        top: isTablet ? (380 / 1242) * width : (478 / 1242) * width,
+        left: (150 / 1242) * width,
+        fontFamily: 'Alatsi',
+        fontWeight: 'bold',
+        fontSize: isTablet ? (50 / 1242) * width : (64 / 1242) * width,
+        lineHeight: isTablet ? (50 * 0.99 / 1242) * width : (64 * 0.99 / 1242) * width,
+        letterSpacing: 0,
+        color: '#303539',
+        zIndex: 10,
+      },
+      personalChartsText: {
+        position: 'absolute',
+        width: (900 / 1242) * width,
+        height: (120 / 1242) * width,
+        top: isTablet ? (460 / 1242) * width : (580 / 1242) * width,
+        left: (150 / 1242) * width,
+        fontFamily: 'Alatsi',
+        fontWeight: 'bold',
+        fontSize: isTablet ? (50 / 1242) * width : (64 / 1242) * width,
+        lineHeight: isTablet ? (50 * 0.99 / 1242) * width : (64 * 0.99 / 1242) * width,
+        letterSpacing: 0,
+        color: '#303539',
+        zIndex: 10,
+      },
+      recommendationsText: {
+        position: 'absolute',
+        width: (900 / 1242) * width,
+        height: (120 / 1242) * width,
+        top: isTablet ? (540 / 1242) * width : (682 / 1242) * width,
+        left: (150 / 1242) * width,
+        fontFamily: 'Alatsi',
+        fontWeight: 'bold',
+        fontSize: isTablet ? (50 / 1242) * width : (64 / 1242) * width,
+        lineHeight: isTablet ? (50 * 0.99 / 1242) * width : (64 * 0.99 / 1242) * width,
+        letterSpacing: 0,
+        color: '#303539',
+        zIndex: 10,
+      },
+      photoImage: {
+        position: 'absolute',
+        width: isTablet ? (700 / 1242) * width : (869 / 1242) * width,
+        height: isTablet ? (700 / 1242) * width : (869 / 1242) * width,
+        top: isTablet ? (650 / 1242) * width : (744 / 1242) * width,
+        left: isTablet ? (270 / 1242) * width : (172 / 1242) * width,
+        opacity: 1,
+        zIndex: 10,
+      },
+      smallRectangle: {
+        position: 'absolute',
+        width: (248 / 1242) * width,
+        height: (86 / 1242) * width,
+        top: isTablet ? (1420 / 1242) * width : (1640 / 1242) * width,
+        left: (863 / 1242) * width,
+        backgroundColor: '#FF1C95',
+        zIndex: 10,
+      },
+      popularText: {
+        position: 'absolute',
+        width: (320 / 1242) * width,
+        height: (92 / 1242) * width,
+        top: isTablet ? (1445 / 1242) * width : (1665 / 1242) * width,
+        left: (822 / 1242) * width,
+        fontFamily: 'Alatsi',
+        fontWeight: 'bold',
+        fontSize: (40 / 1242) * width,
+        lineHeight: (40 * 0.99 / 1242) * width,
+        letterSpacing: 0,
+        textAlign: 'center',
+        textTransform: 'capitalize',
+        color: '#FFFFFF',
+        zIndex: 11,
+      },
+      rectangleButton: {
+        position: 'absolute',
+        width: (1140 / 1242) * width,
+        height: isTablet ? (180 / 1242) * width : (219 / 1242) * width,
+        top: isTablet ? (1500 / 1242) * width : (1719 / 1242) * width,
+        left: (54 / 1242) * width,
+        borderRadius: (75 / 1242) * width,
+        borderWidth: (12 / 1242) * width,
+        backgroundColor: '#FFFFFF',
+        borderColor: '#FF1C95',
+        shadowColor: '#B4ADB1',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.69,
+        shadowRadius: (8.8 / 1242) * width,
+        elevation: 8,
+        zIndex: 10,
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        paddingLeft: (74 / 1242) * width,
+      },
+      secondRectangleButton: {
+        position: 'absolute',
+        width: (1140 / 1242) * width,
+        height: isTablet ? (180 / 1242) * width : (219 / 1242) * width,
+        top: isTablet ? (1720 / 1242) * width : (1978 / 1242) * width,
+        left: (54 / 1242) * width,
+        borderRadius: (75 / 1242) * width,
+        borderWidth: (12 / 1242) * width,
+        backgroundColor: '#FFFFFF',
+        borderColor: '#FF1C95',
+        shadowColor: '#B4ADB1',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.69,
+        shadowRadius: (8.8 / 1242) * width,
+        elevation: 8,
+        zIndex: 10,
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        paddingLeft: (74 / 1242) * width,
+      },
+      unlimitedTextRussian: {
+        top: isTablet ? (430 / 1242) * width : (550 / 1242) * width,
+      },
+      personalChartsTextRussian: {
+        top: isTablet ? (510 / 1242) * width : (652 / 1242) * width,
+      },
+      recommendationsTextRussian: {
+        top: isTablet ? (590 / 1242) * width : (754 / 1242) * width,
+      },
+      unlimitedTextFrench: {
+        top: isTablet ? (410 / 1242) * width : (530 / 1242) * width,
+      },
+      personalChartsTextFrench: {
+        top: isTablet ? (490 / 1242) * width : (632 / 1242) * width,
+      },
+      recommendationsTextFrench: {
+        top: isTablet ? (570 / 1242) * width : (734 / 1242) * width,
+      },
+    });
+  };
+
+  const styles = getStyles();
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#F5A8D4" />
@@ -238,7 +412,7 @@ const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onP
   );
 };
 
-const styles = StyleSheet.create({
+const baseStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5A8D4',
@@ -266,137 +440,6 @@ const styles = StyleSheet.create({
     height: (72 / 1242) * width,
     opacity: 1,
   },
-  proText: {
-    position: 'absolute',
-    width: (1100 / 1242) * width,
-    height: (400 / 1242) * width,
-    top: (260 / 1242) * width,
-    left: (70 / 1242) * width,
-    fontFamily: 'Alatsi',
-    fontWeight: 'bold',
-    fontSize: (70 / 1242) * width,
-    lineHeight: (70 * 0.99 / 1242) * width,
-    letterSpacing: 0,
-    textAlign: 'center',
-    color: '#303539',
-    zIndex: 10,
-  },
-  unlimitedText: {
-    position: 'absolute',
-    width: (900 / 1242) * width,
-    height: (120 / 1242) * width,
-    top: (478 / 1242) * width,
-    left: (150 / 1242) * width,
-    fontFamily: 'Alatsi',
-    fontWeight: 'bold',
-    fontSize: (64 / 1242) * width,
-    lineHeight: (64 * 0.99 / 1242) * width,
-    letterSpacing: 0,
-    color: '#303539',
-    zIndex: 10,
-  },
-  personalChartsText: {
-    position: 'absolute',
-    width: (900 / 1242) * width,
-    height: (120 / 1242) * width,
-    top: (580 / 1242) * width,
-    left: (150 / 1242) * width,
-    fontFamily: 'Alatsi',
-    fontWeight: 'bold',
-    fontSize: (64 / 1242) * width,
-    lineHeight: (64 * 0.99 / 1242) * width,
-    letterSpacing: 0,
-    color: '#303539',
-    zIndex: 10,
-  },
-  recommendationsText: {
-    position: 'absolute',
-    width: (900 / 1242) * width,
-    height: (120 / 1242) * width,
-    top: (682 / 1242) * width,
-    left: (150 / 1242) * width,
-    fontFamily: 'Alatsi',
-    fontWeight: 'bold',
-    fontSize: (64 / 1242) * width,
-    lineHeight: (64 * 0.99 / 1242) * width,
-    letterSpacing: 0,
-    color: '#303539',
-    zIndex: 10,
-  },
-  
-  unlimitedTextRussian: {
-    top: (550 / 1242) * width,
-  },
-  personalChartsTextRussian: {
-    top: (652 / 1242) * width,
-  },
-  recommendationsTextRussian: {
-    top: (754 / 1242) * width,
-  },
-  
-  unlimitedTextFrench: {
-    top: (530 / 1242) * width,
-  },
-  personalChartsTextFrench: {
-    top: (632 / 1242) * width,
-  },
-  recommendationsTextFrench: {
-    top: (734 / 1242) * width,
-  },
-  photoImage: {
-    position: 'absolute',
-    width: (869 / 1242) * width,
-    height: (869 / 1242) * width,
-    top: (744 / 1242) * width,
-    left: (172 / 1242) * width,
-    opacity: 1,
-    zIndex: 10,
-  },
-  smallRectangle: {
-    position: 'absolute',
-    width: (248 / 1242) * width,
-    height: (86 / 1242) * width,
-    top: (1640 / 1242) * width,
-    left: (863 / 1242) * width,
-    backgroundColor: '#FF1C95',
-    zIndex: 10,
-  },
-  popularText: {
-    position: 'absolute',
-    width: (320 / 1242) * width,
-    height: (92 / 1242) * width,
-    top: (1665 / 1242) * width,
-    left: (822 / 1242) * width,
-    fontFamily: 'Alatsi',
-    fontWeight: 'bold',
-    fontSize: (40 / 1242) * width,
-    lineHeight: (40 * 0.99 / 1242) * width,
-    letterSpacing: 0,
-    textAlign: 'center',
-    textTransform: 'capitalize',
-    color: '#FFFFFF',
-    zIndex: 11,
-  },
-  rectangleButton: {
-    position: 'absolute',
-    width: (1140 / 1242) * width,
-    height: (219 / 1242) * width,
-    top: (1719 / 1242) * width,
-    left: (54 / 1242) * width,
-    borderRadius: (75 / 1242) * width,
-    borderWidth: (12 / 1242) * width,
-    backgroundColor: '#FFFFFF',
-    borderColor: '#FF1C95',
-    shadowColor: '#B4ADB1',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.69,
-    shadowRadius: (8.8 / 1242) * width,
-    elevation: 8,
-    zIndex: 10,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    paddingLeft: (74 / 1242) * width,
-  },
   monthsText: {
     fontFamily: 'Alatsi',
     fontWeight: 'bold',
@@ -420,26 +463,6 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     textTransform: 'capitalize',
     color: '#FFA8D6',
-  },
-  secondRectangleButton: {
-    position: 'absolute',
-    width: (1140 / 1242) * width,
-    height: (219 / 1242) * width,
-    top: (1978 / 1242) * width,
-    left: (54 / 1242) * width,
-    borderRadius: (75 / 1242) * width,
-    borderWidth: (12 / 1242) * width,
-    backgroundColor: '#FFFFFF',
-    borderColor: '#FF1C95',
-    shadowColor: '#B4ADB1',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.69,
-    shadowRadius: (8.8 / 1242) * width,
-    elevation: 8,
-    zIndex: 10,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    paddingLeft: (74 / 1242) * width,
   },
   oneMonthText: {
     fontFamily: 'Alatsi',

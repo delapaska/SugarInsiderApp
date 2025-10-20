@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   ScrollView,
   TextInput,
+  Platform,
 } from 'react-native';
 import ProfileScreen from './ProfileScreen';
 import PersonalDataScreen from './PersonalDataScreen';
@@ -22,11 +23,34 @@ import NotificationService from './NotificationService';
 
 const { width, height } = Dimensions.get('window');
 
+
 interface DiaryScreenProps {
   onAccountDeleted?: () => void;
 }
 
 const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
+  // iPad detection logic
+  const screenData = Dimensions.get('screen');
+  const screenWidth = screenData.width;
+  const screenHeight = screenData.height;
+  const screenMinDimension = Math.min(screenWidth, screenHeight);
+
+  const aspectRatio = Math.max(width, height) / Math.min(width, height);
+  const isPossibleTablet = Platform.OS === 'ios' && (
+    screenMinDimension >= 768 ||
+    (width === 375 && height === 667 && aspectRatio < 2.2)
+  );
+
+  const isTablet = isPossibleTablet;
+  const isLandscape = width > height;
+
+  const getBottomNavHeight = () => {
+    if (isTablet) {
+      return isLandscape ? Math.min(85, height * 0.12) : Math.min(85, height * 0.13);
+    }
+    return (280 / 1242) * width;
+  };
+
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -419,6 +443,532 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
     }
   };
 
+  // Create adaptive styles function
+  const getStyles = () => {
+    return StyleSheet.create({
+      ...baseStyles,
+      bottomNavContainer: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        width: width,
+        height: getBottomNavHeight(),
+        backgroundColor: '#FFFFFF',
+        opacity: 1,
+      },
+      diaryTab: {
+        position: 'absolute',
+        left: (110 / 1242) * width,
+        top: isTablet ? 8 : (2453 - 2429) / (1242 / width),
+        alignItems: 'center',
+      },
+      diaryIcon: {
+        width: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
+        height: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
+        opacity: 1,
+      },
+      diaryText: {
+        width: (140 / 1242) * width,
+        marginTop: isTablet ? 5 : (2537 - 2453 - 68) / (1242 / width),
+        fontFamily: 'System',
+        fontWeight: '400',
+        fontSize: isTablet ? Math.min(16, width * 0.02) : (32 / 1242) * width,
+        textAlign: 'center',
+        color: '#FF77C0',
+        textTransform: 'capitalize',
+        opacity: 1,
+      },
+      statisticsTab: {
+        position: 'absolute',
+        left: (426 / 1242) * width,
+        top: isTablet ? 8 : (2453 - 2429) / (1242 / width),
+        alignItems: 'center',
+      },
+      statisticsIcon: {
+        width: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
+        height: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
+        opacity: 1,
+      },
+      statisticsText: {
+        marginTop: isTablet ? 5 : (2536 - 2453 - 68) / (1242 / width),
+        fontFamily: 'System',
+        fontWeight: '400',
+        fontSize: isTablet ? Math.min(15, width * 0.018) : (30 / 1242) * width,
+        textAlign: 'center',
+        color: '#A2A2A2',
+        textTransform: 'capitalize',
+        opacity: 1,
+        minWidth: (180 / 1242) * width,
+      },
+      profileTab: {
+        position: 'absolute',
+        left: (742 / 1242) * width,
+        top: isTablet ? 8 : (2453 - 2429) / (1242 / width),
+        alignItems: 'center',
+      },
+      profileIcon: {
+        width: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
+        height: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
+        opacity: 1,
+      },
+      profileText: {
+        marginTop: isTablet ? 5 : (2537 - 2453 - 68) / (1242 / width),
+        fontFamily: 'System',
+        fontWeight: '400',
+        fontSize: isTablet ? Math.min(16, width * 0.02) : (32 / 1242) * width,
+        textAlign: 'center',
+        color: '#A2A2A2',
+        textTransform: 'capitalize',
+        opacity: 1,
+        minWidth: (140 / 1242) * width,
+      },
+      proTab: {
+        position: 'absolute',
+        left: (1018 / 1242) * width,
+        top: isTablet ? 8 : (2453 - 2429) / (1242 / width),
+        alignItems: 'center',
+      },
+      proIcon: {
+        width: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
+        height: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
+        opacity: 1,
+      },
+      proText: {
+        marginTop: isTablet ? 5 : (2536 - 2453 - 68) / (1242 / width),
+        fontFamily: 'System',
+        fontWeight: '400',
+        fontSize: isTablet ? Math.min(16, width * 0.02) : (32 / 1242) * width,
+        textAlign: 'center',
+        color: '#A2A2A2',
+        textTransform: 'capitalize',
+        opacity: 1,
+        minWidth: (120 / 1242) * width,
+      },
+      addedProductsScrollView: {
+        position: 'absolute',
+        top: isTablet ? (1220 / 1242) * width : (1623 / 1242) * width,
+        left: 0,
+        right: 0,
+        height: isTablet ? height - (1220 / 1242) * width - getBottomNavHeight() - (220 / 1242) * width : (552 / 1242) * width, // Увеличил отступ для iPad чтобы не перекрывать кнопку
+        zIndex: 10,
+      },
+      addButton: {
+        position: 'absolute',
+        left: (66 / 1242) * width,
+        top: isTablet ? height - getBottomNavHeight() - (200 / 1242) * width : (2200 / 1242) * width,
+        width: (1111 / 1242) * width,
+        height: (176 / 1242) * width,
+        borderRadius: (88 / 1242) * width,
+        backgroundColor: '#FF77C0',
+        shadowColor: '#000000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 4,
+        justifyContent: 'center',
+        alignItems: 'center',
+        opacity: 1,
+        zIndex: 20, // Добавил высокий z-index чтобы кнопка была поверх всех элементов
+      },
+      addButtonText: {
+        fontFamily: 'System',
+        fontWeight: '400',
+        fontSize: isTablet ? (60 / 1242) * width : (70 / 1242) * width,
+        textAlign: 'center',
+        color: '#FFFFFF',
+        textTransform: 'capitalize',
+        opacity: 1,
+      },
+      diaryTitle: {
+        position: 'absolute',
+        left: (268 / 1242) * width,
+        top: isTablet ? (150 / 1242) * width : (227 / 1242) * width,
+        width: (706 / 1242) * width,
+        height: isTablet ? (70 / 1242) * width : (92 / 1242) * width,
+        fontFamily: 'System',
+        fontWeight: 'bold',
+        fontSize: isTablet ? (70 / 1242) * width : (96 / 1242) * width,
+        lineHeight: isTablet ? (70 * 0.99) / 1242 * width : (96 * 0.99) / 1242 * width,
+        textAlign: 'center',
+        textTransform: 'capitalize',
+        color: '#303539',
+        opacity: 1,
+      },
+      ellipse: {
+        position: 'absolute',
+        width: isTablet ? (400 / 1242) * width : (544 / 1242) * width,
+        height: isTablet ? (400 / 1242) * width : (544 / 1242) * width,
+        top: isTablet ? (280 / 1242) * width : (443 / 1242) * width,
+        left: isTablet ? (421 / 1242) * width : (351 / 1242) * width,
+        borderRadius: isTablet ? (400 / 2 / 1242) * width : (544 / 2 / 1242) * width,
+        backgroundColor: '#FF84C5',
+        shadowColor: '#000000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 4,
+        opacity: 1,
+      },
+      caloriesText: {
+        position: 'absolute',
+        width: isTablet ? (350 / 1242) * width : (500 / 1242) * width,
+        height: isTablet ? (100 / 1242) * width : (150 / 1242) * width,
+        top: isTablet ? (430 / 1242) * width : (640 / 1242) * width,
+        left: isTablet ? (446 / 1242) * width : (371 / 1242) * width,
+        fontFamily: 'Alatsi',
+        fontWeight: 'bold',
+        fontSize: isTablet ? (70 / 1242) * width : (100 / 1242) * width,
+        lineHeight: isTablet ? (70 * 0.99 / 1242) * width : (100 * 0.99 / 1242) * width,
+        letterSpacing: 0,
+        textAlign: 'center',
+        color: '#FFFFFF',
+        opacity: 1,
+      },
+      summaryTitle: {
+        position: 'absolute',
+        left: (268 / 1242) * width,
+        top: isTablet ? (750 / 1242) * width : (1073 / 1242) * width,
+        width: (706 / 1242) * width,
+        height: isTablet ? (50 / 1242) * width : (60 / 1242) * width,
+        fontFamily: 'System',
+        fontWeight: 'bold',
+        fontSize: isTablet ? (50 / 1242) * width : (64 / 1242) * width,
+        lineHeight: isTablet ? (50 * 0.99) / 1242 * width : (64 * 0.99) / 1242 * width,
+        textAlign: 'center',
+        textTransform: 'capitalize',
+        color: '#303539',
+        opacity: 1,
+      },
+      summaryRectangle: {
+        position: 'absolute',
+        left: (51 / 1242) * width,
+        top: isTablet ? (820 / 1242) * width : (1192 / 1242) * width,
+        width: (1140 / 1242) * width,
+        height: isTablet ? (200 / 1242) * width : (256 / 1242) * width,
+        borderRadius: (75 / 1242) * width,
+        backgroundColor: '#FFFFFF',
+        shadowColor: '#B4ADB1',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.69,
+        shadowRadius: (8.8 / 1242) * width,
+        elevation: 8,
+        opacity: 1,
+      },
+      dateText: {
+        position: 'absolute',
+        left: (256 / 1242) * width,
+        top: isTablet ? (1150 / 1242) * width : (1497 / 1242) * width,
+        width: (706 / 1242) * width,
+        height: isTablet ? (50 / 1242) * width : (60 / 1242) * width,
+        fontFamily: 'System',
+        fontWeight: 'bold',
+        fontSize: isTablet ? (40 / 1242) * width : (48 / 1242) * width,
+        lineHeight: isTablet ? (40 * 0.99) / 1242 * width : (48 * 0.99) / 1242 * width,
+        textAlign: 'center',
+        textTransform: 'capitalize',
+        color: '#303539',
+        opacity: 1,
+      },
+      caloriesLabel: {
+        position: 'absolute',
+        width: isTablet ? (200 / 1242) * width : (250 / 1242) * width,
+        height: isTablet ? (40 / 1242) * width : (40 / 1242) * width,
+        top: isTablet ? (520 / 1242) * width : (760 / 1242) * width, // Опустили на iPhone чтобы не было близко к цифре
+        left: isTablet ? (521 / 1242) * width : (496 / 1242) * width,
+        fontFamily: 'System',
+        fontWeight: '400',
+        fontSize: isTablet ? (50 / 1242) * width : (45 / 1242) * width, // Увеличил размер kcal: iPad 50px, iPhone 45px
+        lineHeight: isTablet ? (50 * 0.99) / 1242 * width : (45 * 0.99) / 1242 * width,
+        textAlign: 'center',
+        color: '#FFFFFF',
+        opacity: 1,
+      },
+      leftArrow: {
+        position: 'absolute',
+        left: (64 / 1242) * width,
+        top: isTablet ? (1165 / 1242) * width : (1513 / 1242) * width, // Подняли стрелку к дате
+        width: (26 / 1242) * width,
+        height: (42 / 1242) * width,
+        transform: [{ rotate: '0deg' }],
+        opacity: 1,
+      },
+      rightArrow: {
+        position: 'absolute',
+        left: (1152 / 1242) * width,
+        top: isTablet ? (1165 / 1242) * width : (1513 / 1242) * width, // Подняли стрелку к дате
+        width: (26 / 1242) * width,
+        height: (42 / 1242) * width,
+        transform: [{ rotate: '180deg' }],
+        opacity: 1,
+      },
+      // БЖУ элементы для поднятого блока Summary
+      carbohydratesText: {
+        position: 'absolute',
+        width: (400 / 1242) * width,
+        height: isTablet ? (35 / 1242) * width : (47 / 1242) * width,
+        top: isTablet ? (870 / 1242) * width : (1247 / 1242) * width, // Подняли в summary блок
+        left: (55 / 1242) * width,
+        fontFamily: 'Alatsi',
+        fontWeight: 'bold',
+        fontSize: isTablet ? (35 / 1242) * width : (48 / 1242) * width, // Уменьшили размер для iPad
+        lineHeight: isTablet ? (35 * 0.99) / 1242 * width : (48 * 0.99) / 1242 * width,
+        letterSpacing: 0,
+        textAlign: 'left',
+        color: '#303539',
+        opacity: 1,
+      },
+      carbohydratesValue: {
+        position: 'absolute',
+        width: (120 / 1242) * width,
+        height: isTablet ? (30 / 1242) * width : (36 / 1242) * width,
+        top: isTablet ? (950 / 1242) * width : (1356 / 1242) * width, // Подняли в summary блок
+        left: (147 / 1242) * width,
+        fontFamily: 'Alatsi',
+        fontWeight: 'bold',
+        fontSize: isTablet ? (30 / 1242) * width : (36 / 1242) * width,
+        lineHeight: isTablet ? (30 * 0.99) / 1242 * width : (36 * 0.99) / 1242 * width,
+        letterSpacing: 0,
+        textAlign: 'center',
+        color: '#303539',
+        opacity: 1,
+      },
+      carbohydratesRectangle: {
+        position: 'absolute',
+        width: (201 / 1242) * width,
+        height: isTablet ? (15 / 1242) * width : (19 / 1242) * width,
+        top: isTablet ? (920 / 1242) * width : (1315 / 1242) * width, // Подняли в summary блок
+        left: (106 / 1242) * width,
+        borderRadius: (100 / 1242) * width,
+        backgroundColor: '#D9D9D9',
+        opacity: 1,
+      },
+      carbohydratesProgress: {
+        position: 'absolute',
+        height: isTablet ? (15 / 1242) * width : (19 / 1242) * width,
+        top: isTablet ? (920 / 1242) * width : (1315 / 1242) * width, // Подняли в summary блок
+        left: (106 / 1242) * width,
+        borderRadius: (100 / 1242) * width,
+        backgroundColor: '#FF77C0',
+        opacity: 1,
+      },
+      proteinsText: {
+        position: 'absolute',
+        width: (170 / 1242) * width,
+        height: isTablet ? (35 / 1242) * width : (47 / 1242) * width,
+        top: isTablet ? (870 / 1242) * width : (1247 / 1242) * width, // Подняли в summary блок
+        left: (536 / 1242) * width,
+        fontFamily: 'Alatsi',
+        fontWeight: 'bold',
+        fontSize: isTablet ? (35 / 1242) * width : (48 / 1242) * width,
+        lineHeight: isTablet ? (35 * 0.99) / 1242 * width : (48 * 0.99) / 1242 * width,
+        letterSpacing: 0,
+        textAlign: 'left',
+        color: '#303539',
+        opacity: 1,
+      },
+      proteinsValue: {
+        position: 'absolute',
+        width: (120 / 1242) * width,
+        height: isTablet ? (30 / 1242) * width : (36 / 1242) * width,
+        top: isTablet ? (950 / 1242) * width : (1356 / 1242) * width, // Подняли в summary блок
+        left: (561 / 1242) * width,
+        fontFamily: 'Alatsi',
+        fontWeight: 'bold',
+        fontSize: isTablet ? (30 / 1242) * width : (36 / 1242) * width,
+        lineHeight: isTablet ? (30 * 0.99) / 1242 * width : (36 * 0.99) / 1242 * width,
+        letterSpacing: 0,
+        textAlign: 'center',
+        color: '#303539',
+        opacity: 1,
+      },
+      proteinsRectangle: {
+        position: 'absolute',
+        width: (170 / 1242) * width,
+        height: isTablet ? (15 / 1242) * width : (19 / 1242) * width,
+        top: isTablet ? (920 / 1242) * width : (1315 / 1242) * width, // Подняли в summary блок
+        left: (536 / 1242) * width,
+        borderRadius: (100 / 1242) * width,
+        backgroundColor: '#D9D9D9',
+        opacity: 1,
+      },
+      proteinsProgress: {
+        position: 'absolute',
+        height: isTablet ? (15 / 1242) * width : (19 / 1242) * width,
+        top: isTablet ? (920 / 1242) * width : (1315 / 1242) * width, // Подняли в summary блок
+        left: (536 / 1242) * width,
+        borderRadius: (100 / 1242) * width,
+        backgroundColor: '#FF77C0',
+        opacity: 1,
+      },
+      fatsText: {
+        position: 'absolute',
+        width: (170 / 1242) * width,
+        height: isTablet ? (35 / 1242) * width : (47 / 1242) * width,
+        top: isTablet ? (870 / 1242) * width : (1253 / 1242) * width, // Подняли в summary блок
+        left: (948 / 1242) * width,
+        fontFamily: 'Alatsi',
+        fontWeight: 'bold',
+        fontSize: isTablet ? (35 / 1242) * width : (48 / 1242) * width,
+        lineHeight: isTablet ? (35 * 0.99) / 1242 * width : (48 * 0.99) / 1242 * width,
+        letterSpacing: 0,
+        textAlign: 'left',
+        color: '#303539',
+        opacity: 1,
+      },
+      fatsValue: {
+        position: 'absolute',
+        width: (120 / 1242) * width,
+        height: isTablet ? (30 / 1242) * width : (36 / 1242) * width,
+        top: isTablet ? (950 / 1242) * width : (1356 / 1242) * width, // Подняли в summary блок
+        left: (973 / 1242) * width,
+        fontFamily: 'Alatsi',
+        fontWeight: 'bold',
+        fontSize: isTablet ? (30 / 1242) * width : (36 / 1242) * width,
+        lineHeight: isTablet ? (30 * 0.99) / 1242 * width : (36 * 0.99) / 1242 * width,
+        letterSpacing: 0,
+        textAlign: 'center',
+        color: '#303539',
+        opacity: 1,
+      },
+      fatsRectangle: {
+        position: 'absolute',
+        width: (170 / 1242) * width,
+        height: isTablet ? (15 / 1242) * width : (19 / 1242) * width,
+        top: isTablet ? (920 / 1242) * width : (1315 / 1242) * width, // Подняли в summary блок
+        left: (948 / 1242) * width,
+        borderRadius: (100 / 1242) * width,
+        backgroundColor: '#D9D9D9',
+        opacity: 1,
+      },
+      fatsProgress: {
+        position: 'absolute',
+        height: isTablet ? (15 / 1242) * width : (19 / 1242) * width,
+        top: isTablet ? (920 / 1242) * width : (1315 / 1242) * width, // Подняли в summary блок
+        left: (948 / 1242) * width,
+        borderRadius: (100 / 1242) * width,
+        backgroundColor: '#FF77C0',
+        opacity: 1,
+      },
+      // Модальное окно выбора категорий
+      modalOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: (1242 / 1242) * width,
+        height: (2688 / 1242) * width,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        opacity: 1,
+      },
+      closeButtonCircle: {
+        position: 'absolute',
+        left: (565 / 1242) * width,
+        top: isTablet ? height - (300 / 1242) * width : (2449 / 1242) * width, // Подняли кнопку закрытия для iPad
+        width: (113 / 1242) * width,
+        height: (113 / 1242) * width,
+        borderRadius: (113 / 2 / 1242) * width,
+        backgroundColor: '#FE4460',
+        justifyContent: 'center',
+        alignItems: 'center',
+        opacity: 1,
+      },
+      iceCreamImage: {
+        position: 'absolute',
+        left: isTablet ? (180 / 1242) * width : (187 / 1242) * width, // Сдвинули правее для лучшего центрирования
+        top: isTablet ? (500 / 1242) * width : (1086 / 1242) * width, // Подняли для iPad
+        width: (385 / 1242) * width, // Вернули оригинальный размер
+        height: (385 / 1242) * width,
+        opacity: 1,
+      },
+      iceCreamText: {
+        position: 'absolute',
+        left: (193 / 1242) * width,
+        top: isTablet ? (900 / 1242) * width : (1455 / 1242) * width, // Подняли для iPad
+        width: (375 / 1242) * width,
+        height: isTablet ? (100 / 1242) * width : (145 / 1242) * width,
+        fontFamily: 'System',
+        fontWeight: 'bold',
+        fontSize: isTablet ? (50 / 1242) * width : (64 / 1242) * width, // Уменьшили для iPad
+        lineHeight: isTablet ? (50 * 0.99) / 1242 * width : (64 * 0.99) / 1242 * width,
+        textAlign: 'center',
+        textTransform: 'capitalize',
+        color: '#FFFFFF',
+        opacity: 1,
+      },
+      chocolateImage: {
+        position: 'absolute',
+        left: isTablet ? (655 / 1242) * width : (663 / 1242) * width, // Сдвинули правее для лучшего центрирования
+        top: isTablet ? (500 / 1242) * width : (1086 / 1242) * width, // Подняли для iPad
+        width: (385 / 1242) * width, // Вернули оригинальный размер
+        height: (385 / 1242) * width,
+        opacity: 1,
+      },
+      chocolateText: {
+        position: 'absolute',
+        left: (668 / 1242) * width,
+        top: isTablet ? (900 / 1242) * width : (1455 / 1242) * width, // Подняли для iPad
+        width: (375 / 1242) * width,
+        height: isTablet ? (100 / 1242) * width : (145 / 1242) * width,
+        fontFamily: 'System',
+        fontWeight: 'bold',
+        fontSize: isTablet ? (50 / 1242) * width : (64 / 1242) * width, // Уменьшили для iPad
+        lineHeight: isTablet ? (50 * 0.99) / 1242 * width : (64 * 0.99) / 1242 * width,
+        textAlign: 'center',
+        textTransform: 'capitalize',
+        color: '#FFFFFF',
+        opacity: 1,
+      },
+      candiesImage: {
+        position: 'absolute',
+        left: isTablet ? (180 / 1242) * width : (187 / 1242) * width, // Сдвинули правее для лучшего центрирования
+        top: isTablet ? (1020 / 1242) * width : (1556 / 1242) * width, // Подняли для iPad
+        width: (385 / 1242) * width, // Вернули оригинальный размер (было 386, делаем 385 для единообразия)
+        height: (385 / 1242) * width,
+        opacity: 1,
+      },
+      candiesText: {
+        position: 'absolute',
+        left: (193 / 1242) * width,
+        top: isTablet ? (1420 / 1242) * width : (1925 / 1242) * width, // Подняли для iPad
+        width: (375 / 1242) * width,
+        height: isTablet ? (100 / 1242) * width : (145 / 1242) * width,
+        fontFamily: 'System',
+        fontWeight: 'bold',
+        fontSize: isTablet ? (50 / 1242) * width : (64 / 1242) * width, // Уменьшили для iPad
+        lineHeight: isTablet ? (50 * 0.99) / 1242 * width : (64 * 0.99) / 1242 * width,
+        textAlign: 'center',
+        textTransform: 'capitalize',
+        color: '#FFFFFF',
+        opacity: 1,
+      },
+      cakeImage: {
+        position: 'absolute',
+        left: isTablet ? (655 / 1242) * width : (664 / 1242) * width, // Сдвинули правее для лучшего центрирования
+        top: isTablet ? (1020 / 1242) * width : (1556 / 1242) * width, // Подняли для iPad
+        width: (385 / 1242) * width, // Вернули оригинальный размер
+        height: (385 / 1242) * width,
+        opacity: 1,
+      },
+      cakeText: {
+        position: 'absolute',
+        left: (668 / 1242) * width,
+        top: isTablet ? (1420 / 1242) * width : (1925 / 1242) * width, // Подняли для iPad
+        width: (375 / 1242) * width,
+        height: isTablet ? (100 / 1242) * width : (145 / 1242) * width,
+        fontFamily: 'System',
+        fontWeight: 'bold',
+        fontSize: isTablet ? (50 / 1242) * width : (64 / 1242) * width, // Уменьшили для iPad
+        lineHeight: isTablet ? (50 * 0.99) / 1242 * width : (64 * 0.99) / 1242 * width,
+        textAlign: 'center',
+        textTransform: 'capitalize',
+        color: '#FFFFFF',
+        opacity: 1,
+      },
+    });
+  };
+
+  const styles = getStyles();
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#F5A8D4" />
@@ -467,7 +1017,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
         />
       </TouchableOpacity>
 
-      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProVisible && !isProductDetailVisible && (
+      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProVisible && !isProductDetailVisible && !isStatisticsVisible && (
         <TouchableOpacity style={styles.addButton} onPress={handleAddPress}>
           <Text style={styles.addButtonText}>{t('addSweet', language)}</Text>
         </TouchableOpacity>
@@ -848,7 +1398,8 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
   );
 };
 
-const styles = StyleSheet.create({
+
+const baseStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5A8D4',
@@ -859,16 +1410,6 @@ const styles = StyleSheet.create({
     height: height + 50,
     top: 0,
     left: 0,
-  },
-  bottomNavContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    width: width,
-    height: (280 / 1242) * width,
-    backgroundColor: '#FFFFFF',
-    opacity: 1,
   },
   topBorder: {
     position: 'absolute',
@@ -886,150 +1427,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
     paddingTop: 3,
-  },
-  diaryTab: {
-    position: 'absolute',
-    left: (110 / 1242) * width,
-    top: (2453 - 2429) / (1242 / width),
-    alignItems: 'center',
-  },
-  diaryIcon: {
-    width: (68 / 1242) * width,
-    height: (68 / 1242) * width,
-    opacity: 1,
-  },
-  diaryText: {
-    width: (140 / 1242) * width,
-    marginTop: (2537 - 2453 - 68) / (1242 / width),
-    fontFamily: 'System',
-    fontWeight: '400',
-    fontSize: (32 / 1242) * width,
-    textAlign: 'center',
-    color: '#FF77C0',
-    textTransform: 'capitalize',
-    opacity: 1,
-  },
-  statisticsTab: {
-    position: 'absolute',
-    left: (426 / 1242) * width,
-    top: (2453 - 2429) / (1242 / width),
-    alignItems: 'center',
-  },
-  statisticsIcon: {
-    width: (68 / 1242) * width,
-    height: (68 / 1242) * width,
-    opacity: 1,
-  },
-  statisticsText: {
-    marginTop: (2536 - 2453 - 68) / (1242 / width),
-    fontFamily: 'System',
-    fontWeight: '400',
-    fontSize: (30 / 1242) * width,
-    textAlign: 'center',
-    color: '#A2A2A2',
-    textTransform: 'capitalize',
-    opacity: 1,
-    minWidth: (180 / 1242) * width,
-  },
-  profileTab: {
-    position: 'absolute',
-    left: (742 / 1242) * width,
-    top: (2453 - 2429) / (1242 / width),
-    alignItems: 'center',
-  },
-  profileIcon: {
-    width: (68 / 1242) * width,
-    height: (68 / 1242) * width,
-    opacity: 1,
-  },
-  profileText: {
-    marginTop: (2537 - 2453 - 68) / (1242 / width),
-    fontFamily: 'System',
-    fontWeight: '400',
-    fontSize: (32 / 1242) * width,
-    textAlign: 'center',
-    color: '#A2A2A2',
-    textTransform: 'capitalize',
-    opacity: 1,
-    minWidth: (140 / 1242) * width,
-  },
-  proTab: {
-    position: 'absolute',
-    left: (1018 / 1242) * width,
-    top: (2453 - 2429) / (1242 / width),
-    alignItems: 'center',
-  },
-  proIcon: {
-    width: (68 / 1242) * width,
-    height: (68 / 1242) * width,
-    opacity: 1,
-  },
-  proText: {
-    marginTop: (2536 - 2453 - 68) / (1242 / width),
-    fontFamily: 'System',
-    fontWeight: '400',
-    fontSize: (32 / 1242) * width,
-    textAlign: 'center',
-    color: '#A2A2A2',
-    textTransform: 'capitalize',
-    opacity: 1,
-    minWidth: (120 / 1242) * width,
-  },
-  addButton: {
-    position: 'absolute',
-    left: (66 / 1242) * width,
-    top: (2200 / 1242) * width,
-    width: (1111 / 1242) * width,
-    height: (176 / 1242) * width,
-    borderRadius: (88 / 1242) * width,
-    backgroundColor: '#FF77C0',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-    opacity: 1,
-  },
-  addButtonText: {
-    fontFamily: 'System',
-    fontWeight: '400',
-    fontSize: (70 / 1242) * width,
-    textAlign: 'center',
-    color: '#FFFFFF',
-    textTransform: 'capitalize',
-    opacity: 1,
-  },
-  diaryTitle: {
-    position: 'absolute',
-    left: (268 / 1242) * width,
-    top: (227 / 1242) * width,
-    width: (706 / 1242) * width,
-    height: (92 / 1242) * width,
-    fontFamily: 'System',
-    fontWeight: 'bold',
-    fontSize: (96 / 1242) * width,
-    lineHeight: (96 * 0.99) / 1242 * width,
-    textAlign: 'center',
-    color: '#303539',
-    textTransform: 'capitalize',
-    opacity: 1,
-  },
-  summaryTitle: {
-    position: 'absolute',
-    left: (268 / 1242) * width,
-    top: (1073 / 1242) * width,
-    width: (706 / 1242) * width,
-    height: (60 / 1242) * width,
-    fontFamily: 'System',
-    fontWeight: 'bold',
-    fontSize: (64 / 1242) * width,
-    lineHeight: (64 * 0.99) / 1242 * width,
-    textAlign: 'center',
-    color: '#303539',
-    textTransform: 'capitalize',
-    opacity: 1,
   },
   summaryRectangle: {
     position: 'absolute',
@@ -1074,40 +1471,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#FFFFFF',
     zIndex: 10,
-  },
-  caloriesLabel: {
-    position: 'absolute',
-    width: (706 / 1242) * width,
-    height: (60 / 1242) * width,
-    top: (746 / 1242) * width,
-    left: (268 / 1242) * width,
-    fontFamily: 'Alatsi',
-    fontWeight: 'bold',
-    fontSize: (48 / 1242) * width,
-    lineHeight: (48 * 0.99 / 1242) * width,
-    letterSpacing: 0,
-    textAlign: 'center',
-    textTransform: 'capitalize',
-    color: '#FFFFFF',
-    zIndex: 10,
-  },
-  leftArrow: {
-    position: 'absolute',
-    left: (64 / 1242) * width,
-    top: (1513 / 1242) * width,
-    width: (26 / 1242) * width,
-    height: (42 / 1242) * width,
-    transform: [{ rotate: '0deg' }],
-    opacity: 1,
-  },
-  rightArrow: {
-    position: 'absolute',
-    left: (1152 / 1242) * width,
-    top: (1513 / 1242) * width,
-    width: (26 / 1242) * width,
-    height: (42 / 1242) * width,
-    transform: [{ rotate: '180deg' }],
-    opacity: 1,
   },
   dateText: {
     position: 'absolute',
@@ -1670,14 +2033,6 @@ const styles = StyleSheet.create({
   },
 
   
-  addedProductsScrollView: {
-    position: 'absolute',
-    top: (1623 / 1242) * width,
-    left: 0,
-    right: 0,
-    height: (552 / 1242) * width, 
-    zIndex: 10,
-  },
 
   
   addedProductsContainer: {

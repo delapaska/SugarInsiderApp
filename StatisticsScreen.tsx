@@ -8,12 +8,13 @@ import {
   TouchableOpacity,
   Dimensions,
   Alert,
+  Platform,
 } from 'react-native';
 import { t, Language } from './translations';
 import { formatSugar, getSugarDisplayValue, getSugarUnit } from './unitConversion';
 import { generateStatisticsPDF } from './pdfGenerator';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 interface StatisticsScreenProps {
   onBack: () => void;
@@ -48,10 +49,33 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
 }) => {
   const [selectedPeriod, setSelectedPeriod] = useState<'day' | 'week' | 'month'>('day');
   const [hoveredData, setHoveredData] = useState<{data: any; index: number} | null>(null); 
-  const [selectedDayData, setSelectedDayData] = useState<any>(null); 
+  const [selectedDayData, setSelectedDayData] = useState<any>(null);
   const [fadeTimeout, setFadeTimeout] = useState<any>(null);
   const [isFullscreenChart, setIsFullscreenChart] = useState(false);
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false); 
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+
+  // iPad detection logic
+  const screenData = Dimensions.get('screen');
+  const screenWidth = screenData.width;
+  const screenHeight = screenData.height;
+  const screenMinDimension = Math.min(screenWidth, screenHeight);
+
+  const aspectRatio = Math.max(width, height) / Math.min(width, height);
+  const isPossibleTablet = Platform.OS === 'ios' && (
+    screenMinDimension >= 768 ||
+    (width === 375 && height === 667 && aspectRatio < 2.2)
+  );
+
+  const isTablet = isPossibleTablet;
+  const isLandscape = width > height;
+
+  const getBottomNavHeight = () => {
+    if (isTablet) {
+      const result = isLandscape ? Math.min(65, height * 0.08) : Math.min(70, height * 0.09);
+      return result;
+    }
+    return (280 / 1242) * width;
+  }; 
 
   
   const handleSugarChartPress = () => {
@@ -397,6 +421,254 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
     return segments;
   };
 
+  // Create adaptive styles function
+  const getStyles = () => {
+    return StyleSheet.create({
+      ...baseStyles,
+      bottomNavContainer: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        width: width,
+        height: getBottomNavHeight(),
+        backgroundColor: '#FFFFFF',
+        opacity: 1,
+      },
+      diaryTab: {
+        position: 'absolute',
+        left: (110 / 1242) * width,
+        top: isTablet ? 8 : (2453 - 2429) / (1242 / width),
+        alignItems: 'center',
+      },
+      statisticsTab: {
+        position: 'absolute',
+        left: (426 / 1242) * width,
+        top: isTablet ? 8 : (2453 - 2429) / (1242 / width),
+        alignItems: 'center',
+      },
+      profileTab: {
+        position: 'absolute',
+        left: (742 / 1242) * width,
+        top: isTablet ? 8 : (2453 - 2429) / (1242 / width),
+        alignItems: 'center',
+      },
+      proTab: {
+        position: 'absolute',
+        left: (1018 / 1242) * width,
+        top: isTablet ? 8 : (2453 - 2429) / (1242 / width),
+        alignItems: 'center',
+      },
+      diaryIcon: {
+        width: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
+        height: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
+        opacity: 1,
+      },
+      statisticsIcon: {
+        width: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
+        height: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
+        opacity: 1,
+      },
+      profileIcon: {
+        width: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
+        height: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
+        opacity: 1,
+      },
+      proIcon: {
+        width: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
+        height: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
+        opacity: 1,
+      },
+      diaryText: {
+        width: (140 / 1242) * width,
+        marginTop: isTablet ? 4 : (2537 - 2453 - 68) / (1242 / width),
+        fontFamily: 'System',
+        fontWeight: '400',
+        fontSize: isTablet ? Math.min(14, width * 0.017) : (32 / 1242) * width,
+        textAlign: 'center',
+        color: '#A2A2A2',
+        textTransform: 'capitalize',
+        opacity: 1,
+      },
+      statisticsText: {
+        marginTop: isTablet ? 4 : (2536 - 2453 - 68) / (1242 / width),
+        fontFamily: 'System',
+        fontWeight: '400',
+        fontSize: isTablet ? Math.min(13, width * 0.016) : (30 / 1242) * width,
+        textAlign: 'center',
+        color: '#FF77C0',
+        textTransform: 'capitalize',
+        opacity: 1,
+        minWidth: (180 / 1242) * width,
+      },
+      profileText: {
+        marginTop: isTablet ? 4 : (2537 - 2453 - 68) / (1242 / width),
+        fontFamily: 'System',
+        fontWeight: '400',
+        fontSize: isTablet ? Math.min(14, width * 0.017) : (32 / 1242) * width,
+        textAlign: 'center',
+        color: '#A2A2A2',
+        textTransform: 'capitalize',
+        opacity: 1,
+        minWidth: (140 / 1242) * width,
+      },
+      proText: {
+        marginTop: isTablet ? 4 : (2536 - 2453 - 68) / (1242 / width),
+        fontFamily: 'System',
+        fontWeight: '400',
+        fontSize: isTablet ? Math.min(14, width * 0.017) : (32 / 1242) * width,
+        textAlign: 'center',
+        color: '#A2A2A2',
+        textTransform: 'capitalize',
+        opacity: 1,
+        minWidth: (120 / 1242) * width,
+      },
+      // Адаптивные стили для основного контента
+      statisticsDataRectangle: {
+        position: 'absolute',
+        left: (51 / 1242) * width,
+        top: isTablet ? (620 / 1242) * width : (778 / 1242) * width,
+        width: (1140 / 1242) * width,
+        height: isTablet ? (380 / 1242) * width : (573 / 1242) * width,
+        borderRadius: (75 / 1242) * width,
+        backgroundColor: '#FFFFFF',
+        shadowColor: '#B4ADB1',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.69,
+        shadowRadius: (8.8 / 1242) * width,
+        elevation: 8,
+        opacity: 1,
+        transform: [{ rotate: '0deg' }],
+      },
+      newRectangle: {
+        position: 'absolute',
+        left: (51 / 1242) * width,
+        top: isTablet ? (1030 / 1242) * width : (1399 / 1242) * width,
+        width: (1140 / 1242) * width,
+        height: isTablet ? (220 / 1242) * width : (335 / 1242) * width,
+        borderRadius: (75 / 1242) * width,
+        backgroundColor: '#FFFFFF',
+        shadowColor: '#B4ADB1',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.69,
+        shadowRadius: (8.8 / 1242) * width,
+        elevation: 8,
+        opacity: 1,
+        transform: [{ rotate: '0deg' }],
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+      },
+      additionalRectangle: {
+        position: 'absolute',
+        left: (51 / 1242) * width,
+        top: isTablet ? (1280 / 1242) * width : (1782 / 1242) * width,
+        width: (1140 / 1242) * width,
+        height: isTablet ? (480 / 1242) * width : (579 / 1242) * width,
+        borderRadius: (75 / 1242) * width,
+        backgroundColor: '#FFFFFF',
+        shadowColor: '#B4ADB1',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.69,
+        shadowRadius: (8.8 / 1242) * width,
+        elevation: 8,
+        opacity: 1,
+        transform: [{ rotate: '0deg' }],
+      },
+      calorieIntakeTitle: {
+        position: 'absolute',
+        left: (268 / 1242) * width,
+        top: isTablet ? (570 / 1242) * width : (627 / 1242) * width,
+        width: (706 / 1242) * width,
+        height: (92 / 1242) * width,
+        fontFamily: 'Alatsi',
+        fontWeight: 'bold',
+        fontSize: isTablet ? (50 / 1242) * width : (64 / 1242) * width,
+        lineHeight: isTablet ? (50 * 0.99) / 1242 * width : (64 * 0.99) / 1242 * width,
+        textAlign: 'center',
+        textTransform: 'capitalize',
+        color: '#303539',
+        opacity: isTablet ? 0 : 1, // Скрываем на iPad
+        transform: [{ rotate: '0deg' }],
+      },
+      averageCalorieIntakeTitle: {
+        position: 'absolute',
+        left: (100 / 1242) * width,
+        top: isTablet ? (60 / 1242) * width : (74 / 1242) * width,
+        width: (940 / 1242) * width,
+        height: isTablet ? (50 / 1242) * width : (80 / 1242) * width,
+        fontFamily: 'Alatsi',
+        fontWeight: 'bold',
+        fontSize: isTablet ? (32 / 1242) * width : (48 / 1242) * width,
+        lineHeight: isTablet ? (32 * 1.1) / 1242 * width : (48 * 1.1) / 1242 * width,
+        textAlign: 'center',
+        color: '#303539',
+        opacity: 1,
+        transform: [{ rotate: '0deg' }],
+      },
+      averageCaloriesValue: {
+        position: 'absolute',
+        left: isTablet ? (100 / 1242) * width : (200 / 1242) * width,
+        top: isTablet ? (125 / 1242) * width : (166 / 1242) * width,
+        width: isTablet ? (940 / 1242) * width : (740 / 1242) * width,
+        height: isTablet ? (80 / 1242) * width : (95 / 1242) * width,
+        fontFamily: 'Alatsi',
+        fontWeight: '400',
+        fontSize: isTablet ? (50 / 1242) * width : (60 / 1242) * width,
+        lineHeight: isTablet ? (50 * 1.1) / 1242 * width : (60 * 1.1) / 1242 * width,
+        textAlign: 'center',
+        color: '#303539',
+        opacity: 1,
+        textTransform: 'none',
+        flexShrink: 0,
+        flexWrap: 'nowrap',
+      },
+      sugarChartTitle: {
+        position: 'absolute',
+        left: (100 / 1242) * width,
+        top: isTablet ? (20 / 1242) * width : (30 / 1242) * width,
+        width: (940 / 1242) * width,
+        height: isTablet ? (40 / 1242) * width : (60 / 1242) * width,
+        fontFamily: 'Alatsi',
+        fontWeight: 'bold',
+        fontSize: isTablet ? (32 / 1242) * width : (48 / 1242) * width,
+        lineHeight: isTablet ? (32 * 1.1) / 1242 * width : (48 * 1.1) / 1242 * width,
+        textAlign: 'center',
+        color: '#303539',
+        opacity: 1,
+      },
+      sugarChartContainer: {
+        position: 'absolute',
+        left: (60 / 1242) * width,
+        top: isTablet ? (80 / 1242) * width : (100 / 1242) * width,
+        width: (1020 / 1242) * width,
+        height: isTablet ? (380 / 1242) * width : (420 / 1242) * width,
+      },
+      chartTitle: {
+        marginTop: isTablet ? (20 / 1242) * width : (30 / 1242) * width,
+        fontFamily: 'Alatsi',
+        fontWeight: 'bold',
+        fontSize: isTablet ? (36 / 1242) * width : (48 / 1242) * width,
+        textAlign: 'center',
+        color: '#303539',
+        opacity: 1,
+      },
+      chartContainer: {
+        flex: 1,
+        marginTop: isTablet ? (20 / 1242) * width : (40 / 1242) * width,
+        paddingHorizontal: (40 / 1242) * width,
+        paddingBottom: (30 / 1242) * width,
+      },
+      chartBars: {
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+        justifyContent: 'space-around',
+        height: isTablet ? (240 / 1242) * width : (300 / 1242) * width,
+        marginTop: isTablet ? (40 / 1242) * width : (80 / 1242) * width,
+      },
+    });
+  };
+
+  const styles = getStyles();
   const chartData = getChartData();
   return (
     <View style={styles.container}>
@@ -546,12 +818,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
           {t('averageCalorieIntake', language)}
         </Text>
         <Text
-          style={[
-            styles.averageCaloriesValue,
-            {
-              fontSize: (60 / 1242) * width  
-            }
-          ]}
+          style={styles.averageCaloriesValue}
           numberOfLines={1}
           allowFontScaling={false}
           ellipsizeMode="clip"
@@ -985,7 +1252,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const baseStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5A8D4',
@@ -1017,22 +1284,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: (268 / 1242) * width,
     top: (173 / 1242) * width,
-    width: (706 / 1242) * width,
-    height: (92 / 1242) * width,
-    fontFamily: 'Alatsi',
-    fontWeight: 'bold',
-    fontSize: (64 / 1242) * width,
-    lineHeight: (64 * 0.99) / 1242 * width,
-    textAlign: 'center',
-    textTransform: 'capitalize',
-    color: '#303539',
-    opacity: 1,
-    transform: [{ rotate: '0deg' }],
-  },
-  calorieIntakeTitle: {
-    position: 'absolute',
-    left: (268 / 1242) * width,
-    top: (627 / 1242) * width,
     width: (706 / 1242) * width,
     height: (92 / 1242) * width,
     fontFamily: 'Alatsi',
@@ -1170,82 +1421,6 @@ const styles = StyleSheet.create({
     color: '#303539',
     opacity: 1,
   },
-  statisticsDataRectangle: {
-    position: 'absolute',
-    left: (51 / 1242) * width,
-    top: (778 / 1242) * width,
-    width: (1140 / 1242) * width,
-    height: (573 / 1242) * width,
-    borderRadius: (75 / 1242) * width,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#B4ADB1',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.69,
-    shadowRadius: (8.8 / 1242) * width,
-    elevation: 8,
-    opacity: 1,
-    transform: [{ rotate: '0deg' }],
-  },
-  newRectangle: {
-    position: 'absolute',
-    left: (51 / 1242) * width,
-    top: (1399 / 1242) * width,
-    width: (1140 / 1242) * width,
-    height: (335 / 1242) * width,
-    borderRadius: (75 / 1242) * width,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#B4ADB1',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.69,
-    shadowRadius: (8.8 / 1242) * width,
-    elevation: 8,
-    opacity: 1,
-    transform: [{ rotate: '0deg' }],
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-  },
-  averageCalorieIntakeTitle: {
-    position: 'absolute',
-    left: (100 / 1242) * width,  
-    top: (74 / 1242) * width,
-    width: (940 / 1242) * width,  
-    height: (80 / 1242) * width,  
-    fontFamily: 'Alatsi',
-    fontWeight: 'bold',
-    fontSize: (48 / 1242) * width,  
-    lineHeight: (48 * 1.1) / 1242 * width,
-    textAlign: 'center',
-    color: '#303539',
-    opacity: 1,
-    transform: [{ rotate: '0deg' }],
-  },
-  averageCaloriesValue: {
-    position: 'absolute',
-    left: (200 / 1242) * width,
-    top: (166 / 1242) * width,
-    width: (740 / 1242) * width,
-    height: (95 / 1242) * width,
-    fontFamily: 'Alatsi',
-    fontWeight: '400',
-    fontSize: (60 / 1242) * width,  
-    lineHeight: (60 * 1.1) / 1242 * width,
-    textAlign: 'center',
-    color: '#303539',
-    opacity: 1,
-    textTransform: 'none',
-    flexShrink: 0,
-    flexWrap: 'nowrap',
-  },
-  bottomNavContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    width: width,
-    height: (280 / 1242) * width,
-    backgroundColor: '#FFFFFF',
-    opacity: 1,
-  },
   topBorder: {
     position: 'absolute',
     top: -6,
@@ -1262,116 +1437,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
     paddingTop: 3,
-  },
-  diaryTab: {
-    position: 'absolute',
-    left: (110 / 1242) * width,
-    top: (2453 - 2429) / (1242 / width),
-    alignItems: 'center',
-  },
-  diaryIcon: {
-    width: (68 / 1242) * width,
-    height: (68 / 1242) * width,
-    opacity: 1,
-  },
-  diaryText: {
-    width: (140 / 1242) * width,
-    marginTop: (2537 - 2453 - 68) / (1242 / width),
-    fontFamily: 'System',
-    fontWeight: '400',
-    fontSize: (32 / 1242) * width,
-    textAlign: 'center',
-    color: '#A2A2A2',
-    textTransform: 'capitalize',
-    opacity: 1,
-  },
-  statisticsTab: {
-    position: 'absolute',
-    left: (426 / 1242) * width,
-    top: (2453 - 2429) / (1242 / width),
-    alignItems: 'center',
-  },
-  statisticsIcon: {
-    width: (68 / 1242) * width,
-    height: (68 / 1242) * width,
-    opacity: 1,
-  },
-  statisticsText: {
-    marginTop: (2536 - 2453 - 68) / (1242 / width),
-    fontFamily: 'System',
-    fontWeight: '400',
-    fontSize: (30 / 1242) * width,
-    textAlign: 'center',
-    color: '#FF77C0',
-    textTransform: 'capitalize',
-    opacity: 1,
-    minWidth: (180 / 1242) * width,
-  },
-  profileTab: {
-    position: 'absolute',
-    left: (742 / 1242) * width,
-    top: (2453 - 2429) / (1242 / width),
-    alignItems: 'center',
-  },
-  profileIcon: {
-    width: (68 / 1242) * width,
-    height: (68 / 1242) * width,
-    opacity: 1,
-  },
-  profileText: {
-    marginTop: (2537 - 2453 - 68) / (1242 / width),
-    fontFamily: 'System',
-    fontWeight: '400',
-    fontSize: (32 / 1242) * width,
-    textAlign: 'center',
-    color: '#A2A2A2',
-    textTransform: 'capitalize',
-    opacity: 1,
-    minWidth: (140 / 1242) * width,
-  },
-  proTab: {
-    position: 'absolute',
-    left: (1018 / 1242) * width,
-    top: (2453 - 2429) / (1242 / width),
-    alignItems: 'center',
-  },
-  proIcon: {
-    width: (68 / 1242) * width,
-    height: (68 / 1242) * width,
-    opacity: 1,
-  },
-  proText: {
-    marginTop: (2536 - 2453 - 68) / (1242 / width),
-    fontFamily: 'System',
-    fontWeight: '400',
-    fontSize: (32 / 1242) * width,
-    textAlign: 'center',
-    color: '#A2A2A2',
-    textTransform: 'capitalize',
-    opacity: 1,
-    minWidth: (120 / 1242) * width,
-  },
-  chartTitle: {
-    marginTop: (30 / 1242) * width,
-    fontFamily: 'Alatsi',
-    fontWeight: 'bold',
-    fontSize: (48 / 1242) * width,
-    textAlign: 'center',
-    color: '#303539',
-    opacity: 1,
-  },
-  chartContainer: {
-    flex: 1,
-    marginTop: (40 / 1242) * width,
-    paddingHorizontal: (40 / 1242) * width,
-    paddingBottom: (30 / 1242) * width,
-  },
-  chartBars: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-around',
-    height: (300 / 1242) * width,
-    marginTop: (80 / 1242) * width,
   },
   barContainer: {
     alignItems: 'center',
@@ -1444,43 +1509,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     flexShrink: 0,
     flexWrap: 'nowrap',
-  },
-  additionalRectangle: {
-    position: 'absolute',
-    left: (51 / 1242) * width,
-    top: (1782 / 1242) * width,
-    width: (1140 / 1242) * width,
-    height: (579 / 1242) * width,
-    borderRadius: (75 / 1242) * width,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#B4ADB1',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.69,
-    shadowRadius: (8.8 / 1242) * width,
-    elevation: 8,
-    opacity: 1,
-    transform: [{ rotate: '0deg' }],
-  },
-  sugarChartTitle: {
-    position: 'absolute',
-    left: (100 / 1242) * width,
-    top: (30 / 1242) * width,
-    width: (940 / 1242) * width,
-    height: (60 / 1242) * width,
-    fontFamily: 'Alatsi',
-    fontWeight: 'bold',
-    fontSize: (48 / 1242) * width,
-    lineHeight: (48 * 1.1) / 1242 * width,
-    textAlign: 'center',
-    color: '#303539',
-    opacity: 1,
-  },
-  sugarChartContainer: {
-    position: 'absolute',
-    left: (60 / 1242) * width,
-    top: (100 / 1242) * width,
-    width: (1020 / 1242) * width,
-    height: (420 / 1242) * width,
   },
   sugarChart: {
     flex: 1,
