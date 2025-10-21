@@ -240,17 +240,17 @@ class NativePaymentService {
         productId: this.PRODUCT_IDS.monthly,
         title: 'Sugar Insider Monthly Premium',
         description: 'Monthly subscription to Sugar Insider Premium features',
-        localizedPrice: '$4.99',
+        localizedPrice: '$3.99',
         currency: 'USD',
-        price: '4.99',
+        price: '3.99',
       },
       {
         productId: this.PRODUCT_IDS.yearly,
         title: 'Sugar Insider Yearly Premium',
         description: 'Yearly subscription to Sugar Insider Premium features',
-        localizedPrice: '$49.99',
+        localizedPrice: '$39.99',
         currency: 'USD',
-        price: '49.99',
+        price: '39.99',
       },
     ];
   }

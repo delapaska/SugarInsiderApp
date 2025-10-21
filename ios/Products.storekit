@@ -86,7 +86,7 @@
           "codeOffers" : [
 
           ],
-          "displayPrice" : "4.99",
+          "displayPrice" : "3.99",
           "familyShareable" : false,
           "groupNumber" : 1,
           "identifier" : "com.sugarinsiderapp.product1",
@@ -99,7 +99,7 @@
               "locale" : "en_US"
             }
           ],
-          "price" : 4.99,
+          "price" : 3.99,
           "productID" : "com.sugarinsiderapp.product1",
           "recurringSubscriptionPeriod" : "P1M",
           "referenceName" : "Monthly Premium",
@@ -116,7 +116,7 @@
           "codeOffers" : [
 
           ],
-          "displayPrice" : "49.99",
+          "displayPrice" : "39.99",
           "familyShareable" : false,
           "groupNumber" : 1,
           "identifier" : "com.sugarinsiderapp.product2",
@@ -129,7 +129,7 @@
               "locale" : "en_US"
             }
           ],
-          "price" : 49.99,
+          "price" : 39.99,
           "productID" : "com.sugarinsiderapp.product2",
           "recurringSubscriptionPeriod" : "P1Y",
           "referenceName" : "Yearly Premium",

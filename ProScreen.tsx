@@ -67,7 +67,7 @@ const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onP
     if (paymentService.shouldUseMockPayments()) {
       Alert.alert(
         'Purchase Confirmation',
-        'Purchase 12 Months Pro subscription for $49.99?',
+        'Purchase 12 Months Pro subscription for $39.99?',
         [
           {
             text: 'Cancel',
@@ -102,7 +102,7 @@ const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onP
     if (paymentService.shouldUseMockPayments()) {
       Alert.alert(
         'Purchase Confirmation',
-        'Purchase 1 Month Pro subscription for $4.99?',
+        'Purchase 1 Month Pro subscription for $3.99?',
         [
           {
             text: 'Cancel',
@@ -146,12 +146,12 @@ const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onP
 
   const getYearlyPrice = () => {
     const yearlyProduct = products.find(p => p.productId.includes('yearly'));
-    return yearlyProduct ? yearlyProduct.price : '$49.99';
+    return yearlyProduct ? yearlyProduct.price : '$39.99';
   };
 
   const getMonthlyPrice = () => {
     const monthlyProduct = products.find(p => p.productId.includes('monthly'));
-    return monthlyProduct ? monthlyProduct.price : '$4.99';
+    return monthlyProduct ? monthlyProduct.price : '$3.99';
   };
 
   // Create adaptive styles function
