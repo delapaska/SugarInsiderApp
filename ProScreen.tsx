@@ -10,11 +10,32 @@ import {
   Alert,
   ActivityIndicator,
   Platform,
+  Linking,
+  ScrollView,
 } from 'react-native';
 import { t, Language } from './translations';
 import { nativePaymentService as paymentService, PaymentProduct } from './NativePaymentService';
 
 const { width, height } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = Dimensions.get('screen');
+const screenMinDimension = Math.min(screenWidth, screenHeight);
+
+const aspectRatio = Math.max(width, height) / Math.min(width, height);
+const isPossibleTablet = Platform.OS === 'ios' && (
+  screenMinDimension >= 768 ||
+  (width === 375 && height === 667 && aspectRatio < 2.2)
+);
+
+const isTablet = isPossibleTablet;
+
+console.log('ProScreen Device info:', {
+  window: { width, height },
+  screen: { width: screenWidth, height: screenHeight },
+  aspectRatio,
+  isPossibleTablet,
+  isTablet,
+  screenMinDimension
+});
 
 interface ProScreenProps {
   onBack: () => void;
@@ -27,19 +48,6 @@ const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onP
   const [products, setProducts] = useState<PaymentProduct[]>([]);
   const [initialized, setInitialized] = useState(false);
 
-  // iPad detection logic
-  const screenData = Dimensions.get('screen');
-  const screenWidth = screenData.width;
-  const screenHeight = screenData.height;
-  const screenMinDimension = Math.min(screenWidth, screenHeight);
-
-  const aspectRatio = Math.max(width, height) / Math.min(width, height);
-  const isPossibleTablet = Platform.OS === 'ios' && (
-    screenMinDimension >= 768 ||
-    (width === 375 && height === 667 && aspectRatio < 2.2)
-  );
-
-  const isTablet = isPossibleTablet;
   const isLandscape = width > height;
 
   useEffect(() => {
@@ -75,11 +83,22 @@ const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onP
           },
           {
             text: 'Purchase',
-            onPress: () => {
-              if (onPurchaseSuccess) onPurchaseSuccess();
-              Alert.alert('Success!', 'Pro subscription activated for 12 months!', [
-                { text: 'OK', onPress: onBack }
-              ]);
+            onPress: async () => {
+              try {
+                setLoading(true);
+                const success = await paymentService.purchaseYearlySubscription();
+                if (success) {
+                  if (onPurchaseSuccess) onPurchaseSuccess();
+                  Alert.alert('Success!', 'Pro subscription activated for 12 months!', [
+                    { text: 'OK', onPress: onBack }
+                  ]);
+                }
+              } catch (error) {
+                console.error('Purchase failed:', error);
+                Alert.alert('Purchase Failed', 'Please try again later.');
+              } finally {
+                setLoading(false);
+              }
             },
           },
         ]
@@ -87,8 +106,10 @@ const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onP
     } else {
       try {
         setLoading(true);
-        await paymentService.purchaseYearlySubscription();
-        if (onPurchaseSuccess) onPurchaseSuccess();
+        const success = await paymentService.purchaseYearlySubscription();
+        if (success && onPurchaseSuccess) {
+          onPurchaseSuccess();
+        }
       } catch (error) {
         console.error('Purchase failed:', error);
         Alert.alert('Purchase Failed', 'Please try again later.');
@@ -110,11 +131,22 @@ const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onP
           },
           {
             text: 'Purchase',
-            onPress: () => {
-              if (onPurchaseSuccess) onPurchaseSuccess();
-              Alert.alert('Success!', 'Pro subscription activated for 1 month!', [
-                { text: 'OK', onPress: onBack }
-              ]);
+            onPress: async () => {
+              try {
+                setLoading(true);
+                const success = await paymentService.purchaseMonthlySubscription();
+                if (success) {
+                  if (onPurchaseSuccess) onPurchaseSuccess();
+                  Alert.alert('Success!', 'Pro subscription activated for 1 month!', [
+                    { text: 'OK', onPress: onBack }
+                  ]);
+                }
+              } catch (error) {
+                console.error('Purchase failed:', error);
+                Alert.alert('Purchase Failed', 'Please try again later.');
+              } finally {
+                setLoading(false);
+              }
             },
           },
         ]
@@ -122,8 +154,10 @@ const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onP
     } else {
       try {
         setLoading(true);
-        await paymentService.purchaseMonthlySubscription();
-        if (onPurchaseSuccess) onPurchaseSuccess();
+        const success = await paymentService.purchaseMonthlySubscription();
+        if (success && onPurchaseSuccess) {
+          onPurchaseSuccess();
+        }
       } catch (error) {
         console.error('Purchase failed:', error);
         Alert.alert('Purchase Failed', 'Please try again later.');
@@ -141,6 +175,51 @@ const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onP
       console.error('Restore failed:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const openTerms = async () => {
+    try {
+      const url = 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert('Error', 'Unable to open Terms of Service. Please check your internet connection.');
+      }
+    } catch (error) {
+      console.error('Failed to open Terms:', error);
+      Alert.alert('Error', 'Unable to open Terms of Service.');
+    }
+  };
+
+  const openPrivacyPolicy = async () => {
+    try {
+      const url = 'https://www.freeprivacypolicy.com/live/64bf6ba9-a758-4d09-a2cf-a245d9ac1f0c';
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert('Error', 'Unable to open Privacy Policy. Please check your internet connection.');
+      }
+    } catch (error) {
+      console.error('Failed to open Privacy Policy:', error);
+      Alert.alert('Error', 'Unable to open Privacy Policy.');
+    }
+  };
+
+  const openSupport = async () => {
+    try {
+      const url = 'https://www.freeprivacypolicy.com/live/64bf6ba9-a758-4d09-a2cf-a245d9ac1f0c';
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert('Error', 'Unable to open Support page. Please check your internet connection.');
+      }
+    } catch (error) {
+      console.error('Failed to open Support:', error);
+      Alert.alert('Error', 'Unable to open Support page.');
     }
   };
 
@@ -313,7 +392,7 @@ const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onP
   const styles = getStyles();
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
       <StatusBar barStyle="dark-content" backgroundColor="#F5A8D4" />
 
       <Image
@@ -366,6 +445,7 @@ const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onP
         disabled={loading}
       >
         <Text style={styles.monthsText}>{t('12_months', language)}</Text>
+        <Text style={styles.subscriptionDetails}>Unlimited tracking • Personal charts</Text>
         <Text style={styles.priceText}>{getYearlyPrice()}</Text>
         {loading && (
           <ActivityIndicator
@@ -382,6 +462,7 @@ const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onP
         disabled={loading}
       >
         <Text style={styles.oneMonthText}>{t('1_month', language)}</Text>
+        <Text style={styles.subscriptionDetails}>Unlimited tracking • Personal charts</Text>
         <Text style={styles.secondPriceText}>{getMonthlyPrice()}</Text>
         {loading && (
           <ActivityIndicator
@@ -391,6 +472,34 @@ const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onP
           />
         )}
       </TouchableOpacity>
+
+      {/* Subscription Terms */}
+      <View style={styles.termsContainer}>
+        <Text style={styles.termsText}>
+          • Subscriptions automatically renew unless auto-renewal is turned off at least 24 hours before the end of the current period{'\n'}
+          • You can cancel your subscription anytime in your device's Settings{'\n'}
+          • Payment will be charged to your Apple ID account at the confirmation of purchase{'\n'}
+          • Your account will be charged for renewal within 24 hours prior to the end of the current period
+        </Text>
+      </View>
+
+      {/* Legal Links */}
+      <View style={styles.legalLinksContainer}>
+        <TouchableOpacity onPress={openTerms}>
+          <Text style={styles.legalLinkText}>Terms of Service</Text>
+        </TouchableOpacity>
+        <Text style={styles.linkSeparator}>•</Text>
+        <TouchableOpacity onPress={openPrivacyPolicy}>
+          <Text style={styles.legalLinkText}>Privacy Policy</Text>
+        </TouchableOpacity>
+        <Text style={styles.linkSeparator}>•</Text>
+        <TouchableOpacity onPress={openSupport}>
+          <Text style={styles.legalLinkText}>Support</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Spacer for scroll */}
+      <View style={styles.bottomSpacer} />
 
       <TouchableOpacity style={styles.backButton} onPress={onBack}>
         <Image
@@ -408,7 +517,7 @@ const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onP
         <Text style={styles.restoreText}>Restore Purchases</Text>
       </TouchableOpacity>
 
-    </View>
+    </ScrollView>
   );
 };
 
@@ -416,6 +525,10 @@ const baseStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5A8D4',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: isTablet ? (150 / 1242) * width : (100 / 1242) * width,
   },
   backgroundImage: {
     position: 'absolute',
@@ -511,6 +624,48 @@ const baseStyles = StyleSheet.create({
     fontSize: (24 / 1242) * width,
     color: '#303539',
     textDecorationLine: 'underline',
+  },
+  subscriptionDetails: {
+    fontFamily: 'Alatsi',
+    fontSize: isTablet ? (20 / 1242) * width : (24 / 1242) * width,
+    color: '#666',
+    marginTop: (5 / 1242) * width,
+  },
+  termsContainer: {
+    marginTop: isTablet ? (1950 / 1242) * width : (2300 / 1242) * width,
+    marginHorizontal: (40 / 1242) * width,
+    padding: (20 / 1242) * width,
+    zIndex: 10,
+  },
+  termsText: {
+    fontFamily: 'Alatsi',
+    fontSize: isTablet ? (16 / 1242) * width : (18 / 1242) * width,
+    lineHeight: isTablet ? (20 / 1242) * width : (22 / 1242) * width,
+    color: '#303539',
+    textAlign: 'left',
+  },
+  legalLinksContainer: {
+    marginTop: (20 / 1242) * width,
+    marginHorizontal: (40 / 1242) * width,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  legalLinkText: {
+    fontFamily: 'Alatsi',
+    fontSize: isTablet ? (16 / 1242) * width : (18 / 1242) * width,
+    color: '#303539',
+    textDecorationLine: 'underline',
+  },
+  linkSeparator: {
+    fontFamily: 'Alatsi',
+    fontSize: isTablet ? (16 / 1242) * width : (18 / 1242) * width,
+    color: '#303539',
+    marginHorizontal: (10 / 1242) * width,
+  },
+  bottomSpacer: {
+    height: (50 / 1242) * width,
   },
 });
 

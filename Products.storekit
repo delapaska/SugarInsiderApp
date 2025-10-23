@@ -73,7 +73,7 @@
       "introductoryOffer" : null,
       "localizations" : [
         {
-          "description" : "Monthly subscription to Sugar Insider Premium features",
+          "description" : "Monthly subscription to Sugar Insider Premium features. Get unlimited sugar tracking and personal charts. Auto-renewable subscription that can be cancelled anytime in Settings.",
           "displayName" : "Sugar Insider Monthly Premium",
           "locale" : "en_US"
         }
@@ -98,7 +98,7 @@
       "introductoryOffer" : null,
       "localizations" : [
         {
-          "description" : "Yearly subscription to Sugar Insider Premium features",
+          "description" : "Yearly subscription to Sugar Insider Premium features. Get unlimited sugar tracking and personal charts. Auto-renewable subscription that can be cancelled anytime in Settings. Best value!",
           "displayName" : "Sugar Insider Yearly Premium",
           "locale" : "en_US"
         }

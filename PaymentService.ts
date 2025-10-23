@@ -135,10 +135,27 @@ class PaymentService {
 
   private handlePurchaseUpdate(purchase: any): void {
     console.log('Purchase updated:', purchase);
+    console.log('Purchase state details:', {
+      purchaseStateAndroid: purchase.purchaseStateAndroid,
+      transactionState: purchase.transactionState,
+      platform: Platform.OS
+    });
 
-
-    if (purchase.purchaseStateAndroid === 1 || Platform.OS === 'ios') {
-      this.onPurchaseSuccess(purchase);
+    // Validate purchase state properly for both platforms
+    if (Platform.OS === 'android') {
+      // For Android: purchaseStateAndroid === 1 means purchased
+      if (purchase.purchaseStateAndroid === 1) {
+        this.onPurchaseSuccess(purchase);
+      } else {
+        console.log('Android purchase not in purchased state:', purchase.purchaseStateAndroid);
+      }
+    } else if (Platform.OS === 'ios') {
+      // For iOS: transactionState === 'purchased' means completed
+      if (purchase.transactionState === 'purchased') {
+        this.onPurchaseSuccess(purchase);
+      } else {
+        console.log('iOS purchase not in purchased state:', purchase.transactionState);
+      }
     }
   }
 
@@ -160,10 +177,29 @@ class PaymentService {
     console.log('Purchase successful:', purchase.productId);
 
     try {
-      // Finalize the subscription purchase
+      // Validate that this is a legitimate purchase
+      if (!purchase.transactionReceipt && !purchase.purchaseToken) {
+        console.error('Invalid purchase: missing receipt/token');
+        Alert.alert('Purchase Error', 'Invalid purchase receipt. Please try again.');
+        return;
+      }
+
+      // Validate product ID
+      const validProductIds = Object.values(this.PRODUCT_IDS);
+      if (!validProductIds.includes(purchase.productId)) {
+        console.error('Invalid purchase: unknown product ID', purchase.productId);
+        Alert.alert('Purchase Error', 'Invalid product. Please try again.');
+        return;
+      }
+
+      // For production apps, you should validate the receipt with your server
+      // For now, we'll do basic client-side validation
+
+      // Finalize the subscription purchase only after validation
       await RNIap.finishTransaction({purchase, isConsumable: false});
       console.log('Subscription finalized successfully');
 
+      // Only update premium status after successful validation and finalization
       this.updatePremiumStatus(purchase.productId);
 
       Alert.alert(
@@ -173,6 +209,11 @@ class PaymentService {
       );
     } catch (error) {
       console.error('Failed to finalize subscription:', error);
+      Alert.alert(
+        'Purchase Error',
+        'Failed to activate subscription. Please contact support if the issue persists.',
+        [{ text: 'OK' }]
+      );
     }
   }
 
@@ -242,7 +283,7 @@ class PaymentService {
       {
         productId: this.PRODUCT_IDS.monthly,
         title: 'Sugar Insider Monthly Premium',
-        description: 'Monthly subscription to Sugar Insider Premium features',
+        description: 'Monthly subscription to Sugar Insider Premium features. Get unlimited sugar tracking and personal charts. Auto-renewable subscription that can be cancelled anytime in Settings.',
         localizedPrice: '$3.99',
         currency: 'USD',
         price: '3.99',
@@ -250,7 +291,7 @@ class PaymentService {
       {
         productId: this.PRODUCT_IDS.yearly,
         title: 'Sugar Insider Yearly Premium',
-        description: 'Yearly subscription to Sugar Insider Premium features',
+        description: 'Yearly subscription to Sugar Insider Premium features. Get unlimited sugar tracking and personal charts. Auto-renewable subscription that can be cancelled anytime in Settings. Best value!',
         localizedPrice: '$39.99',
         currency: 'USD',
         price: '39.99',
