@@ -14,7 +14,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { t, Language } from './translations';
-import { nativePaymentService as paymentService, PaymentProduct } from './NativePaymentService';
+import { nativePaymentService, nativePaymentService as paymentService, PaymentProduct } from './NativePaymentService';
 
 const { width, height } = Dimensions.get('window');
 const { width: screenWidth, height: screenHeight } = Dimensions.get('screen');
@@ -41,18 +41,43 @@ interface ProScreenProps {
   onBack: () => void;
   language?: Language;
   onPurchaseSuccess?: () => void;
+  showSuccessAlert?: (productId: string) => void;
 }
 
-const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onPurchaseSuccess }) => {
+const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onPurchaseSuccess, showSuccessAlert }) => {
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState<PaymentProduct[]>([]);
-  const [initialized, setInitialized] = useState(false);
-
-  const isLandscape = width > height;
 
   useEffect(() => {
     initializePayments();
-  }, []);
+
+    // Set up payment service callback for immediate premium activation
+    const handlePremiumActivation = (productId: string) => {
+      console.log('🔍 ProScreen: handlePremiumActivation called with productId:', productId);
+      console.log('🔍 ProScreen: onPurchaseSuccess available:', !!onPurchaseSuccess);
+      console.log('🔍 ProScreen: showSuccessAlert available:', !!showSuccessAlert);
+
+      if (onPurchaseSuccess) {
+        console.log('🔍 ProScreen: Calling onPurchaseSuccess...');
+        onPurchaseSuccess();
+      }
+
+      if (showSuccessAlert) {
+        console.log('🔍 ProScreen: Calling showSuccessAlert...');
+        showSuccessAlert(productId);
+      }
+    };
+
+    console.log('🔍 ProScreen: Setting up callbacks...');
+    paymentService.onPremiumActivated = handlePremiumActivation;
+    nativePaymentService.onPremiumActivated = handlePremiumActivation;
+    console.log('🔍 ProScreen: Callbacks set up complete');
+
+    return () => {
+      paymentService.onPremiumActivated = undefined;
+      nativePaymentService.onPremiumActivated = undefined;
+    };
+  }, [onPurchaseSuccess, showSuccessAlert]);
 
   const initializePayments = async () => {
     try {
@@ -60,12 +85,9 @@ const ProScreen: React.FC<ProScreenProps> = ({ onBack, language = 'English', onP
       await paymentService.initialize();
 
       setProducts(paymentService.getProducts());
-
-      setInitialized(true);
     } catch (error) {
       console.error('Failed to initialize payments:', error);
       setProducts(paymentService.getProducts());
-      setInitialized(true);
     } finally {
       setLoading(false);
     }

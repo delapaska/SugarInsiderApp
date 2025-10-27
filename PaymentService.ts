@@ -14,6 +14,7 @@ class PaymentService {
   private products: any[] = [];
   private purchaseUpdateSubscription: any = null;
   private purchaseErrorSubscription: any = null;
+  public onPremiumActivated?: (productId: string) => void;
 
   private readonly PRODUCT_IDS = {
     monthly: 'com.sugarinsiderapp.product1',
@@ -202,11 +203,7 @@ class PaymentService {
       // Only update premium status after successful validation and finalization
       this.updatePremiumStatus(purchase.productId);
 
-      Alert.alert(
-        'Purchase Successful!',
-        'Your premium subscription has been activated.',
-        [{ text: 'OK' }]
-      );
+      // Success alert will be handled by the main app through callback
     } catch (error) {
       console.error('Failed to finalize subscription:', error);
       Alert.alert(
@@ -220,6 +217,10 @@ class PaymentService {
   private updatePremiumStatus(productId: string): void {
     console.log('Updating premium status for product:', productId);
 
+    // Notify app of premium activation
+    if (this.onPremiumActivated) {
+      this.onPremiumActivated(productId);
+    }
   }
 
   async restorePurchases(): Promise<void> {

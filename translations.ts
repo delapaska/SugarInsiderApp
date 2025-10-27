@@ -92,15 +92,6 @@ export const translations = {
     'OK': 'OK',
 
     
-    'Personal Data': 'Personal Data',
-    'Date of birth': 'Date of birth',
-    'Update weight data': 'Update weight data',
-    'Update height data': 'Update height data',
-    'KG': 'KG',
-    'LBS': 'LBS',
-    'CM': 'CM',
-
-    
     'sugar': 'Sugar',
     'protein': 'Protein',
     'proteins': 'Proteins',
@@ -133,7 +124,14 @@ export const translations = {
     'reminder_message': 'Don\'t forget to record the sweets you ate today! 🍰',
     'later': 'Later',
     'record': 'Record',
-    'exportPDF': 'Export PDF'
+    'exportPDF': 'Export PDF',
+    'purchase_success_title': 'Congratulations! 🎉',
+    'purchase_success_message': 'New charts and additional product information are now available to you!',
+    'go_to_charts': 'Go to Charts',
+    'ok': 'OK',
+    'premium': 'Premium',
+    'already_have_premium_title': 'Premium Active',
+    'already_have_premium_message': 'You already have premium access to all features!'
   },
 
   French: {
@@ -225,15 +223,6 @@ export const translations = {
     'OK': 'OK',
 
     
-    'Personal Data': 'Données personnelles',
-    'Date of birth': 'Date de naissance',
-    'Update weight data': 'Mettre à jour les données de poids',
-    'Update height data': 'Mettre à jour les données de taille',
-    'KG': 'KG',
-    'LBS': 'LBS',
-    'CM': 'CM',
-
-    
     'sugar': 'Sucre',
     'protein': 'Protéine',
     'proteins': 'Protéines',
@@ -266,7 +255,14 @@ export const translations = {
     'reminder_message': 'N\'oubliez pas d\'enregistrer les sucreries que vous avez mangées aujourd\'hui ! 🍰',
     'later': 'Plus tard',
     'record': 'Enregistrer',
-    'exportPDF': 'Exporter PDF'
+    'exportPDF': 'Exporter PDF',
+    'purchase_success_title': 'Félicitations! 🎉',
+    'purchase_success_message': 'De nouveaux graphiques et des informations supplémentaires sur les produits sont maintenant disponibles!',
+    'go_to_charts': 'Aller aux graphiques',
+    'ok': 'OK',
+    'premium': 'Premium',
+    'already_have_premium_title': 'Premium Actif',
+    'already_have_premium_message': 'Vous avez déjà un accès premium à toutes les fonctionnalités!'
   },
 
   Russian: {
@@ -358,15 +354,6 @@ export const translations = {
     'OK': 'OK',
 
     
-    'Personal Data': 'Личные данные',
-    'Date of birth': 'Дата рождения',
-    'Update weight data': 'Обновить данные о весе',
-    'Update height data': 'Обновить данные о росте',
-    'KG': 'КГ',
-    'LBS': 'ФУНТЫ',
-    'CM': 'СМ',
-
-    
     'sugar': 'Сахар',
     'protein': 'Белок',
     'proteins': 'Белки',
@@ -399,7 +386,14 @@ export const translations = {
     'reminder_message': 'Не забудьте записать сладости, которые съели сегодня! 🍰',
     'later': 'Позже',
     'record': 'Записать',
-    'exportPDF': 'Экспорт PDF'
+    'exportPDF': 'Экспорт PDF',
+    'purchase_success_title': 'Поздравляем! 🎉',
+    'purchase_success_message': 'Вам доступны новые графики и дополнительная информация о продуктах!',
+    'go_to_charts': 'Перейти к графикам',
+    'ok': 'OK',
+    'premium': 'Премиум',
+    'already_have_premium_title': 'Премиум активен',
+    'already_have_premium_message': 'У вас уже есть премиум доступ ко всем функциям!'
   }
 };
 

@@ -29,6 +29,7 @@ class NativePaymentService {
   private initialized = false;
   private purchaseUpdateSubscription: any = null;
   private purchaseErrorSubscription: any = null;
+  public onPremiumActivated?: (productId: string) => void;
 
   private readonly PRODUCT_IDS = {
     monthly: 'com.sugarinsiderapp.product1',
@@ -167,6 +168,19 @@ class NativePaymentService {
         // StoreKit Configuration will handle the product lookup
         const result = await NativeStoreKit.purchaseProduct(productId);
         console.log('Purchase completed:', result);
+
+        // Notify app of premium activation
+        console.log('🔍 JS: Checking onPremiumActivated callback:', !!this.onPremiumActivated);
+        console.log('🔍 JS: Callback type:', typeof this.onPremiumActivated);
+        console.log('🔍 JS: About to call onPremiumActivated with productId:', productId);
+        if (this.onPremiumActivated) {
+          console.log('🔍 JS: Calling onPremiumActivated callback...');
+          this.onPremiumActivated(productId);
+          console.log('🔍 JS: onPremiumActivated callback completed');
+        } else {
+          console.log('🔍 JS: onPremiumActivated callback is not set!');
+        }
+
         return true;
       }
     } catch (error) {
@@ -204,9 +218,11 @@ class NativePaymentService {
               };
 
               if (this.validatePurchase(mockPurchase)) {
-                Alert.alert('Success!', `Pro subscription activated for ${duration}!`, [
-                  { text: 'OK', onPress: () => resolve(true) }
-                ]);
+                // Notify app of premium activation
+                if (this.onPremiumActivated) {
+                  this.onPremiumActivated(product.productId);
+                }
+                resolve(true);
               } else {
                 Alert.alert('Error!', 'Purchase validation failed. Please try again.', [
                   { text: 'OK', onPress: () => resolve(false) }

@@ -10,6 +10,7 @@ import {
   ScrollView,
   TextInput,
   Platform,
+  Alert,
 } from 'react-native';
 import ProfileScreen from './ProfileScreen';
 import PersonalDataScreen from './PersonalDataScreen';
@@ -352,12 +353,37 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
   };
 
   const handleProPress = () => {
-    setIsProVisible(true);
-    setIsProfileVisible(false);
-    setIsPersonalDataVisible(false);
-    setIsSettingsVisible(false);
-    setIsProductDetailVisible(false);
-    setIsStatisticsVisible(false);
+    if (isPremium) {
+      // Show alert that user already has premium, then go to statistics
+      Alert.alert(
+        t('already_have_premium_title', language),
+        t('already_have_premium_message', language),
+        [
+          {
+            text: t('go_to_charts', language),
+            onPress: () => {
+              setIsStatisticsVisible(true);
+              setIsProfileVisible(false);
+              setIsPersonalDataVisible(false);
+              setIsSettingsVisible(false);
+              setIsProductDetailVisible(false);
+            }
+          },
+          {
+            text: t('ok', language),
+            style: 'default'
+          }
+        ]
+      );
+    } else {
+      // Free users see the paywall
+      setIsProVisible(true);
+      setIsProfileVisible(false);
+      setIsPersonalDataVisible(false);
+      setIsSettingsVisible(false);
+      setIsProductDetailVisible(false);
+      setIsStatisticsVisible(false);
+    }
   };
 
   const handleProBack = () => {
@@ -378,7 +404,37 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
 
   const handlePurchaseSuccess = () => {
     setIsPremium(true);
+    console.log('Premium activated successfully!');
   };
+
+  const handleNavigateToStatistics = () => {
+    setIsProVisible(false);
+    setIsStatisticsVisible(true);
+  };
+
+  const showPurchaseSuccessAlert = (productId: string) => {
+    console.log('🔍 DiaryScreen: showPurchaseSuccessAlert called with productId:', productId);
+    console.log('🔍 DiaryScreen: Current language:', language);
+    console.log('🔍 DiaryScreen: Title translation:', t('purchase_success_title', language));
+    console.log('🔍 DiaryScreen: Message translation:', t('purchase_success_message', language));
+    console.log('🔍 DiaryScreen: Button translation:', t('go_to_charts', language));
+
+    Alert.alert(
+      t('purchase_success_title', language),
+      t('purchase_success_message', language),
+      [
+        {
+          text: t('go_to_charts', language),
+          onPress: () => {
+            console.log('🔍 DiaryScreen: Go to charts button pressed');
+            handleNavigateToStatistics();
+          }
+        }
+      ]
+    );
+    console.log('🔍 DiaryScreen: Alert.alert called successfully');
+  };
+
 
   const handleProductPress = (product: any) => {
     setSelectedProduct(product);
@@ -1023,6 +1079,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
         </TouchableOpacity>
       )}
 
+
       {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProVisible && !isProductDetailVisible && (
         <View style={styles.carbohydratesRectangle} />
       )}
@@ -1170,7 +1227,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
               style={styles.proIcon}
               resizeMode="contain"
             />
-            <Text style={styles.proText}>{t('pro', language)}</Text>
+            <Text style={styles.proText}>{isPremium ? t('premium', language) : t('pro', language)}</Text>
           </TouchableOpacity>
 
 
@@ -1375,6 +1432,8 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
           onBack={handleProBack}
           language={language}
           onPurchaseSuccess={handlePurchaseSuccess}
+          onNavigateToStatistics={handleNavigateToStatistics}
+          showSuccessAlert={showPurchaseSuccessAlert}
         />
       )}
 
