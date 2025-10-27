@@ -18,6 +18,7 @@ import SettingsScreen from './SettingsScreen';
 import ProScreen from './ProScreen';
 import ProductDetailScreen from './ProductDetailScreen';
 import StatisticsScreen from './StatisticsScreen';
+import PremiumWelcomeScreen from './PremiumWelcomeScreen';
 import { UnitSystem } from './unitConversion';
 import { t, Language } from './translations';
 import NotificationService from './NotificationService';
@@ -62,6 +63,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
   const [isProVisible, setIsProVisible] = useState(false);
   const [isProductDetailVisible, setIsProductDetailVisible] = useState(false);
   const [isStatisticsVisible, setIsStatisticsVisible] = useState(false);
+  const [isPremiumWelcomeVisible, setIsPremiumWelcomeVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [editingProductIndex, setEditingProductIndex] = useState<number | null>(null);
   const [currentWeight, setCurrentWeight] = useState('60kg');
@@ -414,25 +416,17 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
 
   const showPurchaseSuccessAlert = (productId: string) => {
     console.log('🔍 DiaryScreen: showPurchaseSuccessAlert called with productId:', productId);
-    console.log('🔍 DiaryScreen: Current language:', language);
-    console.log('🔍 DiaryScreen: Title translation:', t('purchase_success_title', language));
-    console.log('🔍 DiaryScreen: Message translation:', t('purchase_success_message', language));
-    console.log('🔍 DiaryScreen: Button translation:', t('go_to_charts', language));
+    console.log('🔍 DiaryScreen: Showing PremiumWelcomeScreen');
+    setIsPremiumWelcomeVisible(true);
+  };
 
-    Alert.alert(
-      t('purchase_success_title', language),
-      t('purchase_success_message', language),
-      [
-        {
-          text: t('go_to_charts', language),
-          onPress: () => {
-            console.log('🔍 DiaryScreen: Go to charts button pressed');
-            handleNavigateToStatistics();
-          }
-        }
-      ]
-    );
-    console.log('🔍 DiaryScreen: Alert.alert called successfully');
+  const handlePremiumWelcomeClose = () => {
+    setIsPremiumWelcomeVisible(false);
+  };
+
+  const handlePremiumWelcomeGoToCharts = () => {
+    setIsPremiumWelcomeVisible(false);
+    handleNavigateToStatistics();
   };
 
 
@@ -1189,6 +1183,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
         </ScrollView>
       )}
 
+
       {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProVisible && !isProductDetailVisible && !isStatisticsVisible && (
         <View style={styles.bottomNavContainer}>
         <View style={styles.topBorder} />
@@ -1369,6 +1364,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
           birthDate={currentDate}
           unitSystem={unitSystem}
           language={language}
+          isPremium={isPremium}
         />
       )}
 
@@ -1450,6 +1446,14 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
           selectedDate={selectedDate}
           isEditing={editingProductIndex !== null}
           currentAmount={editingProductIndex !== null ? savedNutritionData[editingProductIndex]?.selectedAmount : undefined}
+        />
+      )}
+
+      {isPremiumWelcomeVisible && (
+        <PremiumWelcomeScreen
+          onClose={handlePremiumWelcomeClose}
+          onGoToCharts={handlePremiumWelcomeGoToCharts}
+          language={language}
         />
       )}
 

@@ -106,9 +106,9 @@ export const translations = {
 
     
     'pro_main_text': 'SUGAR INSIDER will help you\nmonitor your sugar intake!',
-    'unlimited_accounting': '• unlimited accounting',
-    'personal_charts': '• personal charts',
-    'recommendations': '• recommendations',
+    'unlimited_accounting': 'Advanced charts and analytics',
+    'personal_charts': 'Export data to PDF',
+    'recommendations': 'Detailed product information',
     'popular': 'Popular',
     '12_months': '12 Months',
     '1_month': '1 Month',
@@ -131,7 +131,9 @@ export const translations = {
     'ok': 'OK',
     'premium': 'Premium',
     'already_have_premium_title': 'Premium Active',
-    'already_have_premium_message': 'You already have premium access to all features!'
+    'already_have_premium_message': 'You already have premium access to all features!',
+    'you_are_now_pro': 'You are now PRO!',
+    'close': 'Close'
   },
 
   French: {
@@ -237,9 +239,9 @@ export const translations = {
 
     
     'pro_main_text': 'SUGAR INSIDER vous aidera à\nsurveiller votre consommation de sucre!',
-    'unlimited_accounting': '• comptabilité illimitée',
-    'personal_charts': '• graphiques personnels',
-    'recommendations': '• recommandations',
+    'unlimited_accounting': 'Graphiques et analyses avancés',
+    'personal_charts': 'Exporter les données en PDF',
+    'recommendations': 'Informations produits détaillées',
     'popular': 'Populaire',
     '12_months': '12 Mois',
     '1_month': '1 Mois',
@@ -262,7 +264,9 @@ export const translations = {
     'ok': 'OK',
     'premium': 'Premium',
     'already_have_premium_title': 'Premium Actif',
-    'already_have_premium_message': 'Vous avez déjà un accès premium à toutes les fonctionnalités!'
+    'already_have_premium_message': 'Vous avez déjà un accès premium à toutes les fonctionnalités!',
+    'you_are_now_pro': 'Vous êtes maintenant PRO!',
+    'close': 'Fermer'
   },
 
   Russian: {
@@ -368,9 +372,9 @@ export const translations = {
 
     
     'pro_main_text': 'SUGAR INSIDER поможет вам\nконтролировать потребление сахара!',
-    'unlimited_accounting': '• неограниченный учёт',
-    'personal_charts': '• персональные графики',
-    'recommendations': '• рекомендации',
+    'unlimited_accounting': 'Продвинутые графики и аналитика',
+    'personal_charts': 'Экспорт данных в PDF',
+    'recommendations': 'Подробная информация о продуктах',
     'popular': 'Популярно',
     '12_months': '12 Месяцев',
     '1_month': '1 Месяц',
@@ -393,7 +397,9 @@ export const translations = {
     'ok': 'OK',
     'premium': 'Премиум',
     'already_have_premium_title': 'Премиум активен',
-    'already_have_premium_message': 'У вас уже есть премиум доступ ко всем функциям!'
+    'already_have_premium_message': 'У вас уже есть премиум доступ ко всем функциям!',
+    'you_are_now_pro': 'Вы теперь PRO!',
+    'close': 'Закрыть'
   }
 };
 

@@ -29,9 +29,10 @@ interface ProfileScreenProps {
   birthDate?: string;
   unitSystem?: UnitSystem;
   language?: Language;
+  isPremium?: boolean;
 }
 
-const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onDiaryPress, onStatisticsPress, onPersonalDataPress, onSettingsPress, onProPress, weight = '60kg', height: heightProp = '160cm', userName = 'Name', birthDate = '2007/9/17', unitSystem = 'european', language = 'English' }) => {
+const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onDiaryPress, onStatisticsPress, onPersonalDataPress, onSettingsPress, onProPress, weight = '60kg', height: heightProp = '160cm', userName = 'Name', birthDate = '2007/9/17', unitSystem = 'european', language = 'English', isPremium = false }) => {
   const [avatarSource, setAvatarSource] = useState(require('./assets/Profile/Avatar.png'));
 
   // Переносим определение устройства внутрь компонента
@@ -599,19 +600,21 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onDiaryPress, onS
         </View>
       </View>
 
-      <View style={styles.additionalRectangle}>
-        <Text style={styles.upgradeText}>
-          {t('Upgrade to', language)} <Text style={styles.premiumText}>{t('Premium', language).toUpperCase()}</Text> {t('accountAndGetMore', language)}
-        </Text>
-        <Image
-          source={require('./assets/Profile/photo.png')}
-          style={styles.photoImage}
-          resizeMode="cover"
-        />
-        <TouchableOpacity style={styles.upgradeButton} onPress={onProPress}>
-          <Text style={styles.upgradeButtonText}>Get a premium</Text>
-        </TouchableOpacity>
-      </View>
+      {!isPremium && (
+        <View style={styles.additionalRectangle}>
+          <Text style={styles.upgradeText}>
+            {t('Upgrade to', language)} <Text style={styles.premiumText}>{t('Premium', language).toUpperCase()}</Text> {t('accountAndGetMore', language)}
+          </Text>
+          <Image
+            source={require('./assets/Profile/photo.png')}
+            style={styles.photoImage}
+            resizeMode="cover"
+          />
+          <TouchableOpacity style={styles.upgradeButton} onPress={onProPress}>
+            <Text style={styles.upgradeButtonText}>Get a premium</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
     </View>
   );
