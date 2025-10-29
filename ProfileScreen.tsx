@@ -22,17 +22,15 @@ interface ProfileScreenProps {
   onStatisticsPress: () => void;
   onPersonalDataPress: () => void;
   onSettingsPress: () => void;
-  onProPress: () => void;
   weight?: string;
   height?: string;
   userName?: string;
   birthDate?: string;
   unitSystem?: UnitSystem;
   language?: Language;
-  isPremium?: boolean;
 }
 
-const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onDiaryPress, onStatisticsPress, onPersonalDataPress, onSettingsPress, onProPress, weight = '60kg', height: heightProp = '160cm', userName = 'Name', birthDate = '2007/9/17', unitSystem = 'european', language = 'English', isPremium = false }) => {
+const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onDiaryPress, onStatisticsPress, onPersonalDataPress, onSettingsPress, weight = '60kg', height: heightProp = '160cm', userName = 'Name', birthDate = '2007/9/17', unitSystem = 'european', language = 'English' }) => {
   const [avatarSource, setAvatarSource] = useState(require('./assets/Profile/Avatar.png'));
 
   // Переносим определение устройства внутрь компонента
@@ -84,25 +82,19 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onDiaryPress, onS
       },
       diaryTab: {
         position: 'absolute',
-        left: (110 / 1242) * width,
+        left: (1242 / 6 - 34) / 1242 * width, // Center of first third
         top: isTablet ? 8 : (2453 - 2429) / (1242 / width),
         alignItems: 'center',
       },
       statisticsTab: {
         position: 'absolute',
-        left: (426 / 1242) * width,
+        left: (1242 / 2 - 34) / 1242 * width, // Center of screen
         top: isTablet ? 8 : (2453 - 2429) / (1242 / width),
         alignItems: 'center',
       },
       profileTab: {
         position: 'absolute',
-        left: (742 / 1242) * width,
-        top: isTablet ? 8 : (2453 - 2429) / (1242 / width),
-        alignItems: 'center',
-      },
-      proTab: {
-        position: 'absolute',
-        left: (1018 / 1242) * width,
+        left: (5 * 1242 / 6 - 34) / 1242 * width, // Center of last third
         top: isTablet ? 8 : (2453 - 2429) / (1242 / width),
         alignItems: 'center',
       },
@@ -117,11 +109,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onDiaryPress, onS
         opacity: 1,
       },
       profileIcon: {
-        width: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
-        height: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
-        opacity: 1,
-      },
-      proIcon: {
         width: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
         height: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
         opacity: 1,
@@ -158,17 +145,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onDiaryPress, onS
         textTransform: 'capitalize',
         opacity: 1,
         minWidth: (140 / 1242) * width,
-      },
-      proText: {
-        marginTop: isTablet ? 4 : (2536 - 2453 - 68) / (1242 / width),
-        fontFamily: 'System',
-        fontWeight: '400',
-        fontSize: isTablet ? Math.min(14, width * 0.017) : (32 / 1242) * width,
-        textAlign: 'center',
-        color: '#A2A2A2',
-        textTransform: 'capitalize',
-        opacity: 1,
-        minWidth: (120 / 1242) * width,
       },
       // Адаптивные стили для основного контента
       profileRectangle: {
@@ -589,32 +565,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onDiaryPress, onS
             <Text style={styles.profileTextActive}>{t('profile', language)}</Text>
           </View>
 
-          <TouchableOpacity style={styles.proTab} onPress={onProPress}>
-            <Image
-              source={require('./assets/Diary/Parts/pro-1.png')}
-              style={styles.proIcon}
-              resizeMode="contain"
-            />
-            <Text style={styles.proText}>{t('pro', language)}</Text>
-          </TouchableOpacity>
         </View>
       </View>
 
-      {!isPremium && (
-        <View style={styles.additionalRectangle}>
-          <Text style={styles.upgradeText}>
-            {t('Upgrade to', language)} <Text style={styles.premiumText}>{t('Premium', language).toUpperCase()}</Text> {t('accountAndGetMore', language)}
-          </Text>
-          <Image
-            source={require('./assets/Profile/photo.png')}
-            style={styles.photoImage}
-            resizeMode="cover"
-          />
-          <TouchableOpacity style={styles.upgradeButton} onPress={onProPress}>
-            <Text style={styles.upgradeButtonText}>Get a premium</Text>
-          </TouchableOpacity>
-        </View>
-      )}
 
     </View>
   );

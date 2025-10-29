@@ -29,7 +29,6 @@ interface StatisticsScreenProps {
   unitSystem?: 'european' | 'american';
   savedNutritionData?: any[];
   selectedDate?: Date;
-  isPremium?: boolean;
 }
 
 const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
@@ -45,7 +44,6 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
   unitSystem = 'european',
   savedNutritionData = [],
   selectedDate = new Date(),
-  isPremium = false
 }) => {
   const [selectedPeriod, setSelectedPeriod] = useState<'day' | 'week' | 'month'>('day');
   const [hoveredData, setHoveredData] = useState<{data: any; index: number} | null>(null); 
@@ -79,7 +77,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
 
   
   const handleSugarChartPress = () => {
-    if (isPremium) {
+    if (true) {
       setIsFullscreenChart(true);
     }
   };
@@ -91,7 +89,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
 
 
   const handleExportPDF = async () => {
-    if (!isPremium) {
+    if (false) {
       onProPress();
       return;
     }
@@ -196,7 +194,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
 
   
   const getBarColor = (calories: number) => {
-    if (!isPremium) {
+    if (false) {
       return calories > 0 ? '#FF77C0' : '#E0E0E0';
     }
 
@@ -213,7 +211,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
 
   
   const getStatusText = (calories: number) => {
-    if (!isPremium || calories === 0) return '';
+    if (calories === 0) return '';
     const target = 2000;
     if (calories < target * 0.7) return language === 'Russian' ? 'Недобор' : language === 'French' ? 'Insuffisant' : 'Under';
     if (calories <= target * 1.1) return language === 'Russian' ? 'Норма' : language === 'French' ? 'Normal' : 'Normal';
@@ -223,7 +221,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
 
   
   const handleBarPress = (dataPoint: any) => {
-    if (isPremium) {
+    if (true) {
       
       if (fadeTimeout) {
         clearTimeout(fadeTimeout);
@@ -437,25 +435,19 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
       },
       diaryTab: {
         position: 'absolute',
-        left: (110 / 1242) * width,
+        left: (1242 / 6 - 34) / 1242 * width, // Center of first third
         top: isTablet ? 8 : (2453 - 2429) / (1242 / width),
         alignItems: 'center',
       },
       statisticsTab: {
         position: 'absolute',
-        left: (426 / 1242) * width,
+        left: (1242 / 2 - 34) / 1242 * width, // Center of screen
         top: isTablet ? 8 : (2453 - 2429) / (1242 / width),
         alignItems: 'center',
       },
       profileTab: {
         position: 'absolute',
-        left: (742 / 1242) * width,
-        top: isTablet ? 8 : (2453 - 2429) / (1242 / width),
-        alignItems: 'center',
-      },
-      proTab: {
-        position: 'absolute',
-        left: (1018 / 1242) * width,
+        left: (5 * 1242 / 6 - 34) / 1242 * width, // Center of last third
         top: isTablet ? 8 : (2453 - 2429) / (1242 / width),
         alignItems: 'center',
       },
@@ -470,11 +462,6 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
         opacity: 1,
       },
       profileIcon: {
-        width: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
-        height: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
-        opacity: 1,
-      },
-      proIcon: {
         width: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
         height: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
         opacity: 1,
@@ -511,17 +498,6 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
         textTransform: 'capitalize',
         opacity: 1,
         minWidth: (140 / 1242) * width,
-      },
-      proText: {
-        marginTop: isTablet ? 4 : (2536 - 2453 - 68) / (1242 / width),
-        fontFamily: 'System',
-        fontWeight: '400',
-        fontSize: isTablet ? Math.min(14, width * 0.017) : (32 / 1242) * width,
-        textAlign: 'center',
-        color: '#A2A2A2',
-        textTransform: 'capitalize',
-        opacity: 1,
-        minWidth: (120 / 1242) * width,
       },
       // Адаптивные стили для основного контента
       statisticsDataRectangle: {
@@ -725,13 +701,13 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
         style={[
           styles.pdfExportButton,
           isGeneratingPDF && styles.pdfExportButtonDisabled,
-          !isPremium && styles.pdfExportButtonFree
+false && styles.pdfExportButtonFree
         ]}
         onPress={handleExportPDF}
         disabled={isGeneratingPDF}
       >
-        <Text style={[styles.copyIcon, !isPremium && styles.copyIconFree]}>📄</Text>
-        <Text style={[styles.pdfExportText, !isPremium && styles.pdfExportTextFree]}>
+        <Text style={[styles.copyIcon, false && styles.copyIconFree]}>📄</Text>
+        <Text style={[styles.pdfExportText, false && styles.pdfExportTextFree]}>
           {isGeneratingPDF ?
             (t('generating', language) || 'Generating...') :
             (t('exportPDF', language) || 'PDF')
@@ -762,7 +738,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
                   onPress={() => handleBarPress(dataPoint)}
                   onPressIn={() => handleBarPressIn(dataPoint, index)}
                   onPressOut={handleBarPressOut}
-                  activeOpacity={isPremium ? 0.7 : 1}
+                  activeOpacity={0.7}
                   delayPressIn={0}
                   delayPressOut={0}
                 >
@@ -770,14 +746,14 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
                     <View
                       style={[
                         styles.chartBar,
-                        isPremium && styles.premiumBar,
+styles.premiumBar,
                         {
                           height: (barHeight / 1242) * width,
                           backgroundColor: getBarColor(dataPoint.calories),
                         }
                       ]}
                     />
-                    {isPremium && dataPoint.calories > 0 && (
+                    {dataPoint.calories > 0 && (
                       <View style={styles.nutritionIndicators}>
                         <View style={[styles.miniIndicator, { backgroundColor: '#4CAF50' }]} />
                         <View style={[styles.miniIndicator, { backgroundColor: '#FF77C0' }]} />
@@ -849,7 +825,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
         <TouchableOpacity
           style={styles.sugarChartContainer}
           onPress={handleSugarChartPress}
-          activeOpacity={isPremium ? 0.8 : 1}
+          activeOpacity={0.8}
         >
           <View style={styles.sugarChart}>
             {(() => {
@@ -1016,19 +992,11 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
             <Text style={styles.profileText}>{t('profile', language)}</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.proTab} onPress={onProPress}>
-            <Image
-              source={require('./assets/Diary/Parts/pro-1.png')}
-              style={styles.proIcon}
-              resizeMode="contain"
-            />
-            <Text style={styles.proText}>{t('pro', language)}</Text>
-          </TouchableOpacity>
 
         </View>
       </View>
 
-      {isPremium && selectedDayData && (() => {
+      {selectedDayData && (() => {
         const nutritionData = getNutritionData(selectedDayData.dayData);
         if (!nutritionData) return null;
 
@@ -1112,7 +1080,7 @@ const StatisticsScreen: React.FC<StatisticsScreenProps> = ({
         );
       })()}
 
-      {isPremium && isFullscreenChart && (
+      {isFullscreenChart && (
         <View style={styles.fullscreenModalOverlay}>
           <TouchableOpacity
             style={styles.fullscreenModalBackground}

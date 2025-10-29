@@ -25,13 +25,9 @@ interface PersonalDataScreenProps {
   currentDate?: string;
   unitSystem?: UnitSystem;
   language?: Language;
-  onDiaryPress: () => void;
-  onStatisticsPress?: () => void;
-  onProfilePress: () => void;
-  onProPress: () => void;
 }
 
-const PersonalDataScreen: React.FC<PersonalDataScreenProps> = ({ onBack, onWeightSave, currentWeight, onHeightSave, currentHeight, onDateSave, currentDate, unitSystem = 'european', language = 'English', onDiaryPress, onStatisticsPress, onProfilePress, onProPress }) => {
+const PersonalDataScreen: React.FC<PersonalDataScreenProps> = ({ onBack, onWeightSave, currentWeight, onHeightSave, currentHeight, onDateSave, currentDate, unitSystem = 'european', language = 'English' }) => {
   const [isWeightModalVisible, setIsWeightModalVisible] = useState(false);
   const [isHeightModalVisible, setIsHeightModalVisible] = useState(false);
   const [isDateModalVisible, setIsDateModalVisible] = useState(false);

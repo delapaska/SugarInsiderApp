@@ -2468,11 +2468,6 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - RNIap (12.16.4):
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Core
-    - ReactCommon/turbomodule/core
   - SocketRocket (0.7.1)
   - Yoga (0.0.0)
 
@@ -2559,7 +2554,6 @@ DEPENDENCIES:
   - ReactCodegen (from `build/generated/ios`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
-  - RNIap (from `../node_modules/react-native-iap`)
   - SocketRocket (~> 0.7.1)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -2731,8 +2725,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   RNCClipboard:
     :path: "../node_modules/@react-native-clipboard/clipboard"
-  RNIap:
-    :path: "../node_modules/react-native-iap"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -2818,7 +2810,6 @@ SPEC CHECKSUMS:
   ReactCodegen: 1d05923ad119796be9db37830d5e5dc76586aa00
   ReactCommon: 394c6b92765cf6d211c2c3f7f6bc601dffb316a6
   RNCClipboard: 4b58c780f63676367640f23c8e114e9bd0cf86ac
-  RNIap: 3ed854d92dc54cbb793c4d1317182a835bba5d23
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: a3ed390a19db0459bd6839823a6ac6d9c6db198d
 

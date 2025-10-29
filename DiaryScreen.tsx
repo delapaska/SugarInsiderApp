@@ -10,15 +10,12 @@ import {
   ScrollView,
   TextInput,
   Platform,
-  Alert,
 } from 'react-native';
 import ProfileScreen from './ProfileScreen';
 import PersonalDataScreen from './PersonalDataScreen';
 import SettingsScreen from './SettingsScreen';
-import ProScreen from './ProScreen';
 import ProductDetailScreen from './ProductDetailScreen';
 import StatisticsScreen from './StatisticsScreen';
-import PremiumWelcomeScreen from './PremiumWelcomeScreen';
 import { UnitSystem } from './unitConversion';
 import { t, Language } from './translations';
 import NotificationService from './NotificationService';
@@ -60,10 +57,8 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
   const [isProfileVisible, setIsProfileVisible] = useState(false);
   const [isPersonalDataVisible, setIsPersonalDataVisible] = useState(false);
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
-  const [isProVisible, setIsProVisible] = useState(false);
   const [isProductDetailVisible, setIsProductDetailVisible] = useState(false);
   const [isStatisticsVisible, setIsStatisticsVisible] = useState(false);
-  const [isPremiumWelcomeVisible, setIsPremiumWelcomeVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [editingProductIndex, setEditingProductIndex] = useState<number | null>(null);
   const [currentWeight, setCurrentWeight] = useState('60kg');
@@ -81,7 +76,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
       unitSystem: unitSystem
     });
   }, [language, unitSystem]);
-  const [isPremium, setIsPremium] = useState(false);
+  const [isPremium] = useState(true);
   const [dailyCalories, setDailyCalories] = useState(0);
   const [dailyCarbohydrates, setDailyCarbohydrates] = useState(0);
   const [dailyProteins, setDailyProteins] = useState(0);
@@ -354,80 +349,23 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
     setIsProfileVisible(true);
   };
 
-  const handleProPress = () => {
-    if (isPremium) {
-      // Show alert that user already has premium, then go to statistics
-      Alert.alert(
-        t('already_have_premium_title', language),
-        t('already_have_premium_message', language),
-        [
-          {
-            text: t('go_to_charts', language),
-            onPress: () => {
-              setIsStatisticsVisible(true);
-              setIsProfileVisible(false);
-              setIsPersonalDataVisible(false);
-              setIsSettingsVisible(false);
-              setIsProductDetailVisible(false);
-            }
-          },
-          {
-            text: t('ok', language),
-            style: 'default'
-          }
-        ]
-      );
-    } else {
-      // Free users see the paywall
-      setIsProVisible(true);
-      setIsProfileVisible(false);
-      setIsPersonalDataVisible(false);
-      setIsSettingsVisible(false);
-      setIsProductDetailVisible(false);
-      setIsStatisticsVisible(false);
-    }
-  };
 
-  const handleProBack = () => {
-    setIsProVisible(false);
-  };
 
   const handleStatisticsPress = () => {
     setIsStatisticsVisible(true);
     setIsProfileVisible(false);
     setIsPersonalDataVisible(false);
     setIsSettingsVisible(false);
-    setIsProVisible(false);
   };
 
   const handleStatisticsBack = () => {
     setIsStatisticsVisible(false);
   };
 
-  const handlePurchaseSuccess = () => {
-    setIsPremium(true);
-    console.log('Premium activated successfully!');
-  };
 
-  const handleNavigateToStatistics = () => {
-    setIsProVisible(false);
-    setIsStatisticsVisible(true);
-  };
 
-  const showPurchaseSuccessAlert = (productId: string) => {
-    console.log('🔍 DiaryScreen: showPurchaseSuccessAlert called with productId:', productId);
-    console.log('🔍 DiaryScreen: Showing PremiumWelcomeScreen');
-    setIsPremiumWelcomeVisible(true);
-  };
 
-  const handlePremiumWelcomeClose = () => {
-    setIsPremiumWelcomeVisible(false);
-  };
 
-  const handlePremiumWelcomeGoToCharts = () => {
-    setIsPremiumWelcomeVisible(false);
-    handleNavigateToStatistics();
-  };
 
 
   const handleProductPress = (product: any) => {
@@ -463,7 +401,6 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
     setIsProfileVisible(false);
     setIsPersonalDataVisible(false);
     setIsSettingsVisible(false);
-    setIsProVisible(false);
     setIsStatisticsVisible(false);
   };
 
@@ -471,7 +408,6 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
     setIsProfileVisible(true);
     setIsPersonalDataVisible(false);
     setIsSettingsVisible(false);
-    setIsProVisible(false);
     setIsStatisticsVisible(false);
   };
 
@@ -485,7 +421,6 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
     setIsSettingsVisible(false);
     setIsProfileVisible(false);
     setIsPersonalDataVisible(false);
-    setIsProVisible(false);
 
     
     if (onAccountDeleted) {
@@ -509,7 +444,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
       },
       diaryTab: {
         position: 'absolute',
-        left: (110 / 1242) * width,
+        left: (1242 / 6 - 34) / 1242 * width, // Center of first third
         top: isTablet ? 8 : (2453 - 2429) / (1242 / width),
         alignItems: 'center',
       },
@@ -531,7 +466,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
       },
       statisticsTab: {
         position: 'absolute',
-        left: (426 / 1242) * width,
+        left: (1242 / 2 - 34) / 1242 * width, // Center of screen
         top: isTablet ? 8 : (2453 - 2429) / (1242 / width),
         alignItems: 'center',
       },
@@ -553,7 +488,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
       },
       profileTab: {
         position: 'absolute',
-        left: (742 / 1242) * width,
+        left: (5 * 1242 / 6 - 34) / 1242 * width, // Center of last third
         top: isTablet ? 8 : (2453 - 2429) / (1242 / width),
         alignItems: 'center',
       },
@@ -572,28 +507,6 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
         textTransform: 'capitalize',
         opacity: 1,
         minWidth: (140 / 1242) * width,
-      },
-      proTab: {
-        position: 'absolute',
-        left: (1018 / 1242) * width,
-        top: isTablet ? 8 : (2453 - 2429) / (1242 / width),
-        alignItems: 'center',
-      },
-      proIcon: {
-        width: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
-        height: isTablet ? Math.min(45, width * 0.05) : (68 / 1242) * width,
-        opacity: 1,
-      },
-      proText: {
-        marginTop: isTablet ? 5 : (2536 - 2453 - 68) / (1242 / width),
-        fontFamily: 'System',
-        fontWeight: '400',
-        fontSize: isTablet ? Math.min(16, width * 0.02) : (32 / 1242) * width,
-        textAlign: 'center',
-        color: '#A2A2A2',
-        textTransform: 'capitalize',
-        opacity: 1,
-        minWidth: (120 / 1242) * width,
       },
       addedProductsScrollView: {
         position: 'absolute',
@@ -1035,15 +948,15 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
 
       <View style={styles.summaryRectangle} />
 
-      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProVisible && !isProductDetailVisible && (
+      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProductDetailVisible && (
         <View style={styles.ellipse} />
       )}
 
-      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProVisible && !isProductDetailVisible && !isStatisticsVisible && (
+      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProductDetailVisible && !isStatisticsVisible && (
         <Text style={styles.caloriesText}>{dailyCalories}</Text>
       )}
 
-      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProVisible && !isProductDetailVisible && !isStatisticsVisible && (
+      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProductDetailVisible && !isStatisticsVisible && (
         <Text style={styles.caloriesLabel}>
           {unitSystem === 'american' ? 'Calories' : 'kcal'}
         </Text>
@@ -1067,18 +980,18 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
         />
       </TouchableOpacity>
 
-      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProVisible && !isProductDetailVisible && !isStatisticsVisible && (
+      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProductDetailVisible && !isStatisticsVisible && (
         <TouchableOpacity style={styles.addButton} onPress={handleAddPress}>
           <Text style={styles.addButtonText}>{t('addSweet', language)}</Text>
         </TouchableOpacity>
       )}
 
 
-      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProVisible && !isProductDetailVisible && (
+      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProductDetailVisible && (
         <View style={styles.carbohydratesRectangle} />
       )}
 
-      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProVisible && !isProductDetailVisible && (
+      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProductDetailVisible && (
         <View
           style={[
             styles.carbohydratesProgress,
@@ -1087,7 +1000,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
         />
       )}
 
-      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProVisible && !isProductDetailVisible && (
+      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProductDetailVisible && (
         <Text style={[
           styles.carbohydratesText,
           language === 'Russian' && styles.carbohydratesTextRussian,
@@ -1095,15 +1008,15 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
         ]}>{t('carbohydrates', language)}</Text>
       )}
 
-      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProVisible && !isProductDetailVisible && (
+      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProductDetailVisible && (
         <Text style={styles.carbohydratesValue}>{getCarbohydratesDisplay()}</Text>
       )}
 
-      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProVisible && !isProductDetailVisible && (
+      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProductDetailVisible && (
         <View style={styles.proteinsRectangle} />
       )}
 
-      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProVisible && !isProductDetailVisible && (
+      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProductDetailVisible && (
         <View
           style={[
             styles.proteinsProgress,
@@ -1112,7 +1025,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
         />
       )}
 
-      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProVisible && !isProductDetailVisible && (
+      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProductDetailVisible && (
         <Text style={[
           styles.proteinsText,
           language === 'Russian' && styles.proteinsTextRussian,
@@ -1120,15 +1033,15 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
         ]}>{t('protein', language)}</Text>
       )}
 
-      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProVisible && !isProductDetailVisible && (
+      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProductDetailVisible && (
         <Text style={styles.proteinsValue}>{getProteinsDisplay()}</Text>
       )}
 
-      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProVisible && !isProductDetailVisible && (
+      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProductDetailVisible && (
         <View style={styles.fatsRectangle} />
       )}
 
-      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProVisible && !isProductDetailVisible && (
+      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProductDetailVisible && (
         <View
           style={[
             styles.fatsProgress,
@@ -1137,7 +1050,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
         />
       )}
 
-      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProVisible && !isProductDetailVisible && (
+      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProductDetailVisible && (
         <Text style={[
           styles.fatsText,
           language === 'Russian' && styles.fatsTextRussian,
@@ -1145,11 +1058,11 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
         ]}>{t('fats', language)}</Text>
       )}
 
-      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProVisible && !isProductDetailVisible && (
+      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProductDetailVisible && (
         <Text style={styles.fatsValue}>{getFatsDisplay()}</Text>
       )}
 
-      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProVisible && !isProductDetailVisible && !isStatisticsVisible && (
+      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProductDetailVisible && !isStatisticsVisible && (
         <ScrollView
           showsVerticalScrollIndicator={false}
           style={styles.addedProductsScrollView}
@@ -1184,7 +1097,7 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
       )}
 
 
-      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProVisible && !isProductDetailVisible && !isStatisticsVisible && (
+      {!isAddModalVisible && !isProfileVisible && !isPersonalDataVisible && !isSettingsVisible && !isProductDetailVisible && !isStatisticsVisible && (
         <View style={styles.bottomNavContainer}>
         <View style={styles.topBorder} />
 
@@ -1216,14 +1129,6 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
             <Text style={styles.profileText}>{t('profile', language)}</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.proTab} onPress={handleProPress}>
-            <Image
-              source={require('./assets/Diary/Parts/pro-1.png')}
-              style={styles.proIcon}
-              resizeMode="contain"
-            />
-            <Text style={styles.proText}>{isPremium ? t('premium', language) : t('pro', language)}</Text>
-          </TouchableOpacity>
 
 
         </View>
@@ -1357,14 +1262,12 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
           onStatisticsPress={handleStatisticsPress}
           onPersonalDataPress={handlePersonalDataPress}
           onSettingsPress={handleSettingsPress}
-          onProPress={handleProPress}
           weight={currentWeight}
           height={currentHeight}
           userName={userName}
           birthDate={currentDate}
           unitSystem={unitSystem}
           language={language}
-          isPremium={isPremium}
         />
       )}
 
@@ -1384,7 +1287,6 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
           language={language}
           onDiaryPress={handleDiaryPress}
           onProfilePress={handleProfilePress}
-          onProPress={handleProPress}
         />
       )}
 
@@ -1400,8 +1302,6 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
           onAccountDeleted={handleAccountDeleted}
           onDiaryPress={handleDiaryPress}
           onProfilePress={handleProfilePress}
-          onProPress={handleProPress}
-          isPremium={isPremium}
         />
       )}
 
@@ -1411,7 +1311,6 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
           language={language}
           onDiaryPress={handleDiaryPress}
           onProfilePress={handleProfilePress}
-          onProPress={handleProPress}
           dailyCalories={dailyCalories}
           dailyCarbohydrates={dailyCarbohydrates}
           dailyProteins={dailyProteins}
@@ -1419,19 +1318,9 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
           unitSystem={unitSystem}
           savedNutritionData={savedNutritionData}
           selectedDate={selectedDate}
-          isPremium={isPremium}
         />
       )}
 
-      {isProVisible && (
-        <ProScreen
-          onBack={handleProBack}
-          language={language}
-          onPurchaseSuccess={handlePurchaseSuccess}
-          onNavigateToStatistics={handleNavigateToStatistics}
-          showSuccessAlert={showPurchaseSuccessAlert}
-        />
-      )}
 
 
       {isProductDetailVisible && selectedProduct && (
@@ -1439,8 +1328,6 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
           onBack={handleProductDetailBack}
           product={selectedProduct}
           language={language}
-          onProPress={handleProPress}
-          isPremium={isPremium}
           onSave={handleSaveNutrition}
           unitSystem={unitSystem}
           selectedDate={selectedDate}
@@ -1449,13 +1336,6 @@ const DiaryScreen: React.FC<DiaryScreenProps> = ({ onAccountDeleted }) => {
         />
       )}
 
-      {isPremiumWelcomeVisible && (
-        <PremiumWelcomeScreen
-          onClose={handlePremiumWelcomeClose}
-          onGoToCharts={handlePremiumWelcomeGoToCharts}
-          language={language}
-        />
-      )}
 
     </View>
   );

@@ -31,8 +31,6 @@ interface SettingsScreenProps {
   onDiaryPress: () => void;
   onStatisticsPress?: () => void;
   onProfilePress: () => void;
-  onProPress: () => void;
-  isPremium?: boolean;
   reminderEnabled?: boolean;
   onReminderChange?: (enabled: boolean) => void;
   reminderTime?: string;
@@ -43,7 +41,7 @@ interface SettingsScreenProps {
   onSugarLimitValueChange?: (limit: number) => void;
 }
 
-const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, userName = 'Name', onUserNameChange, unitSystem = 'european', onUnitSystemChange, language = 'English', onLanguageChange, onAccountDeleted, onDiaryPress, onStatisticsPress, onProfilePress, onProPress, isPremium = false, reminderEnabled = false, onReminderChange, reminderTime = '12:00', onReminderTimeChange, sugarLimitEnabled = false, onSugarLimitChange, dailySugarLimit = 50, onSugarLimitValueChange }) => {
+const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, userName = 'Name', onUserNameChange, unitSystem = 'european', onUnitSystemChange, language = 'English', onLanguageChange, onAccountDeleted, onDiaryPress, onStatisticsPress, onProfilePress, reminderEnabled = false, onReminderChange, reminderTime = '12:00', onReminderTimeChange, sugarLimitEnabled = false, onSugarLimitChange, dailySugarLimit = 50, onSugarLimitValueChange }) => {
   const [showAccountScreen, setShowAccountScreen] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
   const [showUnitsScreen, setShowUnitsScreen] = useState(false);
@@ -729,7 +727,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack, userName = 'Nam
 
       <Text style={styles.accountTypeText}>{t('Account type', selectedLanguage)}</Text>
 
-      <Text style={styles.accountTypeValue}>{t(isPremium ? 'Premium' : 'Free', selectedLanguage)}</Text>
+      <Text style={styles.accountTypeValue}>{t('Premium', selectedLanguage)}</Text>
 
       <Text style={styles.notificationsTitle}>{t('Setting up Notifications', selectedLanguage)}</Text>
 

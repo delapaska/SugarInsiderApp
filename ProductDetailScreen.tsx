@@ -32,7 +32,6 @@ interface ProductDetailScreenProps {
   };
   language?: Language;
   onProPress?: () => void;
-  isPremium?: boolean;
   onSave?: (savedData: any) => void;
   unitSystem?: UnitSystem;
   selectedDate?: Date;
@@ -40,7 +39,7 @@ interface ProductDetailScreenProps {
   currentAmount?: string;
 }
 
-const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ onBack, product, language = 'English', onProPress, isPremium = false, onSave, unitSystem = 'european', selectedDate, isEditing = false, currentAmount }) => {
+const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ onBack, product, language = 'English', onProPress, onSave, unitSystem = 'european', selectedDate, isEditing = false, currentAmount }) => {
   const [selectedAmount, setSelectedAmount] = useState(
     currentAmount || (unitSystem === 'american' ? '3.5oz' : '100g')
   );
@@ -704,7 +703,7 @@ const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ onBack, produ
 
       <Text style={styles.proteinLabel}>{t('protein', language)}</Text>
 
-      {isPremium && (
+      {(
         <Text style={styles.proteinValue}>
           {unitSystem === 'american'
             ? Math.round((product.protein * getAmountInGrams(selectedAmount) / 100) / 28.35 * 100) / 100
@@ -715,7 +714,7 @@ const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ onBack, produ
 
       <Text style={styles.carbohydratesLabel}>{t('carbohydrates', language)}</Text>
 
-      {isPremium && (
+      {(
         <Text style={styles.carbohydratesValue}>
           {unitSystem === 'american'
             ? Math.round((product.carbohydrates * getAmountInGrams(selectedAmount) / 100) / 28.35 * 100) / 100
@@ -726,7 +725,7 @@ const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ onBack, produ
 
       <Text style={styles.fatsLabel}>{t('fats', language)}</Text>
 
-      {isPremium && (
+      {(
         <Text style={styles.fatsValue}>
           {unitSystem === 'american'
             ? Math.round((product.fats * getAmountInGrams(selectedAmount) / 100) / 28.35 * 100) / 100
@@ -741,7 +740,7 @@ const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ onBack, produ
 
       <Text style={styles.sodiumLabel}>{t('sodium', language)}</Text>
 
-      {isPremium && (
+      {(
         <Text style={styles.sodiumValue}>
           {Math.round((product.sodium * getAmountInGrams(selectedAmount) / 100))}mg
         </Text>
@@ -749,7 +748,7 @@ const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ onBack, produ
 
       <Text style={styles.cholesterolLabel}>{t('cholesterol', language)}</Text>
 
-      {isPremium && (
+      {(
         <Text style={styles.cholesterolValue}>
           {Math.round((product.cholesterol * getAmountInGrams(selectedAmount) / 100))}mg
         </Text>
@@ -757,43 +756,43 @@ const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ onBack, produ
 
       <Text style={styles.potassiumLabel}>{t('potassium', language)}</Text>
 
-      {isPremium && (
+      {(
         <Text style={styles.potassiumValue}>
           {Math.round((product.potassium * getAmountInGrams(selectedAmount) / 100))}mg
         </Text>
       )}
 
-      {!isPremium && (
+      {false && (
         <TouchableOpacity style={styles.premiumOverlay} onPress={onProPress}>
           <Text style={styles.premiumText}>{t('look', language)}</Text>
         </TouchableOpacity>
       )}
 
-      {!isPremium && (
+      {false && (
         <TouchableOpacity style={styles.carbohydratesOverlay} onPress={onProPress}>
           <Text style={styles.premiumText}>{t('look', language)}</Text>
         </TouchableOpacity>
       )}
 
-      {!isPremium && (
+      {false && (
         <TouchableOpacity style={styles.fatsOverlay} onPress={onProPress}>
           <Text style={styles.premiumText}>{t('look', language)}</Text>
         </TouchableOpacity>
       )}
 
-      {!isPremium && (
+      {false && (
         <TouchableOpacity style={styles.sodiumOverlay} onPress={onProPress}>
           <Text style={styles.premiumText}>{t('look', language)}</Text>
         </TouchableOpacity>
       )}
 
-      {!isPremium && (
+      {false && (
         <TouchableOpacity style={styles.cholesterolOverlay} onPress={onProPress}>
           <Text style={styles.premiumText}>{t('look', language)}</Text>
         </TouchableOpacity>
       )}
 
-      {!isPremium && (
+      {false && (
         <TouchableOpacity style={styles.potassiumOverlay} onPress={onProPress}>
           <Text style={styles.premiumText}>{t('look', language)}</Text>
         </TouchableOpacity>
